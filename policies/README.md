@@ -1,5 +1,9 @@
 # Policies
 
-Policy rules are deterministic, versioned data evaluated by pure code. Model output cannot change a threshold or waive a blocking control.
+`ai_vendor_approval.v1.json` is the domain-specific Vendor Approval Policy Pack.
+It contains the six thresholds, blocking flags, effects, roles, and routing
+precedence used by the demo. The generic engine lives under
+`backend/src/aelitium_decision/policy/` and contains no vendor-specific values.
 
-The initial AI vendor approval rules cover price escalation, EU-only data residency evidence, DPA requirements, certification evidence, document conflicts, and a confidence floor.
+Model assessments supply observed facts only. They cannot change a threshold,
+replace routing precedence, or waive a blocking control.

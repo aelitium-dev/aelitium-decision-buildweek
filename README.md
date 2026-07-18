@@ -2,7 +2,7 @@
 
 Turn AI recommendations into evidence-backed, human-approved, and tamper-evident decision records.
 
-> Build status: initial OpenAI Build Week scaffold, started 2026-07-18. The end-to-end application is not implemented yet.
+> Build status: D1 backend slice implemented. DEMO T1–T3 run without an API key; receipt and frontend work remain scheduled for D2.
 
 ## Build Week workflow
 
@@ -24,10 +24,8 @@ Receipt verification checks integrity and Ed25519 validity under a separately tr
 
 ## Execution modes
 
-- `DEMO`: mandatory pre-computed assessment; no OpenAI key required. This will be the first judging path.
-- `LIVE`: server-side GPT-5.6 Responses API integration with strict Structured Outputs.
-
-Neither mode is implemented at scaffold time.
+- `DEMO`: implemented with three pre-computed assessments; no OpenAI key required.
+- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. No live call is required for the D1 test gate and no live result is claimed yet.
 
 ## Planned architecture
 
@@ -63,17 +61,42 @@ This is a new Build Week application. The exact pre-existing allowlist is record
 
 The project is MIT licensed. The allowlisted `aelitium-v3` canonicalization helper remains Apache-2.0 licensed and retains its original license and notice under `third_party/aelitium-v3/`.
 
-## Current setup and testing
+## Backend setup
 
-No packages were installed during preflight or scaffold creation. The repository currently contains documentation, fixtures, five schemas, the versioned policy, a scaffold validator, and the allowlisted canonicalization source; the application backend and frontend are not implemented and no claim is made that they run.
-
-The current structural gate uses the existing Python environment without installing project dependencies:
+Python 3.12 is used for the current build. The requirements file pins only the seven approved direct backend dependencies; package-manager-resolved transitives are not promoted to direct dependencies.
 
 ```bash
+python3 -m venv backend/.venv
+backend/.venv/bin/python -m pip install -r backend/requirements.txt
+```
+
+Run the three no-key golden cases individually or together:
+
+```bash
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli demo T1
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli demo T2
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli demo T3
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli demo all
+```
+
+Run the backend tests and the independent scaffold/provenance gate:
+
+```bash
+backend/.venv/bin/python -m pytest backend/tests -q
 python3 scripts/validate_scaffold.py
 ```
 
-Reproducible application setup and test commands will be added with the first executable backend and frontend slices.
+Start the API locally:
+
+```bash
+PYTHONPATH=backend/src backend/.venv/bin/python -m uvicorn aelitium_decision.api:app --host 127.0.0.1 --port 8000
+```
+
+SQLite defaults to the ignored `runtime/aelitium.db`; override it with `AELITIUM_DB_PATH`. The D1 API surface is intentionally small: health, create/read case, deterministic evaluation, and latest policy result.
+
+## Structured Outputs boundary
+
+The live adapter derives a transport-only schema from the canonical `ModelAssessment` schema. It retains the closed object shape and complete required fields while relaxing compatibility-sensitive validation keywords. Every response is then revalidated against the full canonical schema in the backend. The canonical schema always wins.
 
 ## Build Week records
 

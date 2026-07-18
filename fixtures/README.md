@@ -5,8 +5,10 @@ All demo fixtures are fictional, written in English, and contain no real persona
 - F1 — vendor commercial proposal
 - F2 — internal procurement policy excerpt
 - F3 — completed but incomplete security questionnaire
-- F4 — long proposed DPA with the material subprocessor clause buried around page 23
+- F4 — long executed DPA with the material subprocessor clause on page 23
 - F5 — later vendor assurance letter
+
+`demo/` contains the three pre-computed ModelAssessment fixtures, their golden manifest, and two short evidence variants used to isolate the T1 low-risk and T3 conflict routes.
 
 Fixture hashes used by cases and receipts will be computed from the exact UTF-8 file bytes.
 

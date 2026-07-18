@@ -1,0 +1,7 @@
+fastapi==0.139.2
+uvicorn==0.51.0
+pydantic==2.13.4
+jsonschema==4.26.0
+cryptography==49.0.0
+openai==2.46.0
+pytest==9.1.1

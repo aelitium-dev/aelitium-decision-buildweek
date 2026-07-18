@@ -1,0 +1,156 @@
+{
+  "schema_version": "model-assessment/v1",
+  "model": "demo-precomputed",
+  "prompt_version": "vendor-assessment/v1",
+  "case_summary": "F1 through F4 establish price and DPA execution but do not establish EU-only residency or an issued assurance report; F3 and F4 also conflict on subprocessor notice.",
+  "facts": [
+    {
+      "fact_id": "fact-annual-price",
+      "fact_key": "commercial.annual_price_eur",
+      "statement": "The annual recurring subscription price is EUR 18,000.",
+      "value": {
+        "value_type": "integer",
+        "string_value": null,
+        "integer_value": 18000,
+        "boolean_value": null
+      },
+      "evidence_refs": [
+        {
+          "document_id": "F1",
+          "locator": "Commercial terms",
+          "quoted_text": "Annual subscription fee: EUR 18,000 excluding VAT.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-eu-residency",
+      "fact_key": "privacy.eu_eea_only_residency_confirmed",
+      "statement": "The supplied documents do not confirm EU or EEA-only storage, backups, and core processing.",
+      "value": {
+        "value_type": "unknown",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": null
+      },
+      "evidence_refs": [
+        {
+          "document_id": "F3",
+          "locator": "DATA-01",
+          "quoted_text": "Primary service regions are currently the United States and European Union and are configurable by plan.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-dpa-executed",
+      "fact_key": "privacy.dpa_executed_by_both_parties",
+      "statement": "The DPA contains execution records for both fictional parties.",
+      "value": {
+        "value_type": "boolean",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": true
+      },
+      "evidence_refs": [
+        {
+          "document_id": "F4",
+          "locator": "page 34 signature blocks",
+          "quoted_text": "Authorized signatory records are present for Caldera Works Europe and NovaMind AI.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-assurance-issued",
+      "fact_key": "security.assurance_report_issued",
+      "statement": "SOC 2 Type II is described as in progress, not issued.",
+      "value": {
+        "value_type": "boolean",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": false
+      },
+      "evidence_refs": [
+        {
+          "document_id": "F3",
+          "locator": "ASSURE-01",
+          "quoted_text": "SOC 2 Type II examination is in progress; no issue date is available.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    }
+  ],
+  "conflicts": [
+    {
+      "conflict_id": "conflict-subprocessor-notice",
+      "summary": "F3 promises at least 30 days' advance notice while executed DPA clause 9.6 permits changes without prior notice.",
+      "severity": "high",
+      "requires_resolution": true,
+      "evidence_refs": [
+        {
+          "document_id": "F3",
+          "locator": "SUB-02",
+          "quoted_text": "Customers receive at least 30 days' advance notice before a new subprocessor is authorized.",
+          "reference_level": "validated_reference"
+        },
+        {
+          "document_id": "F4",
+          "locator": "page 23, clause 9.6",
+          "quoted_text": "Processor may appoint a new or replacement Subprocessor without prior notice to Customer.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    }
+  ],
+  "missing_evidence": [
+    {
+      "item_id": "missing-eu-residency",
+      "control_hint": "R2_EU_DATA_RESIDENCY",
+      "description": "EU or EEA-only coverage is not established for content, backups, and core processing.",
+      "requested_evidence": "Written EU or EEA-only tenant commitment covering storage, backups, and core processing.",
+      "blocking": true
+    },
+    {
+      "item_id": "missing-issued-assurance",
+      "control_hint": "R4_CERTIFICATION",
+      "description": "No issued SOC 2 Type II report or equivalent assurance is evidenced.",
+      "requested_evidence": "Issued report or dated issuance confirmation for equivalent assurance.",
+      "blocking": true
+    }
+  ],
+  "risks": [
+    {
+      "risk_id": "risk-data-location",
+      "category": "privacy",
+      "summary": "Customer Data may be processed or backed up outside the required region.",
+      "severity": "high",
+      "likelihood": "possible",
+      "evidence_refs": [
+        {
+          "document_id": "F3",
+          "locator": "DATA-01",
+          "quoted_text": "Primary service regions are currently the United States and European Union.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    }
+  ],
+  "options": [
+    {
+      "option_id": "option-request-evidence",
+      "label": "Request blocking evidence",
+      "description": "Pause approval until residency and assurance evidence are supplied.",
+      "benefits": ["Preserves the hard controls."],
+      "risks": ["Extends the review timeline."],
+      "preconditions": ["Vendor supplies written evidence."]
+    }
+  ],
+  "recommendation": {
+    "option_id": "option-request-evidence",
+    "rationale": "Blocking evidence remains absent and the document conflict requires human attention.",
+    "conditions": ["Do not approve while any blocking control remains failed."]
+  },
+  "confidence": 88,
+  "requires_human_review": true
+}

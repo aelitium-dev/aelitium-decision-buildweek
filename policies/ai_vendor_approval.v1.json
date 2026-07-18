@@ -31,7 +31,7 @@
       "control_id": "R1_PRICE_CEILING",
       "version": "1.0.0",
       "description": "Annual recurring cost above EUR 15,000 requires director approval.",
-      "operator": "fact_integer_greater_than",
+      "operator": "fact_integer_at_most",
       "fact_key": "commercial.annual_price_eur",
       "expected_value": 15000,
       "missing_fact_result": "FAIL",

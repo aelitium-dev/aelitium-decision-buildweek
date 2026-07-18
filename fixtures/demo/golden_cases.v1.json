@@ -1,0 +1,38 @@
+{
+  "fixture_version": "golden-cases/v1",
+  "policy_path": "policies/ai_vendor_approval.v1.json",
+  "assessment_schema": "model_assessment.v1.schema.json",
+  "policy_result_schema": "policy_result.v1.schema.json",
+  "cases": {
+    "T1": {
+      "case_id": "case-t1-low-risk",
+      "assessment_path": "fixtures/demo/T1_assessment.json",
+      "expected_assessment_hash": "df55824255d83105090c910e4b11a761b1cc7f4ff00d3858938bc6aadcdb49fb",
+      "evaluated_at": "2026-07-19T09:00:00Z",
+      "expected_state": "READY_FOR_APPROVAL",
+      "expected_blocking_controls": [],
+      "expected_conflicts": 0
+    },
+    "T2": {
+      "case_id": "case-t2-missing-evidence",
+      "assessment_path": "fixtures/demo/T2_assessment.json",
+      "expected_assessment_hash": "a320c3434e8026320dccd1245a5a96028b42ad4f979f0e3b986f80ff174de85c",
+      "evaluated_at": "2026-07-19T09:05:00Z",
+      "expected_state": "NEEDS_MORE_EVIDENCE",
+      "expected_blocking_controls": [
+        "R2_EU_DATA_RESIDENCY",
+        "R4_CERTIFICATION"
+      ],
+      "expected_conflicts": 1
+    },
+    "T3": {
+      "case_id": "case-t3-document-conflict",
+      "assessment_path": "fixtures/demo/T3_assessment.json",
+      "expected_assessment_hash": "7fd8374dc8d7b1cc5a80eb5ed722371e7c9dd425237dae3d456b8f12314082e8",
+      "evaluated_at": "2026-07-19T09:10:00Z",
+      "expected_state": "HUMAN_REVIEW",
+      "expected_blocking_controls": [],
+      "expected_conflicts": 1
+    }
+  }
+}

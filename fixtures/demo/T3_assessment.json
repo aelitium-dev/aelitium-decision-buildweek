@@ -1,0 +1,147 @@
+{
+  "schema_version": "model-assessment/v1",
+  "model": "demo-precomputed",
+  "prompt_version": "vendor-assessment/v1",
+  "case_summary": "Conflict-isolation variant: all evidence gates are satisfied, but F3 and F4 materially contradict each other on advance notice for subprocessors.",
+  "facts": [
+    {
+      "fact_id": "fact-annual-price",
+      "fact_key": "commercial.annual_price_eur",
+      "statement": "The amended annual recurring price is EUR 12,000.",
+      "value": {
+        "value_type": "integer",
+        "string_value": null,
+        "integer_value": 12000,
+        "boolean_value": null
+      },
+      "evidence_refs": [
+        {
+          "document_id": "T3-AMENDMENT",
+          "locator": "price amendment",
+          "quoted_text": "The parties amend the annual recurring subscription price to EUR 12,000 excluding VAT.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-eu-residency",
+      "fact_key": "privacy.eu_eea_only_residency_confirmed",
+      "statement": "F5 commits Customer Content, backups, and core processing to the EU or EEA.",
+      "value": {
+        "value_type": "boolean",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": true
+      },
+      "evidence_refs": [
+        {
+          "document_id": "F5",
+          "locator": "section 1",
+          "quoted_text": "Customer Content, backups, and core processing for this tenant will remain in the EU or EEA.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-dpa-executed",
+      "fact_key": "privacy.dpa_executed_by_both_parties",
+      "statement": "The DPA is executed by both parties.",
+      "value": {
+        "value_type": "boolean",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": true
+      },
+      "evidence_refs": [
+        {
+          "document_id": "F4",
+          "locator": "page 34 signature blocks",
+          "quoted_text": "Authorized signatory records are present for Caldera Works Europe and NovaMind AI.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-assurance-issued",
+      "fact_key": "security.assurance_report_issued",
+      "statement": "F5 records the fictional SOC 2 Type II report as issued.",
+      "value": {
+        "value_type": "boolean",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": true
+      },
+      "evidence_refs": [
+        {
+          "document_id": "F5",
+          "locator": "section 2",
+          "quoted_text": "NovaMind's SOC 2 Type II examination has been completed and the report was issued on 2026-07-15.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    }
+  ],
+  "conflicts": [
+    {
+      "conflict_id": "conflict-subprocessor-notice",
+      "summary": "F3 promises advance notice; executed DPA clause 9.6 expressly permits a new or replacement subprocessor without prior notice.",
+      "severity": "high",
+      "requires_resolution": true,
+      "evidence_refs": [
+        {
+          "document_id": "F3",
+          "locator": "SUB-02",
+          "quoted_text": "Customers receive at least 30 days' advance notice before a new subprocessor is authorized.",
+          "reference_level": "validated_reference"
+        },
+        {
+          "document_id": "F4",
+          "locator": "page 23, clause 9.6",
+          "quoted_text": "Processor may appoint a new or replacement Subprocessor without prior notice to Customer.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    }
+  ],
+  "missing_evidence": [],
+  "risks": [
+    {
+      "risk_id": "risk-contract-conflict",
+      "category": "contract",
+      "summary": "The executed DPA and questionnaire create materially different notice expectations.",
+      "severity": "high",
+      "likelihood": "likely",
+      "evidence_refs": [
+        {
+          "document_id": "F3",
+          "locator": "SUB-02",
+          "quoted_text": "Customers receive at least 30 days' advance notice.",
+          "reference_level": "validated_reference"
+        },
+        {
+          "document_id": "F4",
+          "locator": "page 23, clause 9.6",
+          "quoted_text": "without prior notice to Customer",
+          "reference_level": "validated_reference"
+        }
+      ]
+    }
+  ],
+  "options": [
+    {
+      "option_id": "option-human-review",
+      "label": "Route to human review",
+      "description": "Require an operations reviewer to resolve or acknowledge the contractual conflict.",
+      "benefits": ["Makes the conflict explicit before approval."],
+      "risks": ["The reviewer may require contract renegotiation."],
+      "preconditions": ["Reviewer examines F3 SUB-02 and F4 clause 9.6."]
+    }
+  ],
+  "recommendation": {
+    "option_id": "option-human-review",
+    "rationale": "Deterministic controls cannot resolve contradictory source statements.",
+    "conditions": ["Record the human resolution or acknowledgement."]
+  },
+  "confidence": 91,
+  "requires_human_review": true
+}

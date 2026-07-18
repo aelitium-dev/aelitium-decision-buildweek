@@ -1,0 +1,104 @@
+{
+  "schema_version": "model-assessment/v1",
+  "model": "demo-precomputed",
+  "prompt_version": "vendor-assessment/v1",
+  "case_summary": "Low-risk fixture variant with complete evidence and no material contradiction.",
+  "facts": [
+    {
+      "fact_id": "fact-annual-price",
+      "fact_key": "commercial.annual_price_eur",
+      "statement": "The annual recurring subscription price is EUR 12,000.",
+      "value": {
+        "value_type": "integer",
+        "string_value": null,
+        "integer_value": 12000,
+        "boolean_value": null
+      },
+      "evidence_refs": [
+        {
+          "document_id": "T1-LOW-RISK",
+          "locator": "Commercial terms",
+          "quoted_text": "The annual recurring subscription price is EUR 12,000 excluding VAT.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-eu-residency",
+      "fact_key": "privacy.eu_eea_only_residency_confirmed",
+      "statement": "Customer Content, backups, and core processing are committed to the EU or EEA.",
+      "value": {
+        "value_type": "boolean",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": true
+      },
+      "evidence_refs": [
+        {
+          "document_id": "T1-LOW-RISK",
+          "locator": "Privacy and contracting",
+          "quoted_text": "Customer Content, backups, and core processing will remain in the EU or EEA.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-dpa-executed",
+      "fact_key": "privacy.dpa_executed_by_both_parties",
+      "statement": "The DPA is executed by both parties.",
+      "value": {
+        "value_type": "boolean",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": true
+      },
+      "evidence_refs": [
+        {
+          "document_id": "T1-LOW-RISK",
+          "locator": "Privacy and contracting",
+          "quoted_text": "A Data Processing Addendum has been executed by authorized representatives of both parties.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    },
+    {
+      "fact_id": "fact-assurance-issued",
+      "fact_key": "security.assurance_report_issued",
+      "statement": "The fictional SOC 2 Type II report has been issued.",
+      "value": {
+        "value_type": "boolean",
+        "string_value": null,
+        "integer_value": null,
+        "boolean_value": true
+      },
+      "evidence_refs": [
+        {
+          "document_id": "T1-LOW-RISK",
+          "locator": "Independent assurance",
+          "quoted_text": "The vendor's fictional SOC 2 Type II report was issued on 2026-07-15.",
+          "reference_level": "validated_reference"
+        }
+      ]
+    }
+  ],
+  "conflicts": [],
+  "missing_evidence": [],
+  "risks": [],
+  "options": [
+    {
+      "option_id": "option-approve",
+      "label": "Advance to human approval",
+      "description": "All deterministic evidence controls can be evaluated as satisfied.",
+      "benefits": ["Evidence packet is complete for the demo controls."],
+      "risks": ["A human still owns the final decision."],
+      "preconditions": ["Human reviewer confirms the recorded evidence."]
+    }
+  ],
+  "recommendation": {
+    "option_id": "option-approve",
+    "rationale": "The evidence supports advancing the case, subject to human authority.",
+    "conditions": ["Do not treat this assessment as the final decision."]
+  },
+  "confidence": 94,
+  "requires_human_review": false
+}

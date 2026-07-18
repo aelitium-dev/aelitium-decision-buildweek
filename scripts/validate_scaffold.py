@@ -140,11 +140,23 @@ def validate_long_dpa() -> None:
 
 def validate_no_key_material() -> None:
     prohibited_suffixes = {".key", ".pem", ".p12"}
+    excluded_parts = {
+        ".git",
+        ".venv",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules",
+        ".next",
+    }
     detector_path = Path(__file__).resolve()
     files = [
         path
         for path in ROOT.rglob("*")
-        if path.is_file() and ".git" not in path.parts and path.resolve() != detector_path
+        if path.is_file()
+        and not excluded_parts.intersection(path.parts)
+        and path.resolve() != detector_path
     ]
     require(not any(path.suffix.lower() in prohibited_suffixes for path in files), "PRIVATE_KEY_FILE_DETECTED")
 

@@ -21,6 +21,10 @@ Codex identified that the earlier P3 receipt signed a representation with an emp
 
 Codex created ADR-001, exact provenance manifests, the Build Week documentation scaffold, fixtures, and versioned schemas. Subsequent entries will record concrete backend, policy, receipt, test, and UI work.
 
+### D1 backend
+
+Codex implemented DEMO mode before the live adapter, split the generic Policy Engine from the Vendor Approval Policy Pack, and exercised T1–T3 through real CLI subprocesses. It also derived a conservative Structured Outputs transport schema while keeping canonical backend validation authoritative, then built the minimal FastAPI/SQLite slice and its tests without adding packages outside the approved allowlist.
+
 ## Submission reminder
 
 Before submission, replace the pending `/feedback` entry with the Session ID produced for this primary development thread and cite concrete examples of where Codex accelerated implementation and testing.
