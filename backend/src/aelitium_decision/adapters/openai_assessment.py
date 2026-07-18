@@ -11,12 +11,20 @@ and length/item/number bounds. ``const`` is represented as a typed single-value
 Every parsed response is revalidated against the full canonical schema. A value
 accepted by the API-call schema but rejected by the canonical schema fails closed;
 the model cannot relax backend constraints, policy thresholds, or blocking rules.
+
+Before canonical validation, ``normalize_transport_identifiers`` may lowercase
+only identifier tokens that already match their required prefix and grammar
+case-insensitively (for example ``FACT-001`` → ``fact-001``). It works on a copy,
+rejects missing/unsafe IDs and normalization collisions, and keeps recommendation
+references consistent. It never changes evidence, findings, free text, fact keys,
+or ``control_hint``; semantic contract failures remain canonical validation errors.
 """
 
 from __future__ import annotations
 
 import copy
 import json
+import re
 from typing import Any, Protocol
 
 from openai import OpenAI
@@ -26,7 +34,15 @@ from aelitium_decision.schema_validation import load_schema, validate_canonical
 
 MODEL_ASSESSMENT_SCHEMA = "model_assessment.v1.schema.json"
 DEFAULT_MODEL = "gpt-5.6"
-DEFAULT_PROMPT_VERSION = "vendor-assessment/v1"
+DEFAULT_PROMPT_VERSION = "vendor-assessment/v2"
+
+_IDENTIFIER_COLLECTIONS = (
+    ("facts", "fact_id", "fact"),
+    ("conflicts", "conflict_id", "conflict"),
+    ("missing_evidence", "item_id", "missing"),
+    ("risks", "risk_id", "risk"),
+    ("options", "option_id", "option"),
+)
 
 _REMOVED_API_KEYWORDS = {
     "$schema",
@@ -55,6 +71,79 @@ class ResponsesClient(Protocol):
 
 class AssessmentGenerationError(RuntimeError):
     """Raised when the live adapter cannot return a canonical assessment."""
+
+
+def _normalize_prefixed_identifier(
+    value: Any, *, prefix: str, location: str
+) -> str:
+    """Lowercase one already well-formed identifier; never infer or repair it."""
+
+    if not isinstance(value, str):
+        raise AssessmentGenerationError(f"{location} is not a string identifier")
+    pattern = rf"{re.escape(prefix)}-[A-Za-z0-9][A-Za-z0-9-]{{0,63}}"
+    if re.fullmatch(pattern, value, flags=re.IGNORECASE) is None:
+        raise AssessmentGenerationError(
+            f"{location} cannot be safely normalized as a {prefix}- identifier"
+        )
+    return value.lower()
+
+
+def normalize_transport_identifiers(assessment: Any) -> dict[str, Any]:
+    """Mechanically normalize safe ID casing before canonical validation.
+
+    The transport schema deliberately omits unsupported ``pattern`` constraints.
+    This boundary handles casing only when the required prefix and token grammar
+    are already present. It rejects ambiguous repairs and duplicate IDs created by
+    case folding. ``control_hint`` is intentionally outside this transformation.
+    """
+
+    if not isinstance(assessment, dict):
+        raise AssessmentGenerationError("assessment root must be a JSON object")
+    normalized = copy.deepcopy(assessment)
+    normalized_options: set[str] = set()
+
+    for collection_name, id_field, prefix in _IDENTIFIER_COLLECTIONS:
+        collection = normalized.get(collection_name)
+        if not isinstance(collection, list):
+            raise AssessmentGenerationError(
+                f"{collection_name} must be an array before ID normalization"
+            )
+        seen: set[str] = set()
+        for index, item in enumerate(collection):
+            if not isinstance(item, dict):
+                raise AssessmentGenerationError(
+                    f"{collection_name}.{index} must be an object"
+                )
+            location = f"{collection_name}.{index}.{id_field}"
+            identifier = _normalize_prefixed_identifier(
+                item.get(id_field), prefix=prefix, location=location
+            )
+            if identifier in seen:
+                raise AssessmentGenerationError(
+                    f"{collection_name} contains an ID collision after normalization: "
+                    f"{identifier}"
+                )
+            item[id_field] = identifier
+            seen.add(identifier)
+        if collection_name == "options":
+            normalized_options = seen
+
+    recommendation = normalized.get("recommendation")
+    if not isinstance(recommendation, dict):
+        raise AssessmentGenerationError(
+            "recommendation must be an object before ID normalization"
+        )
+    recommendation_id = _normalize_prefixed_identifier(
+        recommendation.get("option_id"),
+        prefix="option",
+        location="recommendation.option_id",
+    )
+    if recommendation_id not in normalized_options:
+        raise AssessmentGenerationError(
+            "recommendation.option_id does not reference a normalized option"
+        )
+    recommendation["option_id"] = recommendation_id
+    return normalized
 
 
 def derive_openai_response_schema(canonical_schema: dict[str, Any]) -> dict[str, Any]:
@@ -149,8 +238,15 @@ class OpenAIAssessmentAdapter:
             instructions=(
                 "Extract evidence-backed facts, conflicts, missing evidence, risks, "
                 "and decision options. Do not make the final decision, alter policy "
-                f"thresholds, or waive controls. Set model to {self.model!r} and "
-                f"prompt_version to {self.prompt_version!r}."
+                "thresholds, or waive controls. Use lowercase identifier tokens with "
+                "these exact prefix forms: fact_id 'fact-001', conflict_id "
+                "'conflict-001', missing_evidence item_id 'missing-001', risk_id "
+                "'risk-001', and option_id 'option-001'. recommendation.option_id "
+                "must exactly equal one option_id. control_hint is one control-token, "
+                "never prose or a citation; for example 'R2_EU_DATA_RESIDENCY'. Put "
+                "explanations in description, requested_evidence, or evidence_refs. "
+                f"Set model to {self.model!r} and prompt_version to "
+                f"{self.prompt_version!r}."
             ),
             input=case_context,
             text={
@@ -172,6 +268,7 @@ class OpenAIAssessmentAdapter:
         except json.JSONDecodeError as exc:
             raise AssessmentGenerationError("Responses API returned invalid JSON") from exc
 
+        assessment = normalize_transport_identifiers(assessment)
         validate_canonical(assessment, MODEL_ASSESSMENT_SCHEMA)
         if assessment["model"] != self.model:
             raise AssessmentGenerationError("assessment model metadata does not match request")

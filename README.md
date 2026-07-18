@@ -2,7 +2,7 @@
 
 Turn AI recommendations into evidence-backed, human-approved, and tamper-evident decision records.
 
-> Build status: the D1 backend, D2 receipt core, and clickable UI screens 1–3 are implemented. DEMO T1–T5 are green without an OpenAI key; the LIVE smoke run remains an explicit manual gate.
+> Build status: the D1 backend, D2 receipt core, and clickable UI screens 1–3 are implemented. DEMO T1–T5 are green without an OpenAI key; a canonical GPT-5.6 LIVE smoke artifact is recorded with its evaluation limits.
 
 ## Build Week workflow
 
@@ -25,7 +25,7 @@ Receipt verification checks integrity and Ed25519 validity under a separately tr
 ## Execution modes
 
 - `DEMO`: implemented with pre-computed assessments and a complete clickable approval → receipt → verify → tamper path; no OpenAI key required.
-- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. No live call is required for the D1 test gate and no live result is claimed yet.
+- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. A versioned T2-style execution passed canonical validation; its artifact, hash, policy route, and fact-key limitation are recorded in `EVAL.md`.
 
 ## Planned architecture
 
@@ -112,6 +112,12 @@ origin; set `AELITIUM_API_BASE_URL` before starting Next if the backend is elsew
 
 The live adapter derives a transport-only schema from the canonical `ModelAssessment` schema. It retains the closed object shape and complete required fields while relaxing compatibility-sensitive validation keywords. Every response is then revalidated against the full canonical schema in the backend. The canonical schema always wins.
 
+The strict transport schema enforces the supported structural subset; canonical
+backend validation enforces the complete contract. Before that final validation,
+the adapter may lowercase only already well-formed, correctly prefixed identifier
+tokens (`FACT-001` → `fact-001`). It rejects ambiguous repairs and collisions and
+never normalizes findings, evidence, free text, fact keys, or `control_hint`.
+
 ## Decision Receipt core
 
 The receipt implementation now has one internal canonicalization boundary, a new
@@ -136,9 +142,12 @@ PYTHONPATH=backend/src backend/.venv/bin/python backend/scripts/live_smoke.py
 ```
 
 The script never reads a key file or logs the key. It uses the strict Responses
-API transport schema, revalidates against the canonical backend schema, and only
-then writes `fixtures/live/gpt-5.6-t2-assessment.json`. No live run is claimed
-until that command succeeds and its execution record is added to `EVAL.md`.
+API transport schema, applies the narrow identifier boundary described above,
+revalidates against the canonical backend schema, and only then writes
+`fixtures/live/gpt-5.6-t2-assessment.json`. Attempt 1 failed closed before writing
+an artifact. Attempt 2 succeeded with GPT-5.6 and prompt
+`vendor-assessment/v2`; both executions and the live policy-fact limitation are
+documented in `EVAL.md`.
 
 ## Build Week records
 

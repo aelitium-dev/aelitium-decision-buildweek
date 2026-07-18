@@ -9,6 +9,7 @@ __pycache__/
 # JavaScript / Next.js
 node_modules/
 .next/
+.next-dev/
 out/
 *.tsbuildinfo
 

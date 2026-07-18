@@ -47,11 +47,51 @@ Metrics describe only the small, documented golden set. They are not generalized
 
 ## LIVE smoke status
 
-The environment-only GPT-5.6 smoke command is prepared but has not been run.
-There is no checked-in live assessment artifact and no live-model quality claim
-at this checkpoint. After explicit approval and a successful call, this section
-will record the model, execution time, canonical assessment hash, resulting
-policy route, and artifact path.
+### Attempt 1 — canonical validation rejected the response
+
+- Execution: external T2-style F1–F4 GPT-5.6 call through the Responses API.
+- Transport result: the derived strict Structured Outputs schema accepted the
+  response shape.
+- Authoritative result: `LIVE_SMOKE_FAILED: CanonicalSchemaError`; the backend
+  rejected the assessment before artifact creation or policy evaluation.
+- Exact violation classes: 34 prefixed IDs used uppercase forms (14 `fact_id`,
+  1 `conflict_id`, 7 missing-evidence `item_id`, 7 `risk_id`, 4 option
+  `option_id`, and 1 recommendation `option_id`), while 7 `control_hint` values
+  contained citation prose rather than a single identifier token.
+- Representative failures: `FACT-001` did not match `fact-…`, `OPTION-001` did
+  not match `option-…`, and `F2 section 3, customer-data control 1; F4 section
+  12.4` did not satisfy the token-only `control_hint` contract.
+- Security/result discipline: the key was redacted, no assessment artifact was
+  written, and no successful live-model or policy-route claim is made.
+
+Remediation for attempt 2 uses prompt `vendor-assessment/v2`. The prompt states
+the ID and `control_hint` formats explicitly. A deterministic boundary may
+lowercase only correctly prefixed, otherwise valid IDs; it cannot edit
+`control_hint` or other semantic content. Canonical validation remains
+authoritative.
+
+### Attempt 2 — canonical live artifact accepted
+
+- Execution: `2026-07-18T19:48:39Z`, externally invoked with model `gpt-5.6`
+  and prompt `vendor-assessment/v2`.
+- Result: `LIVE_SMOKE_OK`; the response passed the transport boundary and the
+  complete canonical `ModelAssessment` schema before artifact creation.
+- Artifact: `fixtures/live/gpt-5.6-t2-assessment.json`.
+- Canonical assessment hash:
+  `55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4`.
+- Vendor Approval Policy Pack result: `NEEDS_MORE_EVIDENCE`; blocking controls
+  were `R2_EU_DATA_RESIDENCY`, `R3_DPA_SIGNED`, and `R4_CERTIFICATION`.
+- Policy-fact boundary: prompt v2 did not provide the pack's exact `fact_key`
+  catalog. The live response used semantically descriptive keys such as
+  `annual_recurring_cost_eur` instead of `commercial.annual_price_eur`.
+  Consequently, all four fact-driven rules observed a missing value and failed
+  closed. The route is conservative, but it is not claimed as evidence of
+  correct live fact-to-policy mapping; in particular, `R3_DPA_SIGNED` failed as
+  missing even though the assessment narrative identifies the executed DPA.
+- The checked-in artifact test revalidates the canonical schema and assessment
+  hash, runs the unchanged policy pack, asserts the real route and blocking
+  controls, and preserves the missing-fact limitation as an explicit assertion.
+- The complete backend suite passed 51 tests with the live-artifact check.
 
 ## D2 UI integration record
 

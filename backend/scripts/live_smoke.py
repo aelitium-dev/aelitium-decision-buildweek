@@ -83,7 +83,8 @@ def main() -> int:
     )
     print(
         "LIVE_SMOKE_OK "
-        f"model={DEFAULT_MODEL} assessment_hash={artifact['assessment_hash']} "
+        f"model={DEFAULT_MODEL} prompt_version={DEFAULT_PROMPT_VERSION} "
+        f"assessment_hash={artifact['assessment_hash']} "
         f"artifact={ARTIFACT_PATH}"
     )
     return 0

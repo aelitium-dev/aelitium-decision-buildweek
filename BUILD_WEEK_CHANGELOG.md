@@ -76,5 +76,52 @@ This log distinguishes work performed during OpenAI Build Week from the declared
   the resulting npm audit reports zero known vulnerabilities.
 - Added a manual LIVE smoke script that reads `OPENAI_API_KEY` only from the
   process environment, redacts it from errors, and writes an assessment artifact
-  only after a successful GPT-5.6 response. The script has been prepared but not
-  executed, so no live-model result is claimed.
+  only after a successful GPT-5.6 response. At the UI checkpoint the script had
+  been prepared but not yet executed.
+
+### LIVE smoke iteration 1 — fail-closed transport boundary
+
+- Ran the T2-style F1–F4 smoke externally. GPT-5.6 returned a structurally valid
+  transport object, but authoritative canonical validation rejected 34
+  identifier-format violations and 7 prose-valued `control_hint` violations.
+- Wrote no artifact and did not pass the rejected assessment to the Policy
+  Engine. The failure is retained in `EVAL.md` as defense-in-depth evidence, not
+  as a successful live result or model-quality claim.
+- Bumped the live adapter prompt from `vendor-assessment/v1` to
+  `vendor-assessment/v2` and added explicit lowercase ID examples plus the
+  single-token `control_hint` contract.
+- Added a deterministic pre-validation identifier casing boundary (implemented
+  internally by `normalize_transport_identifiers`) that only lowercases tokens
+  already carrying the correct case-insensitive prefix and grammar. It operates
+  on a copy and rejects missing IDs, unsafe repairs, case-folding collisions,
+  and recommendation references that do not resolve to an option.
+- Explicitly excluded `control_hint`, findings, evidence, free text, fact keys,
+  and all other semantic content from normalization. Those remain subject to
+  fail-closed canonical validation.
+
+### LIVE smoke iteration 2 — canonical GPT-5.6 artifact
+
+- Re-ran the T2-style F1–F4 smoke externally with GPT-5.6 and prompt
+  `vendor-assessment/v2`. It passed the transport boundary and authoritative
+  canonical validation and wrote
+  `fixtures/live/gpt-5.6-t2-assessment.json` without persisting or logging the
+  API key.
+- Recorded execution time `2026-07-18T19:48:39Z` and canonical assessment hash
+  `55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4`.
+- Added a test that revalidates the checked-in live assessment and hash before
+  evaluating it with the unchanged Vendor Approval Policy Pack. The resulting
+  route is `NEEDS_MORE_EVIDENCE`.
+- Kept the policy-fact limitation visible: prompt v2 did not supply the pack's
+  exact `fact_key` catalog, so the four fact-driven controls failed closed on
+  missing keys. No semantic aliases or inferred mappings were introduced, and
+  this run is not presented as fact-to-policy mapping accuracy evidence.
+- The complete backend suite passed 51 tests with the live-artifact check.
+
+### D2 visual-test runtime repair
+
+- Diagnosed the first browser launch failure as mixed Next.js output: production
+  `page.js` and `chunks/833.js` were followed by development rewrites of the
+  Webpack runtime and React Client Manifest in the same `.next` directory.
+- Kept the approved Next.js 15 toolchain and added no package. Configured
+  `.next-dev` for development and retained `.next` for production, preventing
+  subsequent build/dev manifest collisions without deleting user data.

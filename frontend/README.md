@@ -22,3 +22,7 @@ npm run dev
 The browser calls `/api/backend/*`; Next rewrites that path to
 `http://127.0.0.1:8000` by default. Set `AELITIUM_API_BASE_URL` before starting
 Next to use a different backend origin. No API key is needed for the DEMO path.
+
+Development output is isolated under `.next-dev/`; production builds use
+`.next/`. This prevents `next dev` and `next build` from mixing React Client
+Manifests and Webpack chunks when validation builds run during a visual session.
