@@ -1,4 +1,4 @@
-"""Minimal D1 FastAPI surface for cases and deterministic policy evaluation."""
+"""FastAPI surface for deterministic cases and the clickable DEMO workflow."""
 
 from __future__ import annotations
 
@@ -9,10 +9,21 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Body, FastAPI, HTTPException, Request, status
+from pydantic import BaseModel, ConfigDict, Field
 
+from .demo_workflow import (
+    DEMO_KEYRING_PATH,
+    DEMO_PRIVATE_KEY_PATH,
+    DemoConfigurationError,
+    build_demo_snapshot,
+    create_demo_approval,
+    issue_demo_receipt,
+    verify_demo_receipt,
+)
 from .paths import POLICIES_DIR, REPOSITORY_ROOT
 from .persistence import SQLiteStore, StoreConflictError
 from .policy import PolicyEngine, load_policy_pack
+from .receipt import ReceiptBuildError
 from .schema_validation import CanonicalSchemaError, validate_canonical
 
 
@@ -25,13 +36,39 @@ def _default_database_path() -> Path:
     return Path(configured) if configured else REPOSITORY_ROOT / "runtime" / "aelitium.db"
 
 
-def create_app(*, database_path: Path | None = None) -> FastAPI:
+class DemoApprovalInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    display_name: str = Field(min_length=1, max_length=200)
+    justification: str = Field(min_length=1, max_length=5000)
+    condition: str = Field(min_length=1, max_length=1000)
+
+
+class DemoReceiptInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    approval: dict[str, Any]
+
+
+class DemoVerificationInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    receipt: dict[str, Any]
+
+
+def create_app(
+    *,
+    database_path: Path | None = None,
+    demo_private_key_path: Path = DEMO_PRIVATE_KEY_PATH,
+    demo_keyring_path: Path = DEMO_KEYRING_PATH,
+) -> FastAPI:
     store = SQLiteStore(database_path or _default_database_path())
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         store.initialize()
         app.state.store = store
+        app.state.demo_receipts = {}
         yield
 
     app = FastAPI(
@@ -43,6 +80,76 @@ def create_app(*, database_path: Path | None = None) -> FastAPI:
     @app.get("/health")
     async def health() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/v1/demo/case")
+    async def demo_case() -> dict[str, Any]:
+        """Return the complete no-API-key case, evidence diff, and policy state."""
+
+        return build_demo_snapshot()
+
+    @app.post("/v1/demo/approvals")
+    async def demo_approval(payload: DemoApprovalInput) -> dict[str, Any]:
+        try:
+            approval = create_demo_approval(
+                display_name=payload.display_name,
+                justification=payload.justification,
+                condition=payload.condition,
+            )
+        except (CanonicalSchemaError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        return {
+            "approval": approval,
+            "identity_notice": (
+                "Approver identity is declared only and is not authenticated in the MVP."
+            ),
+        }
+
+    @app.post("/v1/demo/receipts", status_code=status.HTTP_201_CREATED)
+    async def demo_receipt(
+        request: Request, payload: DemoReceiptInput
+    ) -> dict[str, Any]:
+        try:
+            issued = issue_demo_receipt(
+                approval=payload.approval,
+                private_key_path=demo_private_key_path,
+                keyring_path=demo_keyring_path,
+            )
+        except DemoConfigurationError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except (CanonicalSchemaError, ReceiptBuildError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+        signed_payload = issued.receipt["signed_receipt_payload"]
+        receipt_id = signed_payload["receipt_id"]
+        request.app.state.demo_receipts[receipt_id] = issued
+        signing_metadata = signed_payload["signing_metadata"]
+        return {
+            "receipt": issued.receipt,
+            "trust_anchor": {
+                "source": "external_demo_keyring",
+                "key_id": signing_metadata["key_id"],
+                "public_key_fingerprint_sha256": signing_metadata[
+                    "public_key_fingerprint_sha256"
+                ],
+            },
+        }
+
+    @app.post("/v1/demo/receipts/verify")
+    async def demo_verify(
+        request: Request, payload: DemoVerificationInput
+    ) -> dict[str, str]:
+        try:
+            receipt_id = payload.receipt["signed_receipt_payload"]["receipt_id"]
+        except (KeyError, TypeError):
+            return {"status": "INVALID", "reason": "EXTERNAL_MATERIALS_NOT_FOUND"}
+        issued = request.app.state.demo_receipts.get(receipt_id)
+        if issued is None:
+            return {"status": "INVALID", "reason": "EXTERNAL_MATERIALS_NOT_FOUND"}
+        return verify_demo_receipt(
+            payload.receipt,
+            materials=issued.materials,
+            keyring=issued.keyring,
+        ).as_dict()
 
     @app.post("/v1/cases", status_code=status.HTTP_201_CREATED)
     async def create_case(

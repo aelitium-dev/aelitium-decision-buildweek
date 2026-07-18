@@ -7,3 +7,8 @@ precedence used by the demo. The generic engine lives under
 
 Model assessments supply observed facts only. They cannot change a threshold,
 replace routing precedence, or waive a blocking control.
+
+The operator set implemented by the generic engine is a platform contract.
+Policy packs are data: they may select and configure only existing operators,
+and may never introduce executable code. Adding a new operator requires a
+reviewed engine change and tests; editing a pack alone cannot expand execution.

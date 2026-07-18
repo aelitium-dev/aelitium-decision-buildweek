@@ -53,3 +53,28 @@ This log distinguishes work performed during OpenAI Build Week from the declared
 - Added an offline fail-closed verifier with stable reasons and recomputation of assessment, policy result, policy pack, prompt, assessment schema, model request, timeline, content, fingerprint, and signature commitments.
 - Made T4/T5 green, including the six required tamper classes plus the EUR 18,000 → EUR 14,000 narrative alteration.
 - Did not reuse the `aelitium-v3` P3 signer or verifier, make a live OpenAI call, add UI, or push this D2 work.
+
+### D2 clickable Decision Console
+
+- Added a deterministic post-F5 DEMO workflow service and four focused FastAPI
+  routes for case review, declared human approval, receipt issuance, and receipt
+  verification.
+- Kept receipt verification dependent on server-held external commitment
+  materials and the external public keyring; no private-key bytes or path are
+  returned by the API.
+- Added the three spec §8 screens: case/evidence with clickable citations and
+  the `UNKNOWN → PASS` diff, human approval with visible action boundaries, and
+  receipt/verify with the EUR 18,000 → EUR 14,000 tamper interaction.
+- Built the UI as new Build Week work. The historical Command Center remained a
+  visual reference only; no component, markup, style, fixture, or media was
+  copied.
+- Pinned the approved frontend toolchain exactly: Next.js `15.5.20`, React and
+  React DOM `19.2.7`, TypeScript `5.9.3`, Tailwind CSS and its PostCSS adapter
+  `4.3.3`, PostCSS `8.5.19`, `@types/node` `24.13.3`, `@types/react` `19.2.17`,
+  and `@types/react-dom` `19.2.3`.
+- Overrode Next.js's older nested PostCSS with the already approved `8.5.19`;
+  the resulting npm audit reports zero known vulnerabilities.
+- Added a manual LIVE smoke script that reads `OPENAI_API_KEY` only from the
+  process environment, redacts it from errors, and writes an assessment artifact
+  only after a successful GPT-5.6 response. The script has been prepared but not
+  executed, so no live-model result is claimed.

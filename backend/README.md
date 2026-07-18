@@ -5,7 +5,8 @@ The D1 backend contains:
 - `src/aelitium_decision/policy/` — generic deterministic engine and strict policy-pack models
 - `policies/ai_vendor_approval.v1.json` — the domain-specific six-rule Vendor Approval Policy Pack
 - `src/aelitium_decision/demo.py` and `cli.py` — no-key T1–T3 execution
-- `src/aelitium_decision/api.py` — minimal FastAPI case and evaluation routes
+- `src/aelitium_decision/api.py` — generic case routes and focused DEMO UI routes
+- `src/aelitium_decision/demo_workflow.py` — post-F5 approval/receipt workflow over checked-in fixtures
 - `src/aelitium_decision/persistence.py` and `sql/001_initial.sql` — SQLite boundary with versioned SQL
 - `src/aelitium_decision/adapters/openai_assessment.py` — GPT-5.6 Responses API adapter
 - `src/aelitium_decision/schema_validation.py` — authoritative Draft 2020-12 backend validation
@@ -15,4 +16,8 @@ The D1 backend contains:
 
 The policy engine consumes thresholds and effects only from the versioned policy pack. Model output supplies observed facts and conflicts; it cannot replace routing, alter a threshold, or waive a blocking control.
 
-Receipt construction, signing, and verification are implemented as a core library and tested through T4/T5. Approval/receipt API routes and UI wiring remain. No private signing key is present in Git; the locally generated demo key is an ignored runtime file.
+Receipt construction, signing, and verification are implemented as a core
+library and tested through T4/T5. The clickable DEMO API adds case, approval,
+receipt, and verification routes without requiring an OpenAI key. No private
+signing key is present in Git; the locally generated demo key is an ignored
+runtime file and is never returned by the API.

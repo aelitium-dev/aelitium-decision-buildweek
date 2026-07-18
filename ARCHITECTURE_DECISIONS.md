@@ -33,6 +33,9 @@ This ADR records the approved refinement of specification sections 8, 10, and 11
 - New project license: MIT.
 - Vendored `aelitium-v3` material retains Apache-2.0 `LICENSE` and `NOTICE` files.
 - No imports from the absolute local `aelitium-v3` checkout.
+- All current and future application modules import canonicalization and hashing
+  only through `aelitium_decision.hashing`; that boundary is the sole module
+  permitted to import the vendored helper directly.
 - No Git submodule, history merge, runtime P3 service call, or packaging work on `aelitium-v3`.
 - No existing repository is edited to support this application.
 - Private signing keys are never committed. The verifier needs only a trusted public keyring.

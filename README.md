@@ -2,7 +2,7 @@
 
 Turn AI recommendations into evidence-backed, human-approved, and tamper-evident decision records.
 
-> Build status: D1 backend and the first D2 receipt gate are implemented. DEMO T1–T5 are green without an OpenAI key; API wiring for approval/receipts and frontend work remain.
+> Build status: the D1 backend, D2 receipt core, and clickable UI screens 1–3 are implemented. DEMO T1–T5 are green without an OpenAI key; the LIVE smoke run remains an explicit manual gate.
 
 ## Build Week workflow
 
@@ -24,7 +24,7 @@ Receipt verification checks integrity and Ed25519 validity under a separately tr
 
 ## Execution modes
 
-- `DEMO`: implemented with three pre-computed assessments; no OpenAI key required.
+- `DEMO`: implemented with pre-computed assessments and a complete clickable approval → receipt → verify → tamper path; no OpenAI key required.
 - `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. No live call is required for the D1 test gate and no live result is claimed yet.
 
 ## Planned architecture
@@ -92,7 +92,21 @@ Start the API locally:
 PYTHONPATH=backend/src backend/.venv/bin/python -m uvicorn aelitium_decision.api:app --host 127.0.0.1 --port 8000
 ```
 
-SQLite defaults to the ignored `runtime/aelitium.db`; override it with `AELITIUM_DB_PATH`. The D1 API surface is intentionally small: health, create/read case, deterministic evaluation, and latest policy result.
+SQLite defaults to the ignored `runtime/aelitium.db`; override it with
+`AELITIUM_DB_PATH`. The generic API surface remains intentionally small: health,
+create/read case, deterministic evaluation, and latest policy result. The
+`/v1/demo/*` routes expose the fixed Build Week scenario to the Decision Console.
+
+Start the frontend in a second terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open `http://127.0.0.1:3000`. Next rewrites `/api/backend/*` to the local FastAPI
+origin; set `AELITIUM_API_BASE_URL` before starting Next if the backend is elsewhere.
 
 ## Structured Outputs boundary
 
@@ -111,6 +125,20 @@ and SHA-256 fingerprint are present in `config/trusted-keyring.demo.json`.
 Verification establishes integrity and signature validity under that separately
 trusted key. It does not establish truth, correctness, decision quality, legal
 validity, identity authentication, or independently trusted time.
+
+## Manual LIVE smoke gate
+
+After setting `OPENAI_API_KEY` in the invoking shell, one T2-style F1–F4 run can
+be performed with:
+
+```bash
+PYTHONPATH=backend/src backend/.venv/bin/python backend/scripts/live_smoke.py
+```
+
+The script never reads a key file or logs the key. It uses the strict Responses
+API transport schema, revalidates against the canonical backend schema, and only
+then writes `fixtures/live/gpt-5.6-t2-assessment.json`. No live run is claimed
+until that command succeeds and its execution record is added to `EVAL.md`.
 
 ## Build Week records
 
