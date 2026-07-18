@@ -1,0 +1,82 @@
+{
+  "fixture_manifest_version": "1.0",
+  "scenario": "ai_vendor_approval",
+  "company": "Caldera Works Europe S.A.S. (fictional)",
+  "vendor": "NovaMind AI Ltd. (fictional)",
+  "encoding": "UTF-8",
+  "documents": [
+    {
+      "document_id": "F1",
+      "document_type": "commercial_proposal",
+      "filename": "F1_vendor_commercial_proposal.md",
+      "path": "documents/F1_vendor_commercial_proposal.md",
+      "version": "1.0",
+      "sha256": "5b294c430f29c422a71e7c082b65c3b5e7a4cdbc1cad862686880dc3ecc3f7a5",
+      "expected_material_facts": [
+        "annual subscription is EUR 18,000 excluding VAT",
+        "initial term is 36 months",
+        "hosting is described as global cloud infrastructure",
+        "SOC 2 Type II is described as in progress"
+      ]
+    },
+    {
+      "document_id": "F2",
+      "document_type": "internal_policy",
+      "filename": "F2_internal_procurement_policy.md",
+      "path": "documents/F2_internal_procurement_policy.md",
+      "version": "3.2",
+      "sha256": "2aa04b0adc51f43c26ce3099765941d3e0720517d54702767a35331702728392",
+      "expected_material_facts": [
+        "annual recurring cost above EUR 15,000 requires director approval",
+        "EU or EEA-only processing and backups require written confirmation",
+        "a DPA executed by both parties is a hard requirement for Customer Data",
+        "conflicting evidence requires human review"
+      ]
+    },
+    {
+      "document_id": "F3",
+      "document_type": "security_questionnaire",
+      "filename": "F3_security_questionnaire.md",
+      "path": "documents/F3_security_questionnaire.md",
+      "version": "1.0",
+      "sha256": "88395b9c536c82768ec0c6cdfe9386120581214b60ce5abb2ecbd94086690ac8",
+      "expected_material_facts": [
+        "data residency is US–EU and configurable",
+        "SOC 2 Type II is in progress without an issue date",
+        "SUB-02 claims at least 30 days' advance notice for new subprocessors"
+      ]
+    },
+    {
+      "document_id": "F4",
+      "document_type": "executed_dpa",
+      "filename": "F4_executed_data_processing_addendum.md",
+      "path": "documents/F4_executed_data_processing_addendum.md",
+      "version": "4.3",
+      "sha256": "7c2d9909275286661ecc0f2f22a34f60015f28d595b080d1493c2372ff66cd86",
+      "print_pages": 34,
+      "expected_material_facts": [
+        "the DPA is executed by both fictional parties",
+        "no customer-specific EU-only commitment exists at execution",
+        "section 9.6 on page 23 permits a new or replacement subprocessor and non-EEA processing without prior notice",
+        "section 9.6 expressly conflicts with questionnaire response SUB-02"
+      ]
+    },
+    {
+      "document_id": "F5",
+      "document_type": "vendor_assurance_letter",
+      "filename": "F5_vendor_assurance_letter.md",
+      "path": "documents/F5_vendor_assurance_letter.md",
+      "version": "1.0",
+      "sha256": "c3189770b1b4c09609c20abe382c31de8ced9284afe6f7e9943fbe7f73816a1c",
+      "expected_material_facts": [
+        "Customer Content, backups, and core processing are committed to the EU or EEA",
+        "a SOC 2 Type II report is stated as issued on 2026-07-15",
+        "the letter does not amend the DPA's subprocessor-notice language"
+      ]
+    }
+  ],
+  "expected_initial_route": "NEEDS_MORE_EVIDENCE",
+  "expected_post_f5_route": "HUMAN_APPROVAL_REQUIRED",
+  "expected_human_decision": "approve_with_conditions",
+  "expected_condition": "renegotiate subprocessor clause before renewal"
+}

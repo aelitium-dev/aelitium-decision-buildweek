@@ -1,0 +1,115 @@
+{
+  "policy_schema_version": "aelitium-policy/v1",
+  "policy_version": "ai-vendor-approval/1.0.0",
+  "decision_domain": "ai_vendor_approval",
+  "description": "Deterministic minimum controls for the fictional NovaMind AI vendor approval workflow.",
+  "confidence_floor": 70,
+  "routing_precedence": [
+    {
+      "priority": 1,
+      "condition": "blocking_controls_not_empty",
+      "state": "NEEDS_MORE_EVIDENCE"
+    },
+    {
+      "priority": 2,
+      "condition": "director_approval_required",
+      "state": "HUMAN_APPROVAL_REQUIRED"
+    },
+    {
+      "priority": 3,
+      "condition": "human_review_required",
+      "state": "HUMAN_REVIEW"
+    },
+    {
+      "priority": 4,
+      "condition": "otherwise",
+      "state": "READY_FOR_APPROVAL"
+    }
+  ],
+  "rules": [
+    {
+      "control_id": "R1_PRICE_CEILING",
+      "version": "1.0.0",
+      "description": "Annual recurring cost above EUR 15,000 requires director approval.",
+      "operator": "fact_integer_greater_than",
+      "fact_key": "commercial.annual_price_eur",
+      "expected_value": 15000,
+      "missing_fact_result": "FAIL",
+      "failure_effect": "REQUIRE_DIRECTOR_APPROVAL",
+      "blocking": false,
+      "required_approval_roles": ["director"],
+      "missing_evidence": "Current written annual recurring price",
+      "suggested_request": "Provide the current written offer showing annual recurring cost and all mandatory charges."
+    },
+    {
+      "control_id": "R2_EU_DATA_RESIDENCY",
+      "version": "1.0.0",
+      "description": "Customer Data and backups require written EU or EEA-only confirmation.",
+      "operator": "fact_boolean_equals",
+      "fact_key": "privacy.eu_eea_only_residency_confirmed",
+      "expected_value": true,
+      "missing_fact_result": "FAIL",
+      "failure_effect": "BLOCK_APPROVAL",
+      "blocking": true,
+      "required_approval_roles": [],
+      "missing_evidence": "Written confirmation covering Customer Content, backups, and core processing in the EU or EEA",
+      "suggested_request": "Confirm in writing that Customer Content, backups, and core processing for this tenant will remain in the EU or EEA."
+    },
+    {
+      "control_id": "R3_DPA_SIGNED",
+      "version": "1.0.0",
+      "description": "A DPA executed by both parties is required before Customer Data is uploaded.",
+      "operator": "fact_boolean_equals",
+      "fact_key": "privacy.dpa_executed_by_both_parties",
+      "expected_value": true,
+      "missing_fact_result": "FAIL",
+      "failure_effect": "BLOCK_APPROVAL",
+      "blocking": true,
+      "required_approval_roles": [],
+      "missing_evidence": "DPA execution evidence for both parties",
+      "suggested_request": "Provide a Data Processing Addendum executed by authorized representatives of both parties."
+    },
+    {
+      "control_id": "R4_CERTIFICATION",
+      "version": "1.0.0",
+      "description": "SOC 2 Type II or equivalent assurance must be issued; planned or in-progress status is insufficient.",
+      "operator": "fact_boolean_equals",
+      "fact_key": "security.assurance_report_issued",
+      "expected_value": true,
+      "missing_fact_result": "FAIL",
+      "failure_effect": "REQUEST_EVIDENCE",
+      "blocking": true,
+      "required_approval_roles": [],
+      "missing_evidence": "Issued SOC 2 Type II report or documented equivalent assurance",
+      "suggested_request": "Provide the issued SOC 2 Type II report, a dated issuance confirmation, or documented equivalent assurance."
+    },
+    {
+      "control_id": "R5_CONFLICT_GATE",
+      "version": "1.0.0",
+      "description": "Any material conflict in the assessment requires human review.",
+      "operator": "assessment_conflicts_count_equals",
+      "fact_key": "assessment.conflicts_count",
+      "expected_value": 0,
+      "missing_fact_result": "FAIL",
+      "failure_effect": "REQUIRE_HUMAN_REVIEW",
+      "blocking": false,
+      "required_approval_roles": ["operations_reviewer"],
+      "missing_evidence": "Resolution or acknowledgement of each material document conflict",
+      "suggested_request": "Resolve or explicitly acknowledge the conflicting vendor statements before the final decision."
+    },
+    {
+      "control_id": "R6_CONFIDENCE_FLOOR",
+      "version": "1.0.0",
+      "description": "Assessment confidence below 70 percent requires human review.",
+      "operator": "assessment_confidence_at_least",
+      "fact_key": "assessment.confidence",
+      "expected_value": 70,
+      "missing_fact_result": "FAIL",
+      "failure_effect": "REQUIRE_HUMAN_REVIEW",
+      "blocking": false,
+      "required_approval_roles": ["operations_reviewer"],
+      "missing_evidence": "Higher-confidence evidence or explicit human assessment of uncertainty",
+      "suggested_request": "Review the low-confidence findings and obtain additional evidence where material."
+    }
+  ]
+}

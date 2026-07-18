@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aelitium.dev/schemas/human_approval.v1.schema.json",
+  "title": "HumanApproval v1",
+  "description": "Declared human decision and conditions for a policy result. Identity is not authenticated in the MVP.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "human-approval/v1"
+    },
+    "approval_id": {
+      "type": "string",
+      "pattern": "^approval-[a-z0-9][a-z0-9-]{2,63}$"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^case-[a-z0-9][a-z0-9-]{2,63}$"
+    },
+    "policy_result_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "approver": {
+      "$ref": "#/$defs/approver"
+    },
+    "decision": {
+      "enum": [
+        "approve",
+        "approve_with_conditions",
+        "reject",
+        "request_evidence"
+      ]
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/condition"
+      }
+    },
+    "requested_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    },
+    "justification": {
+      "type": "string",
+      "maxLength": 5000
+    },
+    "override": {
+      "type": "boolean"
+    },
+    "override_controls": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^R[1-9][0-9]*_[A-Z0-9_]+$"
+      }
+    },
+    "decision_evidence_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decisionEvidence"
+      }
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "schema_version",
+    "approval_id",
+    "case_id",
+    "policy_result_hash",
+    "approver",
+    "decision",
+    "conditions",
+    "requested_evidence",
+    "justification",
+    "override",
+    "override_controls",
+    "decision_evidence_refs",
+    "decided_at"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "override": {
+            "const": true
+          }
+        },
+        "required": ["override"]
+      },
+      "then": {
+        "properties": {
+          "justification": {
+            "minLength": 1
+          },
+          "override_controls": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "approve_with_conditions"
+          }
+        },
+        "required": ["decision"]
+      },
+      "then": {
+        "properties": {
+          "conditions": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "request_evidence"
+          }
+        },
+        "required": ["decision"]
+      },
+      "then": {
+        "properties": {
+          "requested_evidence": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "approver": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "declared_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{1,127}$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,63}$"
+        },
+        "identity_assurance": {
+          "const": "declared_only"
+        }
+      },
+      "required": [
+        "declared_id",
+        "display_name",
+        "role",
+        "identity_assurance"
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "type": "string",
+          "pattern": "^condition-[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "owner_role": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,63}$"
+        },
+        "due_event": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "condition_id",
+        "text",
+        "owner_role",
+        "due_event"
+      ]
+    },
+    "decisionEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "required": ["document_id", "locator", "note"]
+    }
+  }
+}

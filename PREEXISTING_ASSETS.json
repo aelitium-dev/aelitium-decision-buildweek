@@ -1,0 +1,61 @@
+{
+  "manifest_version": "1.0",
+  "project": "AELITIUM — Verifiable Decision Workflows",
+  "build_week_start_date": "2026-07-18",
+  "governing_adr": "ARCHITECTURE_DECISIONS.md#adr-001--build-week-boundary-provenance-and-decision-receipt-protocol",
+  "default_classification": "Build Week work",
+  "allowlist_required": true,
+  "assets": [
+    {
+      "component": "AELITIUM canonical JSON helper",
+      "source_repository": "git@github.com:aelitium-dev/aelitium-v3.git",
+      "source_checkout": "/home/catarina-aelitium/aelitium-v3",
+      "source_commit": "727afff1f26081a05d66d3634b58eb5bd3924a07",
+      "source_path": "engine/canonical.py",
+      "source_sha256": "c16d50a8b8343f637b2d9abfb610837bc2282474e2237fd992de9ef561dea1d8",
+      "destination_path": "backend/src/aelitium_decision/vendor/aelitium_v3/canonical.py",
+      "modification_status": "verbatim frozen copy; modifications prohibited; Build Week wrappers live outside vendor/",
+      "classification": "pre-existing"
+    },
+    {
+      "component": "aelitium-v3 Apache-2.0 license",
+      "source_repository": "git@github.com:aelitium-dev/aelitium-v3.git",
+      "source_checkout": "/home/catarina-aelitium/aelitium-v3",
+      "source_commit": "727afff1f26081a05d66d3634b58eb5bd3924a07",
+      "source_path": "LICENSE",
+      "source_sha256": "2d9bedeb0036f3461f5eedcdb6c574b141c256ac89780fae61dd8c61a594b6fe",
+      "destination_path": "third_party/aelitium-v3/LICENSE",
+      "modification_status": "verbatim copy",
+      "classification": "pre-existing"
+    },
+    {
+      "component": "aelitium-v3 attribution notice",
+      "source_repository": "git@github.com:aelitium-dev/aelitium-v3.git",
+      "source_checkout": "/home/catarina-aelitium/aelitium-v3",
+      "source_commit": "727afff1f26081a05d66d3634b58eb5bd3924a07",
+      "source_path": "NOTICE",
+      "source_sha256": "05341cffa744e4ccc73f5c8c2e8bd0547c9e16e98cd7a4361d22a93ae2d94ae5",
+      "destination_path": "third_party/aelitium-v3/NOTICE",
+      "modification_status": "verbatim copy",
+      "classification": "pre-existing"
+    }
+  ],
+  "explicitly_not_allowlisted": [
+    {
+      "source": "/home/catarina-aelitium/aelitium-v3/p3/server/signing.py",
+      "reason": "receipt representation differs from ADR-001; new signer and verifier are Build Week work"
+    },
+    {
+      "source": "/home/catarina-aelitium/aelitium-v3/engine/ai_cli.py::cmd_verify_receipt",
+      "reason": "not copied; new public-key-only fail-closed verifier is Build Week work"
+    },
+    {
+      "source": "/mnt/c/Users/CATARINA-AELITIUM/Desktop/WORK/_private-publication-hold/applied-ai-portfolio/aelitium-os-command-center",
+      "reason": "visual reference only; copying requires a D2 checkpoint manifest update before the copy"
+    },
+    {
+      "source": "/mnt/c/Users/CATARINA-AELITIUM/Desktop/INFRA/AELITIUM_OS",
+      "reason": "architecture reference only; no files copied"
+    }
+  ]
+}

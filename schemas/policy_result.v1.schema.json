@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aelitium.dev/schemas/policy_result.v1.schema.json",
+  "title": "PolicyResult v1",
+  "description": "Deterministic evaluation result for a versioned decision policy.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "policy-result/v1"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^case-[a-z0-9][a-z0-9-]{2,63}$"
+    },
+    "policy_version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,63}$"
+    },
+    "assessment_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "state": {
+      "enum": [
+        "NEEDS_MORE_EVIDENCE",
+        "HUMAN_REVIEW",
+        "READY_FOR_APPROVAL",
+        "HUMAN_APPROVAL_REQUIRED"
+      ]
+    },
+    "rules_evaluated": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ruleEvaluation"
+      }
+    },
+    "blocking_controls": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/blockingControl"
+      }
+    },
+    "missing_evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/missingEvidence"
+      }
+    },
+    "suggested_request": {
+      "type": "string",
+      "maxLength": 5000
+    },
+    "required_approval_roles": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{1,63}$"
+      }
+    },
+    "routing_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "evaluated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "schema_version",
+    "case_id",
+    "policy_version",
+    "assessment_hash",
+    "state",
+    "rules_evaluated",
+    "blocking_controls",
+    "missing_evidence",
+    "suggested_request",
+    "required_approval_roles",
+    "routing_reasons",
+    "evaluated_at"
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "scalarValue": {
+      "type": ["string", "integer", "boolean", "null"]
+    },
+    "ruleEvaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "type": "string",
+          "pattern": "^R[1-9][0-9]*_[A-Z0-9_]+$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "result": {
+          "enum": ["PASS", "FAIL", "NOT_APPLICABLE"]
+        },
+        "observed_value": {
+          "$ref": "#/$defs/scalarValue"
+        },
+        "expected_value": {
+          "$ref": "#/$defs/scalarValue"
+        },
+        "fact_keys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_.]{2,127}$"
+          }
+        },
+        "effect": {
+          "enum": [
+            "NONE",
+            "BLOCK_APPROVAL",
+            "REQUEST_EVIDENCE",
+            "REQUIRE_HUMAN_REVIEW",
+            "REQUIRE_DIRECTOR_APPROVAL"
+          ]
+        }
+      },
+      "required": [
+        "control_id",
+        "version",
+        "description",
+        "result",
+        "observed_value",
+        "expected_value",
+        "fact_keys",
+        "effect"
+      ]
+    },
+    "blockingControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "type": "string",
+          "pattern": "^R[1-9][0-9]*_[A-Z0-9_]+$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "missing_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "suggested_request": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "control_id",
+        "description",
+        "missing_evidence",
+        "suggested_request"
+      ]
+    },
+    "missingEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "pattern": "^missing-[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "required_by_controls": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^R[1-9][0-9]*_[A-Z0-9_]+$"
+          }
+        }
+      },
+      "required": [
+        "item_id",
+        "description",
+        "required_by_controls"
+      ]
+    }
+  }
+}

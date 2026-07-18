@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aelitium.dev/schemas/model_assessment.v1.schema.json",
+  "title": "ModelAssessment v1",
+  "description": "Strict structured assessment proposed by GPT-5.6 and revalidated by the backend.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "model-assessment/v1"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "prompt_version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,63}$"
+    },
+    "case_summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "facts": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/fact"
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/conflict"
+      }
+    },
+    "missing_evidence": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/missingEvidence"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "$ref": "#/$defs/risk"
+      }
+    },
+    "options": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/option"
+      }
+    },
+    "recommendation": {
+      "$ref": "#/$defs/recommendation"
+    },
+    "confidence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Integer percentage; floats are prohibited by ADR-001."
+    },
+    "requires_human_review": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "model",
+    "prompt_version",
+    "case_summary",
+    "facts",
+    "conflicts",
+    "missing_evidence",
+    "risks",
+    "options",
+    "recommendation",
+    "confidence",
+    "requires_human_review"
+  ],
+  "$defs": {
+    "typedValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value_type": {
+          "enum": ["string", "integer", "boolean", "unknown"]
+        },
+        "string_value": {
+          "type": ["string", "null"]
+        },
+        "integer_value": {
+          "type": ["integer", "null"]
+        },
+        "boolean_value": {
+          "type": ["boolean", "null"]
+        }
+      },
+      "required": [
+        "value_type",
+        "string_value",
+        "integer_value",
+        "boolean_value"
+      ]
+    },
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "quoted_text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "reference_level": {
+          "enum": [
+            "source_reference",
+            "validated_reference",
+            "decision_evidence"
+          ]
+        }
+      },
+      "required": [
+        "document_id",
+        "locator",
+        "quoted_text",
+        "reference_level"
+      ]
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "type": "string",
+          "pattern": "^fact-[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "fact_key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.]{2,127}$"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "value": {
+          "$ref": "#/$defs/typedValue"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/evidenceReference"
+          }
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "statement",
+        "value",
+        "evidence_refs"
+      ]
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "conflict_id": {
+          "type": "string",
+          "pattern": "^conflict-[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "severity": {
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "requires_resolution": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/evidenceReference"
+          }
+        }
+      },
+      "required": [
+        "conflict_id",
+        "summary",
+        "severity",
+        "requires_resolution",
+        "evidence_refs"
+      ]
+    },
+    "missingEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "pattern": "^missing-[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "control_hint": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "requested_evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "blocking": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "item_id",
+        "control_hint",
+        "description",
+        "requested_evidence",
+        "blocking"
+      ]
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "risk_id": {
+          "type": "string",
+          "pattern": "^risk-[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "category": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,63}$"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "severity": {
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "likelihood": {
+          "enum": ["unlikely", "possible", "likely", "unknown"]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/evidenceReference"
+          }
+        }
+      },
+      "required": [
+        "risk_id",
+        "category",
+        "summary",
+        "severity",
+        "likelihood",
+        "evidence_refs"
+      ]
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "option_id": {
+          "type": "string",
+          "pattern": "^option-[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "benefits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      },
+      "required": [
+        "option_id",
+        "label",
+        "description",
+        "benefits",
+        "risks",
+        "preconditions"
+      ]
+    },
+    "recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "option_id": {
+          "type": "string",
+          "pattern": "^option-[a-z0-9][a-z0-9-]{0,63}$"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      },
+      "required": ["option_id", "rationale", "conditions"]
+    }
+  }
+}

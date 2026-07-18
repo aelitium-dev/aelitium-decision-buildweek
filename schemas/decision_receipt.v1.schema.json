@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aelitium.dev/schemas/decision_receipt.v1.schema.json",
+  "title": "DecisionReceipt v1",
+  "description": "Exact three-part receipt envelope governed by ADR-001.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "decision_content": {
+      "$ref": "#/$defs/decisionContent"
+    },
+    "signed_receipt_payload": {
+      "$ref": "#/$defs/signedReceiptPayload"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{86}==$",
+      "description": "Base64 encoding of exactly 64 Ed25519 signature bytes."
+    }
+  },
+  "required": [
+    "decision_content",
+    "signed_receipt_payload",
+    "signature"
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "documentCommitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+        },
+        "document_type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,63}$"
+        },
+        "filename": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$"
+        }
+      },
+      "required": [
+        "document_id",
+        "document_type",
+        "filename",
+        "sha256",
+        "version"
+      ]
+    },
+    "effectiveParameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.]{0,127}$"
+        },
+        "value_type": {
+          "enum": ["string", "integer", "boolean", "null"]
+        },
+        "string_value": {
+          "type": ["string", "null"]
+        },
+        "integer_value": {
+          "type": ["integer", "null"]
+        },
+        "boolean_value": {
+          "type": ["boolean", "null"]
+        }
+      },
+      "required": [
+        "name",
+        "value_type",
+        "string_value",
+        "integer_value",
+        "boolean_value"
+      ]
+    },
+    "modelExecution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "model_config": {
+          "type": "array",
+          "uniqueItems": true,
+          "description": "Complete effective parameters, normalized by name before hashing.",
+          "items": {
+            "$ref": "#/$defs/effectiveParameter"
+          }
+        },
+        "prompt_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,63}$"
+        },
+        "prompt_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "assessment_schema_version": {
+          "const": "model-assessment/v1"
+        },
+        "assessment_schema_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "model_request_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "model_config",
+        "prompt_version",
+        "prompt_hash",
+        "assessment_schema_version",
+        "assessment_schema_hash",
+        "model_request_hash"
+      ]
+    },
+    "caseCommitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "pattern": "^case-[a-z0-9][a-z0-9-]{2,63}$"
+        },
+        "decision_domain": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,63}$"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "documents": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/documentCommitment"
+          }
+        }
+      },
+      "required": [
+        "case_id",
+        "decision_domain",
+        "case_version",
+        "created_at",
+        "documents"
+      ]
+    },
+    "policyCommitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policy_version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,63}$"
+        },
+        "policy_rules_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "policy_result": {
+          "$ref": "policy_result.v1.schema.json"
+        },
+        "policy_result_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "policy_version",
+        "policy_rules_hash",
+        "policy_result",
+        "policy_result_hash"
+      ]
+    },
+    "timelineCommitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "event_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "head_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": ["event_count", "head_hash"]
+    },
+    "decisionContent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "case": {
+          "$ref": "#/$defs/caseCommitment"
+        },
+        "model_execution": {
+          "$ref": "#/$defs/modelExecution"
+        },
+        "model_assessment": {
+          "$ref": "model_assessment.v1.schema.json"
+        },
+        "assessment_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "policy": {
+          "$ref": "#/$defs/policyCommitment"
+        },
+        "human_approval": {
+          "$ref": "human_approval.v1.schema.json"
+        },
+        "timeline": {
+          "$ref": "#/$defs/timelineCommitment"
+        }
+      },
+      "required": [
+        "case",
+        "model_execution",
+        "model_assessment",
+        "assessment_hash",
+        "policy",
+        "human_approval",
+        "timeline"
+      ]
+    },
+    "signingMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "signature_algorithm": {
+          "const": "Ed25519"
+        },
+        "signature_encoding": {
+          "const": "base64"
+        },
+        "key_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$"
+        },
+        "public_key_fingerprint_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "payload_canonicalization": {
+          "const": "json_sorted_keys_no_whitespace_utf8"
+        }
+      },
+      "required": [
+        "signature_algorithm",
+        "signature_encoding",
+        "key_id",
+        "public_key_fingerprint_sha256",
+        "payload_canonicalization"
+      ]
+    },
+    "signedReceiptPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "receipt_version": {
+          "const": "aelitium-decision-receipt/v1"
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^rec-[a-z0-9][a-z0-9-]{2,95}$"
+        },
+        "content_schema_version": {
+          "const": "aelitium-decision-content/v1"
+        },
+        "content_hash_algorithm": {
+          "const": "sha256"
+        },
+        "content_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "signing_metadata": {
+          "$ref": "#/$defs/signingMetadata"
+        }
+      },
+      "required": [
+        "receipt_version",
+        "receipt_id",
+        "content_schema_version",
+        "content_hash_algorithm",
+        "content_hash",
+        "issued_at",
+        "signing_metadata"
+      ]
+    }
+  }
+}
