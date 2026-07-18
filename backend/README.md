@@ -9,7 +9,10 @@ The D1 backend contains:
 - `src/aelitium_decision/persistence.py` and `sql/001_initial.sql` — SQLite boundary with versioned SQL
 - `src/aelitium_decision/adapters/openai_assessment.py` — GPT-5.6 Responses API adapter
 - `src/aelitium_decision/schema_validation.py` — authoritative Draft 2020-12 backend validation
+- `src/aelitium_decision/hashing.py` — sole internal wrapper around the allowlisted canonical JSON helper
+- `src/aelitium_decision/receipt.py` and `signing.py` — normalized ADR-001 content assembly and detached Ed25519 issuance
+- `src/aelitium_decision/keyring.py` and `verification.py` — external-keyring, offline, fail-closed verification
 
 The policy engine consumes thresholds and effects only from the versioned policy pack. Model output supplies observed facts and conflicts; it cannot replace routing, alter a threshold, or waive a blocking control.
 
-Receipts, signing, human approval, and verification remain D2 work. No signing key is present in this repository.
+Receipt construction, signing, and verification are implemented as a core library and tested through T4/T5. Approval/receipt API routes and UI wiring remain. No private signing key is present in Git; the locally generated demo key is an ignored runtime file.

@@ -8,8 +8,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
+from .hashing import canonical_json
 from .paths import REPOSITORY_ROOT
-from .vendor.aelitium_v3.canonical import canonical_json
 
 
 class StoreConflictError(RuntimeError):

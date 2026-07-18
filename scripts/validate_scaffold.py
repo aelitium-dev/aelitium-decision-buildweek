@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -140,24 +141,24 @@ def validate_long_dpa() -> None:
 
 def validate_no_key_material() -> None:
     prohibited_suffixes = {".key", ".pem", ".p12"}
-    excluded_parts = {
-        ".git",
-        ".venv",
-        ".pytest_cache",
-        ".mypy_cache",
-        ".ruff_cache",
-        "__pycache__",
-        "node_modules",
-        ".next",
-    }
     detector_path = Path(__file__).resolve()
-    files = [
-        path
-        for path in ROOT.rglob("*")
-        if path.is_file()
-        and not excluded_parts.intersection(path.parts)
-        and path.resolve() != detector_path
-    ]
+    try:
+        completed = subprocess.run(
+            ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise ValidationFailure("GIT_FILE_ENUMERATION_FAILED") from exc
+    files = []
+    for relative_path in completed.stdout.split("\0"):
+        if not relative_path:
+            continue
+        path = ROOT / relative_path
+        if path.is_file() and path.resolve() != detector_path:
+            files.append(path)
     require(not any(path.suffix.lower() in prohibited_suffixes for path in files), "PRIVATE_KEY_FILE_DETECTED")
 
     markers = ("BEGIN PRIVATE KEY", "BEGIN OPENSSH PRIVATE KEY", "AEL_ED25519_PRIVKEY_B64=")

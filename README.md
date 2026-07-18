@@ -2,7 +2,7 @@
 
 Turn AI recommendations into evidence-backed, human-approved, and tamper-evident decision records.
 
-> Build status: D1 backend slice implemented. DEMO T1–T3 run without an API key; receipt and frontend work remain scheduled for D2.
+> Build status: D1 backend and the first D2 receipt gate are implemented. DEMO T1–T5 are green without an OpenAI key; API wiring for approval/receipts and frontend work remain.
 
 ## Build Week workflow
 
@@ -97,6 +97,20 @@ SQLite defaults to the ignored `runtime/aelitium.db`; override it with `AELITIUM
 ## Structured Outputs boundary
 
 The live adapter derives a transport-only schema from the canonical `ModelAssessment` schema. It retains the closed object shape and complete required fields while relaxing compatibility-sensitive validation keywords. Every response is then revalidated against the full canonical schema in the backend. The canonical schema always wins.
+
+## Decision Receipt core
+
+The receipt implementation now has one internal canonicalization boundary, a new
+Build Week Ed25519 signer, a three-part ADR-001 envelope, and an offline verifier.
+Verification requires both an external public keyring and the external policy,
+prompt, schema, model-request, and timeline materials whose hashes are committed
+by the receipt. No public key is accepted from a receipt.
+
+The local demo private key is ignored under `runtime/keys/`; only its public key
+and SHA-256 fingerprint are present in `config/trusted-keyring.demo.json`.
+Verification establishes integrity and signature validity under that separately
+trusted key. It does not establish truth, correctness, decision quality, legal
+validity, identity authentication, or independently trusted time.
 
 ## Build Week records
 

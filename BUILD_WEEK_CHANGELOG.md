@@ -42,3 +42,14 @@ This log distinguishes work performed during OpenAI Build Week from the declared
 - Command Center source or components
 - AELITIUM_OS source
 - Historical workflows, sites, datasets, archives, and local service data
+
+### D2 receipt verification gate
+
+- Added `hashing.py` as the sole internal wrapper around the pinned canonicalization helper and migrated the Policy Engine and SQLite persistence away from direct vendor imports.
+- Added strict JSON parsing that rejects duplicate keys, floats, non-finite numbers, non-string keys, and unsupported values before canonicalization.
+- Added normalized Decision Content assembly, complete nested commitments, a detached Ed25519 signer, and an exact ADR-001 receipt envelope as new Build Week work.
+- Added an external trusted keyring format; receipts contain `key_id` and signed fingerprint metadata but no public key.
+- Generated a local mode-0600 DEMO private key under the Git-ignored runtime tree and committed only its public key and fingerprint.
+- Added an offline fail-closed verifier with stable reasons and recomputation of assessment, policy result, policy pack, prompt, assessment schema, model request, timeline, content, fingerprint, and signature commitments.
+- Made T4/T5 green, including the six required tamper classes plus the EUR 18,000 → EUR 14,000 narrative alteration.
+- Did not reuse the `aelitium-v3` P3 signer or verifier, make a live OpenAI call, add UI, or push this D2 work.

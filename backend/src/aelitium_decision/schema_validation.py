@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
+from referencing import Registry, Resource
 
 from .paths import SCHEMAS_DIR
 
@@ -22,11 +23,24 @@ def load_schema(filename: str) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+@lru_cache(maxsize=1)
+def schema_registry() -> Registry:
+    resources = []
+    for path in sorted(SCHEMAS_DIR.glob("*.schema.json")):
+        schema = load_schema(path.name)
+        resources.append((schema["$id"], Resource.from_contents(schema)))
+    return Registry().with_resources(resources)
+
+
 def validate_canonical(instance: Any, schema_filename: str) -> None:
     """Validate fully and report every canonical-schema violation at once."""
 
     schema = load_schema(schema_filename)
-    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+    validator = Draft202012Validator(
+        schema,
+        format_checker=FormatChecker(),
+        registry=schema_registry(),
+    )
     errors = sorted(validator.iter_errors(instance), key=lambda error: list(error.path))
     if not errors:
         return

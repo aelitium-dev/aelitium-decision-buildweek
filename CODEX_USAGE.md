@@ -25,6 +25,10 @@ Codex created ADR-001, exact provenance manifests, the Build Week documentation 
 
 Codex implemented DEMO mode before the live adapter, split the generic Policy Engine from the Vendor Approval Policy Pack, and exercised T1–T3 through real CLI subprocesses. It also derived a conservative Structured Outputs transport schema while keeping canonical backend validation authoritative, then built the minimal FastAPI/SQLite slice and its tests without adding packages outside the approved allowlist.
 
+### D2 receipt gate
+
+Codex introduced a single internal hashing boundary, implemented the new ADR-001 signer/verifier rather than inheriting P3 behavior, and iterated against a deterministic tamper matrix. The resulting tests distinguish top-level content mismatch, nested commitment mismatch, signed-metadata changes, key-fingerprint mismatch, signature failure, duplicate JSON keys, and schema additions without claiming that verification proves truth or legal validity.
+
 ## Submission reminder
 
 Before submission, replace the pending `/feedback` entry with the Session ID produced for this primary development thread and cite concrete examples of where Codex accelerated implementation and testing.

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from aelitium_decision.vendor.aelitium_v3.canonical import canonicalize_and_hash
+from aelitium_decision.hashing import canonicalize_and_hash
 
 from .pack import PolicyPack, PolicyRule
 

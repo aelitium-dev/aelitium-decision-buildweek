@@ -1,0 +1,12 @@
+{
+  "keyring_version": "aelitium-trusted-keyring/v1",
+  "keys": [
+    {
+      "key_id": "buildweek-demo-2026",
+      "algorithm": "Ed25519",
+      "public_key_encoding": "base64_raw",
+      "public_key": "1bgdwie14YVkaWNb0v6rpGa8KsmNGUbZ/IdEiKEXPxM=",
+      "fingerprint_sha256": "6fa378abbdbc64d19459e421a3a32575d32432529f093bdb855afe865ebe281e"
+    }
+  ]
+}
