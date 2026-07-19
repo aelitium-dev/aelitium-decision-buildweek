@@ -677,9 +677,23 @@
     "schema_version": "model-assessment/v1"
   },
   "assessment_hash": "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4",
+  "assessment_source": "gpt_generated_live",
   "executed_at": "2026-07-18T19:48:39Z",
   "execution_mode": "LIVE",
   "model": "gpt-5.6",
   "prompt_version": "vendor-assessment/v2",
-  "scenario": "T2-style F1–F4 missing-evidence case"
+  "provider": "openai",
+  "runtime_model_call": true,
+  "scenario": "T2-style F1–F4 missing-evidence case",
+  "source_documents": {
+    "authenticity_verified": false,
+    "classification": "fictional_build_week_work",
+    "origin": "build_week_repository_fixtures",
+    "repository_paths": [
+      "fixtures/documents/F1_vendor_commercial_proposal.md",
+      "fixtures/documents/F2_internal_procurement_policy.md",
+      "fixtures/documents/F3_security_questionnaire.md",
+      "fixtures/documents/F4_executed_data_processing_addendum.md"
+    ]
+  }
 }

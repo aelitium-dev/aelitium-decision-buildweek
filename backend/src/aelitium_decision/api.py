@@ -16,6 +16,7 @@ from .approval import ApprovalAuthorizationError
 from .demo_workflow import (
     DEMO_KEYRING_PATH,
     DEMO_PRIVATE_KEY_PATH,
+    TRUST_LIMITATIONS,
     DemoConfigurationError,
     build_demo_snapshot,
     create_demo_approval,
@@ -58,6 +59,24 @@ class DemoVerificationInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     receipt: dict[str, Any]
+
+
+def _verification_response(status_value: str, reason: str) -> dict[str, Any]:
+    return {
+        "status": status_value,
+        "reason": reason,
+        "provenance": {
+            "result_source": "aelitium_local_integrity_verifier",
+            "trusted_key_source": "external_demo_keyring",
+            "checks": [
+                "canonical_schema",
+                "external_material_commitments",
+                "content_hash",
+                "ed25519_signature",
+            ],
+            "does_not_prove": TRUST_LIMITATIONS,
+        },
+    }
 
 
 def create_app(
@@ -135,6 +154,24 @@ def create_app(
             "identity_notice": (
                 "Approver identity is declared only and is not authenticated in the MVP."
             ),
+            "provenance": {
+                "record_source": "human_entered_at_runtime",
+                "human_entered_fields": [
+                    "approver.display_name",
+                    "conditions[0].text",
+                    "justification",
+                ],
+                "aelitium_bound_fields": [
+                    "approval_id",
+                    "case_id",
+                    "policy_result_hash",
+                    "approver.role",
+                    "decision",
+                    "conditions[0].owner_role",
+                    "conditions[0].due_event",
+                    "decided_at",
+                ],
+            },
         }
 
     @app.post("/v1/demo/receipts", status_code=status.HTTP_201_CREATED)
@@ -194,24 +231,43 @@ def create_app(
                     "public_key_fingerprint_sha256"
                 ],
             },
+            "provenance": {
+                "assessment": {
+                    "execution_mode": "DEMO",
+                    "assessment_source": "precomputed_fixture",
+                    "runtime_model_call": False,
+                },
+                "human_approval": {
+                    "source": "server_recorded_human_approval",
+                    "approval_id": recorded.approval["approval_id"],
+                },
+                "policy_result": {
+                    "source": "aelitium_deterministic_policy_engine"
+                },
+                "hashes": {"source": "aelitium_canonical_sha256"},
+                "signature": {"source": "aelitium_local_ed25519_signer"},
+                "receipt": {"source": "aelitium_receipt_builder"},
+                "source_document_authenticity_verified": False,
+            },
         }
 
     @app.post("/v1/demo/receipts/verify")
     async def demo_verify(
         request: Request, payload: DemoVerificationInput
-    ) -> dict[str, str]:
+    ) -> dict[str, Any]:
         try:
             receipt_id = payload.receipt["signed_receipt_payload"]["receipt_id"]
         except (KeyError, TypeError):
-            return {"status": "INVALID", "reason": "EXTERNAL_MATERIALS_NOT_FOUND"}
+            return _verification_response("INVALID", "EXTERNAL_MATERIALS_NOT_FOUND")
         issued = request.app.state.demo_receipts.get(receipt_id)
         if issued is None:
-            return {"status": "INVALID", "reason": "EXTERNAL_MATERIALS_NOT_FOUND"}
-        return verify_demo_receipt(
+            return _verification_response("INVALID", "EXTERNAL_MATERIALS_NOT_FOUND")
+        result = verify_demo_receipt(
             payload.receipt,
             materials=issued.materials,
             keyring=issued.keyring,
-        ).as_dict()
+        )
+        return _verification_response(result.status, result.reason)
 
     @app.post("/v1/cases", status_code=status.HTTP_201_CREATED)
     async def create_case(

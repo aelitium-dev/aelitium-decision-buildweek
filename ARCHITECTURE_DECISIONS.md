@@ -26,7 +26,7 @@ This ADR records the approved refinement of specification sections 8, 10, and 11
 7. Verification resolves a public key from an external trusted keyring. A receipt cannot introduce or authorize its own verification key.
 8. Only the three assets enumerated in `PREEXISTING_ASSETS.json` may be copied. In particular, the P3 signer and verifier are not reused.
 9. The Command Center is visual reference only. No source, markup, styles, components, fixtures, or media may be copied from it unless the D2 midday checkpoint first updates both provenance manifests.
-10. Verification claims only supported-version/schema checks, content integrity, and Ed25519 validity under a separately trusted public key. It does not establish truth, correctness, decision quality, legal validity, or independently trusted time.
+10. Verification claims only supported-version/schema checks, content integrity, and Ed25519 validity under a separately trusted public key. It does not establish source-document authenticity, truth, correctness, fairness, decision quality, legal validity, or independently trusted time.
 
 ### Repository and implementation boundary
 
@@ -77,7 +77,7 @@ No public key is embedded in the receipt. `key_id` identifies a key in the verif
 |---|---|
 | `case` | `case_id`, `decision_domain`, `case_version`, `created_at`, ordered `documents[]` |
 | Each document | `document_id`, `document_type`, `filename`, `sha256`, `version` |
-| `model_execution` | `provider`, `model`, complete effective `model_config`, `prompt_version`, `prompt_hash`, `assessment_schema_version`, `assessment_schema_hash`, `model_request_hash` |
+| `model_execution` | `execution_mode`, `assessment_source`, `runtime_model_call`, `provider`, `model`, complete effective `model_config`, `prompt_version`, `prompt_hash`, `assessment_schema_version`, `assessment_schema_hash`, `model_request_hash` |
 | `model_assessment` | The complete schema-valid `ModelAssessment` object |
 | Assessment commitment | `assessment_hash` recomputed from the canonical `model_assessment` |
 | `policy` | `policy_version`, `policy_rules_hash`, complete `policy_result`, and recomputed `policy_result_hash` |
@@ -89,6 +89,16 @@ ownership does not create an additional approval requirement. A receipt commits
 to exactly one server-recorded `HumanApproval`; receipt issuance resolves it by
 `approval_id` and revalidates its current case, assessment, policy-result,
 decision, selected role, conditions, and admission fingerprint before signing.
+
+Assessment provenance is part of signed decision content. `DEMO` requires
+`assessment_source=precomputed_fixture` and `runtime_model_call=false`; its
+`model_config` is empty, and `model_request_hash` commits to an explicit
+`no_model_request` fixture-input record. It never records LIVE transport options
+such as Structured Outputs or `store`. `LIVE` requires
+`assessment_source=gpt_generated_live` and `runtime_model_call=true`, preserving
+GPT-5.6 as the model-backed assessment path. The shared `model_request_hash`
+field therefore commits either to the actual LIVE request record or to DEMO's
+explicit no-call record; it never implies that DEMO invoked a model.
 
 Document bodies are not embedded in a receipt; their committed SHA-256 hashes are. Collections with set semantics are normalized before hashing: documents by `(document_id, version)`, rule evaluations by `control_id`, and evidence references by `(document_id, locator)`. Arrays whose order is semantically authored, such as approval conditions, retain their supplied order.
 
@@ -130,6 +140,8 @@ Verification is offline and deterministic. It must:
 3. Reject unsupported receipt/content versions, algorithms, encodings, or canonicalization identifiers.
 4. Canonicalize `decision_content`, recompute `content_hash`, and require an exact match with the signed value.
 5. Recompute and validate every nested commitment: document hash shape, assessment hash, policy-result hash, ruleset hash reference, model-request hash reference, and timeline head shape.
+   The assessment-input record must also agree with the signed execution mode,
+   source, and runtime-call flag; otherwise verification fails closed.
 6. Resolve `key_id` in an external trusted keyring; never use a receipt-supplied key.
 7. Recompute the trusted public key fingerprint and require an exact match with the signed fingerprint.
 8. Canonicalize `signed_receipt_payload`, decode exactly one 64-byte Ed25519 signature, and verify it with the trusted public key.

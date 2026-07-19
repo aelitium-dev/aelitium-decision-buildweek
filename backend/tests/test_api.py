@@ -203,6 +203,28 @@ def test_demo_ui_api_approval_receipt_verify_and_tamper(tmp_path):
             assert snapshot["policy_result"]["blocking_controls"] == []
             assert snapshot["evidence_diff"][0]["before"] == "UNKNOWN"
             assert snapshot["evidence_diff"][0]["after"] == "PASS"
+            provenance = snapshot["provenance"]
+            assert provenance["source_documents"]["origin"] == (
+                "build_week_repository_fixtures"
+            )
+            assert provenance["source_documents"]["authenticity_verified"] is False
+            for relative_path in provenance["source_documents"]["repository_paths"]:
+                assert not relative_path.startswith("/")
+                assert (REPOSITORY_ROOT / relative_path).is_file()
+            assert provenance["demo_assessment"] == {
+                "execution_mode": "DEMO",
+                "assessment_source": "precomputed_fixture",
+                "base_artifact_path": "fixtures/demo/T2_assessment.json",
+                "derivation_version": "demo-fixture-derivation/v1",
+                "runtime_model_call": False,
+                "used_for_current_demo": True,
+            }
+            assert provenance["live_assessment"]["model"] == "gpt-5.6"
+            assert provenance["live_assessment"]["assessment_source"] == (
+                "gpt_generated_live"
+            )
+            assert provenance["live_assessment"]["runtime_model_call"] is True
+            assert provenance["live_assessment"]["used_for_current_demo"] is False
 
             status, approval_response = await _request(
                 app,
@@ -214,6 +236,24 @@ def test_demo_ui_api_approval_receipt_verify_and_tamper(tmp_path):
             approval = approval_response["approval"]
             assert approval["decision"] == "approve_with_conditions"
             assert approval["approver"]["identity_assurance"] == "declared_only"
+            assert approval_response["provenance"] == {
+                "record_source": "human_entered_at_runtime",
+                "human_entered_fields": [
+                    "approver.display_name",
+                    "conditions[0].text",
+                    "justification",
+                ],
+                "aelitium_bound_fields": [
+                    "approval_id",
+                    "case_id",
+                    "policy_result_hash",
+                    "approver.role",
+                    "decision",
+                    "conditions[0].owner_role",
+                    "conditions[0].due_event",
+                    "decided_at",
+                ],
+            }
 
             status, receipt_response = await _request(
                 app,
@@ -226,6 +266,17 @@ def test_demo_ui_api_approval_receipt_verify_and_tamper(tmp_path):
             serialized_response = json.dumps(receipt_response)
             assert "PRIVATE KEY" not in serialized_response
             assert str(private_key_path) not in serialized_response
+            assert receipt_response["provenance"]["assessment"] == {
+                "execution_mode": "DEMO",
+                "assessment_source": "precomputed_fixture",
+                "runtime_model_call": False,
+            }
+            assert receipt_response["provenance"]["policy_result"]["source"] == (
+                "aelitium_deterministic_policy_engine"
+            )
+            assert receipt_response["provenance"][
+                "source_document_authenticity_verified"
+            ] is False
 
             status, verification = await _request(
                 app,
@@ -234,7 +285,17 @@ def test_demo_ui_api_approval_receipt_verify_and_tamper(tmp_path):
                 {"receipt": receipt},
             )
             assert status == 200
-            assert verification == {"status": "VALID", "reason": "VERIFIED"}
+            assert verification["status"] == "VALID"
+            assert verification["reason"] == "VERIFIED"
+            assert verification["provenance"]["result_source"] == (
+                "aelitium_local_integrity_verifier"
+            )
+            assert "source_document_authenticity" in verification["provenance"][
+                "does_not_prove"
+            ]
+            assert "decision_fairness" in verification["provenance"][
+                "does_not_prove"
+            ]
 
             tampered = copy.deepcopy(receipt)
             price = next(
@@ -250,10 +311,11 @@ def test_demo_ui_api_approval_receipt_verify_and_tamper(tmp_path):
                 {"receipt": tampered},
             )
             assert status == 200
-            assert verification == {
-                "status": "INVALID",
-                "reason": "ASSESSMENT_HASH_MISMATCH",
-            }
+            assert verification["status"] == "INVALID"
+            assert verification["reason"] == "ASSESSMENT_HASH_MISMATCH"
+            assert verification["provenance"]["result_source"] == (
+                "aelitium_local_integrity_verifier"
+            )
 
     asyncio.run(scenario())
 

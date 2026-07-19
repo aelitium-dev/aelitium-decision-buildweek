@@ -128,9 +128,41 @@ def _validate_model_config(parameters: list[dict[str, Any]]) -> None:
             raise ReceiptBuildError("model parameter carries multiple scalars")
 
 
+def _validate_assessment_provenance(
+    *,
+    execution_mode: str,
+    assessment_source: str,
+    runtime_model_call: bool,
+    model_config: list[dict[str, Any]],
+    model_request: dict[str, Any],
+) -> None:
+    expected = {
+        "DEMO": ("precomputed_fixture", False),
+        "LIVE": ("gpt_generated_live", True),
+    }
+    if expected.get(execution_mode) != (assessment_source, runtime_model_call):
+        raise ReceiptBuildError("assessment provenance is inconsistent")
+    if execution_mode == "DEMO" and model_config:
+        raise ReceiptBuildError("DEMO cannot carry effective model parameters")
+    if (
+        model_request.get("execution_mode") != execution_mode
+        or model_request.get("assessment_source") != assessment_source
+        or model_request.get("runtime_model_call") is not runtime_model_call
+    ):
+        raise ReceiptBuildError("assessment input provenance is inconsistent")
+    if (
+        execution_mode == "DEMO"
+        and model_request.get("record_type") != "no_model_request"
+    ):
+        raise ReceiptBuildError("DEMO requires an explicit no-model-request record")
+
+
 def build_decision_content(
     *,
     case: dict[str, Any],
+    execution_mode: str,
+    assessment_source: str,
+    runtime_model_call: bool,
     provider: str,
     model: str,
     model_config: list[dict[str, Any]],
@@ -148,6 +180,13 @@ def build_decision_content(
     validate_json_value(materials.assessment_schema)
     validate_json_value(materials.model_request)
     _validate_model_config(model_config)
+    _validate_assessment_provenance(
+        execution_mode=execution_mode,
+        assessment_source=assessment_source,
+        runtime_model_call=runtime_model_call,
+        model_config=model_config,
+        model_request=materials.model_request,
+    )
     try:
         effective_policy = PolicyPack.model_validate(materials.policy_pack)
     except ValueError as exc:
@@ -192,6 +231,9 @@ def build_decision_content(
         ],
     }
     model_execution = {
+        "execution_mode": execution_mode,
+        "assessment_source": assessment_source,
+        "runtime_model_call": runtime_model_call,
         "provider": provider,
         "model": model,
         "model_config": copy.deepcopy(model_config),

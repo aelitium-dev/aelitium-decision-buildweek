@@ -77,6 +77,10 @@ authoritative.
 - Result: `LIVE_SMOKE_OK`; the response passed the transport boundary and the
   complete canonical `ModelAssessment` schema before artifact creation.
 - Artifact: `fixtures/live/gpt-5.6-t2-assessment.json`.
+- Provenance: `assessment_source=gpt_generated_live`, provider `openai`,
+  `runtime_model_call=true`. The artifact lists the four checked-in fictional
+  source fixtures and explicitly records that their authenticity was not
+  verified.
 - Canonical assessment hash:
   `55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4`.
 - Vendor Approval Policy Pack result: `NEEDS_MORE_EVIDENCE`; blocking controls
@@ -107,3 +111,8 @@ authoritative.
 - Localhost socket binding is prohibited by the Codex sandbox (`EPERM`), so this
   checkpoint does not claim an in-sandbox browser session. Both attempted server
   processes shut down, and no orphan Uvicorn or Next process remained.
+
+The clickable path is a DEMO fixture execution, not a replay of the LIVE call.
+Its post-F5 assessment is derived deterministically from a checked-in fixture,
+records `runtime_model_call=false`, and is evaluated separately from the LIVE
+artifact above.

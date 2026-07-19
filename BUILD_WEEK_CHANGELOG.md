@@ -129,3 +129,27 @@ This log distinguishes work performed during OpenAI Build Week from the declared
 - Kept the approved Next.js 15 toolchain and added no package. Configured
   `.next-dev` for development and retained `.next` for production, preventing
   subsequent build/dev manifest collisions without deleting user data.
+
+### B2 DEMO provenance correction
+
+- Replaced misleading DEMO model-call metadata with signed assessment
+  provenance: `execution_mode=DEMO`, `assessment_source=precomputed_fixture`,
+  and `runtime_model_call=false`.
+- Removed `store=false` and `structured_outputs=true` from DEMO receipt content;
+  its model configuration is empty and its input commitment explicitly records
+  `no_model_request` plus the checked-in base fixture and deterministic
+  derivation version.
+- Constrained those DEMO semantics in the receipt schema and made the verifier
+  reject external assessment-input material whose mode, source, or runtime-call
+  flag contradicts the signed provenance.
+- Kept LIVE separate and model-backed: the checked-in artifact records provider
+  `openai`, model `gpt-5.6`, `assessment_source=gpt_generated_live`, and
+  `runtime_model_call=true`.
+- Added machine-readable API/UI provenance for fictional source fixtures,
+  human-entered approval fields, and AELITIUM-generated policy results, hashes,
+  signature, receipt, and verification result. Trust wording now explicitly
+  excludes original-document authenticity, correctness, fairness, and legal
+  validity.
+- Added a frontend runtime contract check so a stale pre-B2 API response produces
+  an explicit backend-restart message instead of dereferencing missing
+  provenance metadata.

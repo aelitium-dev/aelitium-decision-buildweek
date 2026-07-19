@@ -91,9 +91,19 @@
       ]
     },
     "modelExecution": {
+      "description": "Assessment-production provenance. LIVE records an actual model call; DEMO explicitly records a checked-in fixture path with no runtime model call.",
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "execution_mode": {
+          "enum": ["DEMO", "LIVE"]
+        },
+        "assessment_source": {
+          "enum": ["precomputed_fixture", "gpt_generated_live"]
+        },
+        "runtime_model_call": {
+          "type": "boolean"
+        },
         "provider": {
           "type": "string",
           "minLength": 1,
@@ -126,10 +136,14 @@
           "$ref": "#/$defs/sha256"
         },
         "model_request_hash": {
-          "$ref": "#/$defs/sha256"
+          "$ref": "#/$defs/sha256",
+          "description": "Commitment to the actual LIVE request record or, in DEMO, an explicit no-model-request fixture-input record."
         }
       },
       "required": [
+        "execution_mode",
+        "assessment_source",
+        "runtime_model_call",
         "provider",
         "model",
         "model_config",
@@ -138,6 +152,37 @@
         "assessment_schema_version",
         "assessment_schema_hash",
         "model_request_hash"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "execution_mode": {"const": "DEMO"}
+            },
+            "required": ["execution_mode"]
+          },
+          "then": {
+            "properties": {
+              "assessment_source": {"const": "precomputed_fixture"},
+              "runtime_model_call": {"const": false},
+              "model_config": {"maxItems": 0}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "execution_mode": {"const": "LIVE"}
+            },
+            "required": ["execution_mode"]
+          },
+          "then": {
+            "properties": {
+              "assessment_source": {"const": "gpt_generated_live"},
+              "runtime_model_call": {"const": true}
+            }
+          }
+        }
       ]
     },
     "caseCommitment": {

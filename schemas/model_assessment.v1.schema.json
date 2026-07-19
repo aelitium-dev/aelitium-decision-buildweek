@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://aelitium.dev/schemas/model_assessment.v1.schema.json",
   "title": "ModelAssessment v1",
-  "description": "Strict structured assessment proposed by GPT-5.6 and revalidated by the backend.",
+  "description": "Strict structured assessment contract used by GPT-generated LIVE artifacts and deterministic precomputed DEMO fixtures; every instance is revalidated by the backend.",
   "type": "object",
   "additionalProperties": false,
   "properties": {

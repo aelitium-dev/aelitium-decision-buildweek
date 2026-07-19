@@ -27,3 +27,11 @@ library and tested through T4/T5. The clickable DEMO API adds case, approval,
 receipt, and verification routes without requiring an OpenAI key. No private
 signing key is present in Git; the locally generated demo key is an ignored
 runtime file and is never returned by the API.
+
+DEMO assessment provenance is `precomputed_fixture` with
+`runtime_model_call=false`; its receipt commits an explicit no-model-request
+input record and no LIVE transport settings. The separate checked-in LIVE
+artifact records `gpt_generated_live`, provider `openai`, model `gpt-5.6`, and
+`runtime_model_call=true`. API provenance also distinguishes fictional source
+fixtures, human-entered approval fields, and AELITIUM-generated policy, hash,
+signature, receipt, and verification outputs.

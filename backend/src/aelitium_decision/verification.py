@@ -118,6 +118,19 @@ def verify_receipt(
             return _invalid("ASSESSMENT_SCHEMA_HASH_MISMATCH")
         if hash_json(materials.model_request) != execution["model_request_hash"]:
             return _invalid("MODEL_REQUEST_HASH_MISMATCH")
+        model_request = materials.model_request
+        if (
+            model_request.get("execution_mode") != execution["execution_mode"]
+            or model_request.get("assessment_source")
+            != execution["assessment_source"]
+            or model_request.get("runtime_model_call")
+            is not execution["runtime_model_call"]
+            or (
+                execution["execution_mode"] == "DEMO"
+                and model_request.get("record_type") != "no_model_request"
+            )
+        ):
+            return _invalid("ASSESSMENT_INPUT_PROVENANCE_MISMATCH")
         if build_timeline_commitment(materials.timeline_events) != content["timeline"]:
             return _invalid("TIMELINE_HEAD_MISMATCH")
     except (CanonicalizationError, ReceiptBuildError):

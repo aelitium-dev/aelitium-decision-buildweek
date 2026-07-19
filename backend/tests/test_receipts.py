@@ -20,7 +20,11 @@ from aelitium_decision.receipt import (
     issue_receipt,
     normalize_policy_result,
 )
-from aelitium_decision.schema_validation import load_schema, validate_canonical
+from aelitium_decision.schema_validation import (
+    CanonicalSchemaError,
+    load_schema,
+    validate_canonical,
+)
 from aelitium_decision.signing import public_key_record
 from aelitium_decision.verification import VerificationResult, verify_receipt
 
@@ -51,6 +55,7 @@ def _t4_assessment():
         "F1–F5 satisfy the blocking residency, DPA, and assurance controls; "
         "director approval and human conflict review remain required."
     )
+    assessment["prompt_version"] = "demo-fixture-derivation/v1"
     facts = {fact["fact_key"]: fact for fact in assessment["facts"]}
     residency = facts["privacy.eu_eea_only_residency_confirmed"]
     residency["statement"] = "F5 confirms EU or EEA-only residency for the tenant."
@@ -199,12 +204,19 @@ def _receipt_bundle() -> ReceiptBundle:
         "decided_at": "2026-07-19T11:15:00Z",
     }
     validate_canonical(approval, "human_approval.v1.schema.json")
-    prompt_text = "Assess the fictional vendor evidence without making the final decision."
+    prompt_text = (
+        "Deterministically derive the post-F5 DEMO assessment from the checked-in "
+        "T2 assessment fixture and fixed F5 evidence changes."
+    )
     model_request = {
+        "record_type": "no_model_request",
         "case_id": case["case_id"],
         "document_hashes": [document["sha256"] for document in case["documents"]],
-        "mode": "DEMO",
-        "prompt_version": "vendor-assessment/v1",
+        "execution_mode": "DEMO",
+        "assessment_source": "precomputed_fixture",
+        "runtime_model_call": False,
+        "base_artifact_path": "fixtures/demo/T2_assessment.json",
+        "derivation_version": "demo-fixture-derivation/v1",
         "schema_version": "model-assessment/v1",
     }
     timeline_events = [
@@ -221,35 +233,15 @@ def _receipt_bundle() -> ReceiptBundle:
         model_request=model_request,
         timeline_events=timeline_events,
     )
-    model_config = [
-        {
-            "name": "mode",
-            "value_type": "string",
-            "string_value": "DEMO",
-            "integer_value": None,
-            "boolean_value": None,
-        },
-        {
-            "name": "store",
-            "value_type": "boolean",
-            "string_value": None,
-            "integer_value": None,
-            "boolean_value": False,
-        },
-        {
-            "name": "structured_outputs",
-            "value_type": "boolean",
-            "string_value": None,
-            "integer_value": None,
-            "boolean_value": True,
-        },
-    ]
     content = build_decision_content(
         case=case,
-        provider="aelitium-demo",
+        execution_mode="DEMO",
+        assessment_source="precomputed_fixture",
+        runtime_model_call=False,
+        provider="repository-fixture",
         model="demo-precomputed",
-        model_config=model_config,
-        prompt_version="vendor-assessment/v1",
+        model_config=[],
+        prompt_version="demo-fixture-derivation/v1",
         model_assessment=assessment,
         policy_result=policy_result,
         human_approval=approval,
@@ -291,6 +283,79 @@ def test_t4_complete_approval_receipt_is_valid():
     )
 
     assert result == VerificationResult("VALID", "VERIFIED")
+
+
+def test_demo_receipt_commits_precomputed_fixture_provenance_without_model_call():
+    bundle = _receipt_bundle()
+
+    assert bundle.content["model_execution"] == {
+        "execution_mode": "DEMO",
+        "assessment_source": "precomputed_fixture",
+        "runtime_model_call": False,
+        "provider": "repository-fixture",
+        "model": "demo-precomputed",
+        "model_config": [],
+        "prompt_version": "demo-fixture-derivation/v1",
+        "prompt_hash": bundle.content["model_execution"]["prompt_hash"],
+        "assessment_schema_version": "model-assessment/v1",
+        "assessment_schema_hash": bundle.content["model_execution"][
+            "assessment_schema_hash"
+        ],
+        "model_request_hash": bundle.content["model_execution"][
+            "model_request_hash"
+        ],
+    }
+    assert bundle.materials.model_request["record_type"] == "no_model_request"
+    assert bundle.materials.model_request["runtime_model_call"] is False
+    assert bundle.materials.model_request["assessment_source"] == (
+        "precomputed_fixture"
+    )
+    parameter_names = {
+        parameter["name"]
+        for parameter in bundle.content["model_execution"]["model_config"]
+    }
+    assert not parameter_names & {"store", "structured_outputs"}
+
+
+def test_receipt_schema_rejects_demo_claiming_a_runtime_model_call():
+    bundle = _receipt_bundle()
+    contradictory = copy.deepcopy(bundle.receipt)
+    contradictory["decision_content"]["model_execution"][
+        "runtime_model_call"
+    ] = True
+
+    with pytest.raises(CanonicalSchemaError, match="runtime_model_call"):
+        validate_canonical(contradictory, "decision_receipt.v1.schema.json")
+
+
+def test_verifier_rejects_external_assessment_input_with_false_provenance():
+    bundle = _receipt_bundle()
+    false_input = {
+        **bundle.materials.model_request,
+        "record_type": "model_request",
+        "runtime_model_call": True,
+    }
+    inconsistent_content = copy.deepcopy(bundle.content)
+    inconsistent_content["model_execution"]["model_request_hash"] = hash_json(
+        false_input
+    )
+    receipt = issue_receipt(
+        decision_content=inconsistent_content,
+        receipt_id="rec-false-provenance-001",
+        issued_at="2026-07-19T11:20:00Z",
+        key_id="buildweek-test-key",
+        private_key=bundle.private_key,
+    )
+
+    result = verify_receipt(
+        receipt,
+        keyring=bundle.keyring,
+        materials=replace(bundle.materials, model_request=false_input),
+    )
+
+    assert result == VerificationResult(
+        "INVALID", "ASSESSMENT_INPUT_PROVENANCE_MISMATCH"
+    )
 
 
 def test_content_hash_is_deterministic_and_excludes_receipt_issued_at():
@@ -459,10 +524,13 @@ def test_approval_with_blocking_controls_cannot_be_receipted():
     ):
         build_decision_content(
             case=bundle.case,
-            provider="aelitium-demo",
+            execution_mode="DEMO",
+            assessment_source="precomputed_fixture",
+            runtime_model_call=False,
+            provider="repository-fixture",
             model="demo-precomputed",
             model_config=bundle.content["model_execution"]["model_config"],
-            prompt_version="vendor-assessment/v1",
+            prompt_version="demo-fixture-derivation/v1",
             model_assessment=bundle.assessment,
             policy_result=blocked_result,
             human_approval=blocked_approval,

@@ -8,7 +8,7 @@ Turn AI recommendations into evidence-backed, human-approved, and tamper-evident
 
 The MVP evaluates whether a fictional European company should adopt the fictional AI SaaS vendor NovaMind AI:
 
-1. GPT-5.6 cross-references a commercial proposal, internal procurement policy, security questionnaire, and DPA.
+1. In LIVE mode, GPT-5.6 cross-references a commercial proposal, internal procurement policy, security questionnaire, and DPA. DEMO instead uses checked-in precomputed fixtures and makes no model call.
 2. Deterministic rules identify blocking evidence and approval routing.
 3. A human approves, rejects, requests evidence, or approves with conditions.
 4. A Decision Receipt binds the recorded evidence, assessment, policy result, and human decision.
@@ -20,12 +20,14 @@ GPT-5.6 performs interpretation. Deterministic code validates and routes. A huma
 
 `Tamper-evident ≠ truthful · Verifiable ≠ correct · Signed ≠ legally valid`
 
-Receipt verification checks integrity and Ed25519 validity under a separately trusted key. It does not prove factual truth, decision quality, legal validity, or independently trusted time.
+Receipt verification checks integrity and Ed25519 validity under a separately trusted key. It does not prove source-document authenticity, factual truth, assessment or decision correctness, fairness, legal validity, identity, or independently trusted time.
 
 ## Execution modes
 
-- `DEMO`: implemented with pre-computed assessments and a complete clickable approval → receipt → verify → tamper path; no OpenAI key required.
-- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. A versioned T2-style execution passed canonical validation; its artifact, hash, policy route, and fact-key limitation are recorded in `EVAL.md`.
+- `DEMO`: implemented with precomputed assessment fixtures and a deterministic post-F5 derivation. It makes no runtime model call and needs no OpenAI key. Its clickable approval → receipt → verify → tamper path is independent of the LIVE artifact.
+- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. A versioned T2-style execution passed canonical validation; its GPT-generated artifact, hash, policy route, and fact-key limitation are recorded in `EVAL.md`.
+
+The fictional source documents are Build Week work checked into `fixtures/documents/`; they are not authenticated external originals. Human-entered approval data is limited to the declared name, condition text, and justification. AELITIUM generates the deterministic policy result, canonical hashes, local Ed25519 signature, receipt, and verification result. Those generated outputs bind what was recorded; they do not validate the underlying documents or decision claims.
 
 ## Planned architecture
 
@@ -123,14 +125,15 @@ never normalizes findings, evidence, free text, fact keys, or `control_hint`.
 The receipt implementation now has one internal canonicalization boundary, a new
 Build Week Ed25519 signer, a three-part ADR-001 envelope, and an offline verifier.
 Verification requires both an external public keyring and the external policy,
-prompt, schema, model-request, and timeline materials whose hashes are committed
+prompt/derivation description, schema, assessment-input record, and timeline materials whose hashes are committed
 by the receipt. No public key is accepted from a receipt.
 
 The local demo private key is ignored under `runtime/keys/`; only its public key
 and SHA-256 fingerprint are present in `config/trusted-keyring.demo.json`.
 Verification establishes integrity and signature validity under that separately
-trusted key. It does not establish truth, correctness, decision quality, legal
-validity, identity authentication, or independently trusted time.
+trusted key. It does not establish source-document authenticity, truth,
+assessment or decision correctness, fairness, legal validity, identity
+authentication, or independently trusted time.
 
 ## Manual LIVE smoke gate
 
@@ -144,7 +147,10 @@ PYTHONPATH=backend/src backend/.venv/bin/python backend/scripts/live_smoke.py
 The script never reads a key file or logs the key. It uses the strict Responses
 API transport schema, applies the narrow identifier boundary described above,
 revalidates against the canonical backend schema, and only then writes
-`fixtures/live/gpt-5.6-t2-assessment.json`. Attempt 1 failed closed before writing
+`fixtures/live/gpt-5.6-t2-assessment.json`. That artifact explicitly records
+`assessment_source=gpt_generated_live`, `runtime_model_call=true`, the OpenAI
+provider, and the fictional repository fixtures used as source documents.
+Attempt 1 failed closed before writing
 an artifact. Attempt 2 succeeded with GPT-5.6 and prompt
 `vendor-assessment/v2`; both executions and the live policy-fact limitation are
 documented in `EVAL.md`.

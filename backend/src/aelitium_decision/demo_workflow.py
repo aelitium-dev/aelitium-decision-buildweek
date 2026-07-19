@@ -45,8 +45,24 @@ from .verification import VerificationResult, verify_receipt
 DEMO_KEY_ID = "buildweek-demo-2026"
 DEMO_PRIVATE_KEY_PATH = REPOSITORY_ROOT / "runtime" / "keys" / f"{DEMO_KEY_ID}.key"
 DEMO_KEYRING_PATH = REPOSITORY_ROOT / "config" / "trusted-keyring.demo.json"
-PROMPT_VERSION = "vendor-assessment/v1"
-PROMPT_TEXT = "Assess the fictional vendor evidence without making the final decision."
+DEMO_ASSESSMENT_SOURCE = "precomputed_fixture"
+DEMO_DERIVATION_VERSION = "demo-fixture-derivation/v1"
+DEMO_DERIVATION_DESCRIPTION = (
+    "Deterministically derive the post-F5 DEMO assessment from the checked-in "
+    "T2 assessment fixture and the fixed F5 evidence changes in demo_workflow.py."
+)
+LIVE_ARTIFACT_PATH = "fixtures/live/gpt-5.6-t2-assessment.json"
+DEMO_BASE_ASSESSMENT_PATH = "fixtures/demo/T2_assessment.json"
+TRUST_LIMITATIONS = [
+    "source_document_authenticity",
+    "factual_truth",
+    "assessment_correctness",
+    "decision_correctness",
+    "decision_fairness",
+    "legal_validity",
+    "identity_authentication",
+    "trusted_time",
+]
 
 
 class DemoConfigurationError(RuntimeError):
@@ -87,6 +103,8 @@ def _post_f5_assessment() -> dict[str, Any]:
     assessment = _load_json(
         REPOSITORY_ROOT / manifest["cases"]["T2"]["assessment_path"]
     )
+    assessment["model"] = "demo-precomputed"
+    assessment["prompt_version"] = DEMO_DERIVATION_VERSION
     assessment["case_summary"] = (
         "F1–F5 satisfy the blocking residency, DPA, and assurance controls; "
         "director approval and human conflict review remain required."
@@ -284,10 +302,60 @@ def _static_snapshot() -> dict[str, Any]:
             ],
             "prohibited": ["approve_without_condition", "waive_blocking_control"],
         },
+        "provenance": {
+            "source_documents": {
+                "origin": "build_week_repository_fixtures",
+                "classification": "fictional_build_week_work",
+                "repository_paths": [
+                    f"fixtures/documents/{document['filename']}"
+                    for document in case["documents"]
+                ],
+                "authenticity_verified": False,
+            },
+            "demo_assessment": {
+                "execution_mode": "DEMO",
+                "assessment_source": DEMO_ASSESSMENT_SOURCE,
+                "base_artifact_path": DEMO_BASE_ASSESSMENT_PATH,
+                "derivation_version": DEMO_DERIVATION_VERSION,
+                "runtime_model_call": False,
+                "used_for_current_demo": True,
+            },
+            "live_assessment": {
+                "execution_mode": "LIVE",
+                "assessment_source": "gpt_generated_live",
+                "provider": "openai",
+                "model": "gpt-5.6",
+                "prompt_version": "vendor-assessment/v2",
+                "artifact_path": LIVE_ARTIFACT_PATH,
+                "runtime_model_call": True,
+                "used_for_current_demo": False,
+            },
+            "human_approval": {
+                "source": "human_entered_at_runtime",
+                "human_entered_fields": [
+                    "approver.display_name",
+                    "conditions[0].text",
+                    "justification",
+                ],
+                "identity_assurance": "declared_only",
+            },
+            "aelitium_outputs": {
+                "source": "aelitium_generated",
+                "artifacts": [
+                    "policy_result",
+                    "canonical_hashes",
+                    "signature",
+                    "decision_receipt",
+                    "verification_result",
+                ],
+            },
+            "limitations": TRUST_LIMITATIONS,
+        },
         "trust_notice": (
             "Verification establishes integrity and signature validity under a "
-            "separately trusted key. It does not prove truth, correctness, decision "
-            "quality, legal validity, identity authentication, or trusted time."
+            "separately trusted key. It does not prove source-document authenticity, "
+            "truth, correctness, fairness, legal validity, identity authentication, "
+            "or trusted time."
         ),
     }
 
@@ -431,13 +499,17 @@ def _receipt_materials(
     policy_pack = _load_json(POLICIES_DIR / "ai_vendor_approval.v1.json")
     return ReceiptMaterials(
         policy_pack=policy_pack,
-        prompt_text=PROMPT_TEXT,
+        prompt_text=DEMO_DERIVATION_DESCRIPTION,
         assessment_schema=load_schema("model_assessment.v1.schema.json"),
         model_request={
+            "record_type": "no_model_request",
             "case_id": case["case_id"],
             "document_hashes": [document["sha256"] for document in case["documents"]],
-            "mode": "DEMO",
-            "prompt_version": PROMPT_VERSION,
+            "execution_mode": "DEMO",
+            "assessment_source": DEMO_ASSESSMENT_SOURCE,
+            "runtime_model_call": False,
+            "base_artifact_path": DEMO_BASE_ASSESSMENT_PATH,
+            "derivation_version": DEMO_DERIVATION_VERSION,
             "schema_version": "model-assessment/v1",
         },
         timeline_events=[
@@ -549,35 +621,15 @@ def issue_demo_receipt(
     materials = _receipt_materials(
         case=case, policy_result=policy_result, approval=approval
     )
-    model_config = [
-        {
-            "name": "mode",
-            "value_type": "string",
-            "string_value": "DEMO",
-            "integer_value": None,
-            "boolean_value": None,
-        },
-        {
-            "name": "store",
-            "value_type": "boolean",
-            "string_value": None,
-            "integer_value": None,
-            "boolean_value": False,
-        },
-        {
-            "name": "structured_outputs",
-            "value_type": "boolean",
-            "string_value": None,
-            "integer_value": None,
-            "boolean_value": True,
-        },
-    ]
     content = build_decision_content(
         case=case,
-        provider="aelitium-demo",
+        execution_mode="DEMO",
+        assessment_source=DEMO_ASSESSMENT_SOURCE,
+        runtime_model_call=False,
+        provider="repository-fixture",
         model="demo-precomputed",
-        model_config=model_config,
-        prompt_version=PROMPT_VERSION,
+        model_config=[],
+        prompt_version=DEMO_DERIVATION_VERSION,
         model_assessment=assessment,
         policy_result=policy_result,
         human_approval=approval,

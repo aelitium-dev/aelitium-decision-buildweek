@@ -66,13 +66,24 @@ def main() -> int:
 
     artifact = {
         "artifact_version": "aelitium-live-assessment/v1",
+        "assessment_source": "gpt_generated_live",
         "execution_mode": "LIVE",
+        "runtime_model_call": True,
         "scenario": "T2-style F1–F4 missing-evidence case",
         "executed_at": datetime.now(UTC)
         .isoformat(timespec="seconds")
         .replace("+00:00", "Z"),
         "model": DEFAULT_MODEL,
+        "provider": "openai",
         "prompt_version": DEFAULT_PROMPT_VERSION,
+        "source_documents": {
+            "origin": "build_week_repository_fixtures",
+            "classification": "fictional_build_week_work",
+            "repository_paths": [
+                f"fixtures/documents/{filename}" for filename in SOURCE_DOCUMENTS
+            ],
+            "authenticity_verified": False,
+        },
         "assessment_hash": hash_json(assessment),
         "assessment": assessment,
     }
