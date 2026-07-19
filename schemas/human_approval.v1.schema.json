@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://aelitium.dev/schemas/human_approval.v1.schema.json",
   "title": "HumanApproval v1",
-  "description": "Declared human decision and conditions for a policy result. Identity is not authenticated in the MVP.",
+  "description": "The single authoritative human decision for a policy result. Its approver role must match deterministic routing; identity is not authenticated in the MVP.",
   "type": "object",
   "additionalProperties": false,
   "properties": {

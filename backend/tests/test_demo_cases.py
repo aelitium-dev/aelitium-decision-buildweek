@@ -11,18 +11,21 @@ from aelitium_decision.schema_validation import CanonicalSchemaError, validate_c
 
 
 @pytest.mark.parametrize(
-    ("case_name", "expected_state", "expected_blocking"),
+    ("case_name", "expected_state", "expected_blocking", "expected_role"),
     [
-        ("T1", "READY_FOR_APPROVAL", []),
+        ("T1", "READY_FOR_APPROVAL", [], "operations_reviewer"),
         (
             "T2",
             "NEEDS_MORE_EVIDENCE",
             ["R2_EU_DATA_RESIDENCY", "R4_CERTIFICATION"],
+            None,
         ),
-        ("T3", "HUMAN_REVIEW", []),
+        ("T3", "HUMAN_REVIEW", [], "operations_reviewer"),
     ],
 )
-def test_golden_case_routes(case_name, expected_state, expected_blocking):
+def test_golden_case_routes(
+    case_name, expected_state, expected_blocking, expected_role
+):
     result = run_demo_case(case_name)
 
     assert result["mode"] == "DEMO"
@@ -33,6 +36,7 @@ def test_golden_case_routes(case_name, expected_state, expected_blocking):
     assert [
         item["control_id"] for item in result["policy_result"]["blocking_controls"]
     ] == expected_blocking
+    assert result["policy_result"]["selected_approval_role"] == expected_role
 
 
 def test_t3_has_material_conflict():

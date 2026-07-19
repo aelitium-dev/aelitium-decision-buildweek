@@ -51,13 +51,10 @@
       "type": "string",
       "maxLength": 5000
     },
-    "required_approval_roles": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z][a-z0-9_]{1,63}$"
-      }
+    "selected_approval_role": {
+      "description": "The single authoritative human approval role selected by deterministic routing; null while approval is blocked.",
+      "type": ["string", "null"],
+      "pattern": "^[a-z][a-z0-9_]{1,63}$"
     },
     "routing_reasons": {
       "type": "array",
@@ -82,7 +79,7 @@
     "blocking_controls",
     "missing_evidence",
     "suggested_request",
-    "required_approval_roles",
+    "selected_approval_role",
     "routing_reasons",
     "evaluated_at"
   ],

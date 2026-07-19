@@ -8,6 +8,7 @@ from typing import Any
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from .approval import validate_authoritative_approval
 from .hashing import canonical_bytes, hash_json, sha256_text, validate_json_value
 from .policy.pack import PolicyPack
 from .schema_validation import validate_canonical
@@ -162,17 +163,17 @@ def build_decision_content(
         raise ReceiptBuildError("model assessment metadata mismatch")
     if model_assessment["prompt_version"] != prompt_version:
         raise ReceiptBuildError("prompt version mismatch")
-    if human_approval["decision"] in {"approve", "approve_with_conditions"} and policy_result[
-        "blocking_controls"
-    ]:
-        raise ReceiptBuildError("approval prohibited while blocking controls remain")
-
     normalized_assessment = normalize_assessment(model_assessment)
     assessment_hash = hash_json(normalized_assessment)
+    if policy_result["assessment_hash"] != assessment_hash:
+        raise ReceiptBuildError("model assessment and policy result hash mismatch")
     normalized_policy_result = normalize_policy_result(policy_result)
     policy_result_hash = hash_json(normalized_policy_result)
-    if human_approval["policy_result_hash"] != policy_result_hash:
-        raise ReceiptBuildError("human approval policy_result_hash mismatch")
+    validate_authoritative_approval(
+        policy_result=normalized_policy_result,
+        policy_result_hash=policy_result_hash,
+        approval=human_approval,
+    )
 
     case_commitment = {
         "case_id": case["case_id"],

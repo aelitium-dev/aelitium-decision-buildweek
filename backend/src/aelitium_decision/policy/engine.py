@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 from aelitium_decision.hashing import canonicalize_and_hash
 
-from .pack import PolicyPack, PolicyRule
+from .pack import PolicyPack, PolicyRule, RoutingRule
 
 
 Scalar = str | int | bool | None
@@ -149,9 +149,6 @@ class PolicyEngine:
             for rule in failed
             if rule.failure_effect != "REQUIRE_DIRECTOR_APPROVAL"
         ]
-        required_roles = list(
-            dict.fromkeys(role for rule in failed for role in rule.required_approval_roles)
-        )
         conditions = {
             "blocking_controls_not_empty": bool(blocking_rules),
             "director_approval_required": any(
@@ -162,7 +159,7 @@ class PolicyEngine:
             ),
             "otherwise": True,
         }
-        state = self._route(policy_pack, conditions)
+        route = self._route(policy_pack, conditions)
         _, assessment_hash = canonicalize_and_hash(assessment)
 
         return {
@@ -170,7 +167,7 @@ class PolicyEngine:
             "case_id": case_id,
             "policy_version": policy_pack.policy_version,
             "assessment_hash": assessment_hash,
-            "state": state,
+            "state": route.state,
             "rules_evaluated": evaluations,
             "blocking_controls": [
                 {
@@ -193,7 +190,7 @@ class PolicyEngine:
             "suggested_request": " ".join(
                 dict.fromkeys(rule.suggested_request for rule in evidence_failures)
             ),
-            "required_approval_roles": required_roles,
+            "selected_approval_role": route.selected_approval_role,
             "routing_reasons": [
                 f"{rule.control_id} failed: {rule.failure_effect}" for rule in failed
             ],
@@ -201,8 +198,10 @@ class PolicyEngine:
         }
 
     @staticmethod
-    def _route(policy_pack: PolicyPack, conditions: dict[str, bool]) -> str:
+    def _route(
+        policy_pack: PolicyPack, conditions: dict[str, bool]
+    ) -> RoutingRule:
         for route in sorted(policy_pack.routing_precedence, key=lambda item: item.priority):
             if conditions[route.condition]:
-                return route.state
+                return route
         raise PolicyEvaluationError("policy pack has no matching routing rule")

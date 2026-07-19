@@ -84,6 +84,12 @@ No public key is embedded in the receipt. `key_id` identifies a key in the verif
 | `human_approval` | The complete schema-valid `HumanApproval`, including declared approver identity/role, decision, conditions, justification, and decision timestamp |
 | `timeline` | `event_count` and final `head_hash` of the case event chain |
 
+Approval routing selects one authoritative approval role. Control or condition
+ownership does not create an additional approval requirement. A receipt commits
+to exactly one server-recorded `HumanApproval`; receipt issuance resolves it by
+`approval_id` and revalidates its current case, assessment, policy-result,
+decision, selected role, conditions, and admission fingerprint before signing.
+
 Document bodies are not embedded in a receipt; their committed SHA-256 hashes are. Collections with set semantics are normalized before hashing: documents by `(document_id, version)`, rule evaluations by `control_id`, and evidence references by `(document_id, locator)`. Arrays whose order is semantically authored, such as approval conditions, retain their supplied order.
 
 All recorded timestamps other than receipt-level `issued_at` remain part of decision content when their containing schema requires them. Excluding `issued_at` therefore does not erase the case or approval chronology.

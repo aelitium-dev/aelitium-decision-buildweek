@@ -16,6 +16,12 @@ The D1 backend contains:
 
 The policy engine consumes thresholds and effects only from the versioned policy pack. Model output supplies observed facts and conflicts; it cannot replace routing, alter a threshold, or waive a blocking control.
 
+Approval routing selects one authoritative approval role. Control or condition
+ownership does not create an additional approval requirement. The DEMO approval
+route records that single approval in server state; receipt creation accepts only
+its `approval_id` and fails closed if the record or its bound decision inputs no
+longer match.
+
 Receipt construction, signing, and verification are implemented as a core
 library and tested through T4/T5. The clickable DEMO API adds case, approval,
 receipt, and verification routes without requiring an OpenAI key. No private

@@ -28,6 +28,9 @@ class RoutingRule(BaseModel):
         "otherwise",
     ]
     state: PolicyState
+    selected_approval_role: str | None = Field(
+        pattern=r"^[a-z][a-z0-9_]{1,63}$"
+    )
 
 
 class PolicyRule(BaseModel):
@@ -52,7 +55,6 @@ class PolicyRule(BaseModel):
         "REQUIRE_DIRECTOR_APPROVAL",
     ]
     blocking: bool
-    required_approval_roles: list[str]
     missing_evidence: str
     suggested_request: str
 
@@ -82,5 +84,12 @@ def load_policy_pack(path: Path) -> PolicyPack:
     priorities = [route.priority for route in pack.routing_precedence]
     if len(priorities) != len(set(priorities)):
         raise ValueError("policy pack contains duplicate routing priorities")
+
+    for route in pack.routing_precedence:
+        if route.state == "NEEDS_MORE_EVIDENCE":
+            if route.selected_approval_role is not None:
+                raise ValueError("blocked routes must not select an approval role")
+        elif route.selected_approval_role is None:
+            raise ValueError("receipt-eligible routes must select an approval role")
 
     return pack

@@ -19,6 +19,12 @@ from typing import Any
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from .approval import (
+    ApprovalAuthorizationError,
+    permitted_decisions,
+    validate_authoritative_approval,
+    validate_policy_receipt_eligibility,
+)
 from .demo import load_golden_manifest
 from .hashing import hash_json
 from .keyring import TrustedKeyring, load_trusted_keyring
@@ -28,9 +34,10 @@ from .receipt import (
     ReceiptMaterials,
     build_decision_content,
     issue_receipt,
+    normalize_assessment,
     normalize_policy_result,
 )
-from .schema_validation import load_schema, validate_canonical
+from .schema_validation import CanonicalSchemaError, load_schema, validate_canonical
 from .signing import load_private_key, public_key_fingerprint
 from .verification import VerificationResult, verify_receipt
 
@@ -51,6 +58,17 @@ class IssuedDemoReceipt:
     receipt: dict[str, Any]
     materials: ReceiptMaterials
     keyring: TrustedKeyring
+
+
+@dataclass(frozen=True)
+class RecordedDemoApproval:
+    """Server-held approval plus immutable decision-input fingerprints."""
+
+    approval: dict[str, Any]
+    approval_hash: str
+    case_hash: str
+    assessment_hash: str
+    policy_result_hash: str
 
 
 def _utc_now() -> str:
@@ -217,8 +235,11 @@ def _static_snapshot() -> dict[str, Any]:
         raise ValueError("DEMO post-F5 route is not HUMAN_APPROVAL_REQUIRED")
     if after_result["blocking_controls"]:
         raise ValueError("DEMO post-F5 route unexpectedly has blocking controls")
+    if after_result["selected_approval_role"] != "director":
+        raise ValueError("DEMO post-F5 route did not select director authority")
 
     policy_pack = _load_json(POLICIES_DIR / "ai_vendor_approval.v1.json")
+    allowed_decisions = permitted_decisions(after_result)
     return {
         "mode": "DEMO",
         "company": "Caldera Works Europe S.A.S. (fictional)",
@@ -251,7 +272,16 @@ def _static_snapshot() -> dict[str, Any]:
             "rules": policy_pack["rules"],
         },
         "actions": {
-            "allowed": ["approve_with_conditions", "reject", "request_evidence"],
+            "allowed": [
+                decision
+                for decision in (
+                    "approve",
+                    "approve_with_conditions",
+                    "reject",
+                    "request_evidence",
+                )
+                if decision in allowed_decisions
+            ],
             "prohibited": ["approve_without_condition", "waive_blocking_control"],
         },
         "trust_notice": (
@@ -268,33 +298,71 @@ def build_demo_snapshot() -> dict[str, Any]:
     return copy.deepcopy(_static_snapshot())
 
 
+def _current_decision_hashes(
+    snapshot: dict[str, Any],
+) -> tuple[str, str, str]:
+    try:
+        case = snapshot["case"]
+        assessment = snapshot["assessment"]
+        policy_result = snapshot["policy_result"]
+        validate_canonical(case, "decision_case.v1.schema.json")
+        validate_canonical(assessment, "model_assessment.v1.schema.json")
+        validate_canonical(policy_result, "policy_result.v1.schema.json")
+    except (CanonicalSchemaError, KeyError, TypeError) as exc:
+        raise ApprovalAuthorizationError(
+            "CURRENT_DECISION_INVALID",
+            "current server-held decision inputs are invalid",
+        ) from exc
+
+    if policy_result["case_id"] != case["case_id"]:
+        raise ApprovalAuthorizationError(
+            "CURRENT_POLICY_CASE_MISMATCH",
+            "current policy result does not belong to the current decision case",
+        )
+    assessment_hash = hash_json(normalize_assessment(assessment))
+    if policy_result["assessment_hash"] != assessment_hash:
+        raise ApprovalAuthorizationError(
+            "CURRENT_ASSESSMENT_MISMATCH",
+            "current assessment does not match the current policy result",
+        )
+    return (
+        hash_json(case),
+        assessment_hash,
+        hash_json(normalize_policy_result(policy_result)),
+    )
+
+
 def create_demo_approval(
     *,
+    snapshot: dict[str, Any],
     display_name: str,
+    approver_role: str,
     justification: str,
     condition: str,
     decided_at: str | None = None,
 ) -> dict[str, Any]:
-    snapshot = build_demo_snapshot()
     policy_result = snapshot["policy_result"]
-    if policy_result["blocking_controls"]:
-        raise ValueError("approval is prohibited while blocking controls remain")
+    _, _, policy_result_hash = _current_decision_hashes(snapshot)
+    validate_policy_receipt_eligibility(policy_result)
 
     display_name = display_name.strip()
+    approver_role = approver_role.strip()
     justification = justification.strip()
     condition = condition.strip()
-    if not display_name or not justification or not condition:
-        raise ValueError("display name, justification, and condition are required")
+    if not display_name or not approver_role or not justification or not condition:
+        raise ValueError(
+            "display name, approver role, justification, and condition are required"
+        )
 
     approval = {
         "schema_version": "human-approval/v1",
         "approval_id": f"approval-demo-{secrets.token_hex(6)}",
         "case_id": snapshot["case"]["case_id"],
-        "policy_result_hash": hash_json(normalize_policy_result(policy_result)),
+        "policy_result_hash": policy_result_hash,
         "approver": {
             "declared_id": "demo-director-01",
             "display_name": display_name,
-            "role": "director",
+            "role": approver_role,
             "identity_assurance": "declared_only",
         },
         "decision": "approve_with_conditions",
@@ -325,7 +393,36 @@ def create_demo_approval(
         "decided_at": decided_at or _utc_now(),
     }
     validate_canonical(approval, "human_approval.v1.schema.json")
+    validate_authoritative_approval(
+        policy_result=policy_result,
+        policy_result_hash=policy_result_hash,
+        approval=approval,
+    )
     return approval
+
+
+def record_demo_approval(
+    *, approval: dict[str, Any], snapshot: dict[str, Any]
+) -> RecordedDemoApproval:
+    """Bind a canonical approval to the current server-held decision inputs."""
+
+    validate_canonical(approval, "human_approval.v1.schema.json")
+    case_hash, assessment_hash, policy_result_hash = _current_decision_hashes(
+        snapshot
+    )
+    validate_authoritative_approval(
+        policy_result=snapshot["policy_result"],
+        policy_result_hash=policy_result_hash,
+        approval=approval,
+    )
+    stored = copy.deepcopy(approval)
+    return RecordedDemoApproval(
+        approval=stored,
+        approval_hash=hash_json(stored),
+        case_hash=case_hash,
+        assessment_hash=assessment_hash,
+        policy_result_hash=policy_result_hash,
+    )
 
 
 def _receipt_materials(
@@ -395,16 +492,60 @@ def _load_signing_material(
 
 def issue_demo_receipt(
     *,
-    approval: dict[str, Any],
+    recorded_approval: RecordedDemoApproval,
+    snapshot: dict[str, Any],
     private_key_path: Path = DEMO_PRIVATE_KEY_PATH,
     keyring_path: Path = DEMO_KEYRING_PATH,
     issued_at: str | None = None,
 ) -> IssuedDemoReceipt:
-    validate_canonical(approval, "human_approval.v1.schema.json")
-    snapshot = build_demo_snapshot()
+    try:
+        current_approval_hash = hash_json(recorded_approval.approval)
+    except (TypeError, ValueError) as exc:
+        raise ApprovalAuthorizationError(
+            "APPROVAL_RECORD_MODIFIED",
+            "server-recorded approval changed after admission",
+        ) from exc
+    if current_approval_hash != recorded_approval.approval_hash:
+        raise ApprovalAuthorizationError(
+            "APPROVAL_RECORD_MODIFIED",
+            "server-recorded approval changed after admission",
+        )
+    try:
+        validate_canonical(recorded_approval.approval, "human_approval.v1.schema.json")
+    except CanonicalSchemaError as exc:
+        raise ApprovalAuthorizationError(
+            "APPROVAL_RECORD_INVALID",
+            "server-recorded approval no longer satisfies its canonical schema",
+        ) from exc
     case = snapshot["case"]
     assessment = snapshot["assessment"]
     policy_result = snapshot["policy_result"]
+    case_hash, assessment_hash, policy_result_hash = _current_decision_hashes(
+        snapshot
+    )
+    validate_policy_receipt_eligibility(policy_result)
+
+    approval = recorded_approval.approval
+    if approval["case_id"] != case["case_id"]:
+        raise ApprovalAuthorizationError(
+            "APPROVAL_CASE_MISMATCH",
+            "server-recorded approval belongs to another decision case",
+        )
+    if (
+        recorded_approval.case_hash != case_hash
+        or recorded_approval.assessment_hash != assessment_hash
+        or recorded_approval.policy_result_hash != policy_result_hash
+    ):
+        raise ApprovalAuthorizationError(
+            "APPROVAL_STALE",
+            "server-recorded approval is not bound to the current decision inputs",
+        )
+    validate_authoritative_approval(
+        policy_result=policy_result,
+        policy_result_hash=policy_result_hash,
+        approval=approval,
+    )
+    approval = copy.deepcopy(approval)
     materials = _receipt_materials(
         case=case, policy_result=policy_result, approval=approval
     )

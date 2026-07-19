@@ -65,6 +65,10 @@ This log distinguishes work performed during OpenAI Build Week from the declared
 - Added the three spec §8 screens: case/evidence with clickable citations and
   the `UNKNOWN → PASS` diff, human approval with visible action boundaries, and
   receipt/verify with the EUR 18,000 → EUR 14,000 tamper interaction.
+- Closed the approval-admission boundary: routing now selects one authoritative
+  role, the server records one fingerprinted `HumanApproval`, and receipt
+  creation accepts only `approval_id` before revalidating current decision
+  bindings. Condition ownership remains separate from approval authority.
 - Built the UI as new Build Week work. The historical Command Center remained a
   visual reference only; no component, markup, style, fixture, or media was
   copied.

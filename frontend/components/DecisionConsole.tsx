@@ -56,7 +56,7 @@ type PolicyResult = {
   policy_version: string;
   blocking_controls: Array<{ control_id: string; description: string }>;
   rules_evaluated: RuleEvaluation[];
-  required_approval_roles: string[];
+  selected_approval_role: string | null;
   routing_reasons: string[];
   evaluated_at: string;
 };
@@ -167,9 +167,15 @@ async function callApi<T>(path: string, init?: RequestInit): Promise<T> {
       ...init?.headers,
     },
   });
-  const payload = (await response.json()) as T & { detail?: string };
+  const payload = (await response.json()) as T & {
+    detail?: string | { code: string; message: string };
+  };
   if (!response.ok) {
-    throw new Error(payload.detail ?? `Request failed with status ${response.status}`);
+    const detail = payload.detail;
+    if (typeof detail === "object" && detail !== null) {
+      throw new Error(`${detail.code}: ${detail.message}`);
+    }
+    throw new Error(detail ?? `Request failed with status ${response.status}`);
   }
   return payload;
 }
@@ -254,13 +260,21 @@ export function DecisionConsole() {
     setWorking(true);
     setError(null);
     try {
+      if (!snapshot) throw new Error("Decision case is not loaded");
+      const approverRole = snapshot.policy_result.selected_approval_role;
+      if (!approverRole) throw new Error("Policy route has no approval authority");
       const approvalResponse = await callApi<{ approval: Approval }>("/v1/demo/approvals", {
         method: "POST",
-        body: JSON.stringify({ display_name: displayName, justification, condition }),
+        body: JSON.stringify({
+          display_name: displayName,
+          approver_role: approverRole,
+          justification,
+          condition,
+        }),
       });
       const issued = await callApi<ReceiptResponse>("/v1/demo/receipts", {
         method: "POST",
-        body: JSON.stringify({ approval: approvalResponse.approval }),
+        body: JSON.stringify({ approval_id: approvalResponse.approval.approval_id }),
       });
       setReceiptResponse(issued);
       setVerification(null);
@@ -612,7 +626,9 @@ function ApprovalView({
           <h1>Record the decision</h1>
           <p>The model recommendation cannot approve this €18,000 commitment.</p>
         </div>
-        <span className="authority-badge">DIRECTOR REQUIRED</span>
+        <span className="authority-badge">
+          {(snapshot.policy_result.selected_approval_role ?? "NO ROLE").replaceAll("_", " ").toUpperCase()} REQUIRED
+        </span>
       </div>
 
       <div className="approval-grid">
@@ -657,7 +673,7 @@ function ApprovalView({
                 {snapshot.actions.prohibited.map((action) => <span className="prohibited-action" key={action}>× {friendlyAction(action)}</span>)}
               </div>
             </div>
-            <p className="boundary-copy">Policy packs select existing platform operators. Neither this form nor model output can change thresholds or waive a blocking control.</p>
+            <p className="boundary-copy">Approval routing selects one authoritative approval role. Control or condition ownership does not create an additional approval requirement.</p>
           </article>
         </div>
 

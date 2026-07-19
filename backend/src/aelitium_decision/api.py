@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import os
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
@@ -11,6 +12,7 @@ from typing import Any
 from fastapi import Body, FastAPI, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 
+from .approval import ApprovalAuthorizationError
 from .demo_workflow import (
     DEMO_KEYRING_PATH,
     DEMO_PRIVATE_KEY_PATH,
@@ -18,6 +20,7 @@ from .demo_workflow import (
     build_demo_snapshot,
     create_demo_approval,
     issue_demo_receipt,
+    record_demo_approval,
     verify_demo_receipt,
 )
 from .paths import POLICIES_DIR, REPOSITORY_ROOT
@@ -40,6 +43,7 @@ class DemoApprovalInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     display_name: str = Field(min_length=1, max_length=200)
+    approver_role: str = Field(pattern="^[a-z][a-z0-9_]{1,63}$")
     justification: str = Field(min_length=1, max_length=5000)
     condition: str = Field(min_length=1, max_length=1000)
 
@@ -47,7 +51,7 @@ class DemoApprovalInput(BaseModel):
 class DemoReceiptInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    approval: dict[str, Any]
+    approval_id: str = Field(pattern="^approval-[a-z0-9][a-z0-9-]{2,63}$")
 
 
 class DemoVerificationInput(BaseModel):
@@ -68,6 +72,9 @@ def create_app(
     async def lifespan(app: FastAPI):
         store.initialize()
         app.state.store = store
+        app.state.demo_snapshot = build_demo_snapshot()
+        app.state.demo_approvals = {}
+        app.state.demo_approval_by_case = {}
         app.state.demo_receipts = {}
         yield
 
@@ -82,21 +89,47 @@ def create_app(
         return {"status": "ok"}
 
     @app.get("/v1/demo/case")
-    async def demo_case() -> dict[str, Any]:
+    async def demo_case(request: Request) -> dict[str, Any]:
         """Return the complete no-API-key case, evidence diff, and policy state."""
 
-        return build_demo_snapshot()
+        return copy.deepcopy(request.app.state.demo_snapshot)
 
     @app.post("/v1/demo/approvals")
-    async def demo_approval(payload: DemoApprovalInput) -> dict[str, Any]:
+    async def demo_approval(
+        request: Request, payload: DemoApprovalInput
+    ) -> dict[str, Any]:
         try:
             approval = create_demo_approval(
+                snapshot=request.app.state.demo_snapshot,
                 display_name=payload.display_name,
+                approver_role=payload.approver_role,
                 justification=payload.justification,
                 condition=payload.condition,
             )
+            recorded = record_demo_approval(
+                approval=approval,
+                snapshot=request.app.state.demo_snapshot,
+            )
+        except ApprovalAuthorizationError as exc:
+            raise HTTPException(
+                status_code=422,
+                detail={"code": exc.code, "message": exc.message},
+            ) from exc
         except (CanonicalSchemaError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
+        case_id = approval["case_id"]
+        if case_id in request.app.state.demo_approval_by_case:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "APPROVAL_ALREADY_RECORDED",
+                    "message": (
+                        "the decision case already has its authoritative approval"
+                    ),
+                },
+            )
+        request.app.state.demo_approvals[approval["approval_id"]] = recorded
+        request.app.state.demo_approval_by_case[case_id] = approval["approval_id"]
         return {
             "approval": approval,
             "identity_notice": (
@@ -108,14 +141,43 @@ def create_app(
     async def demo_receipt(
         request: Request, payload: DemoReceiptInput
     ) -> dict[str, Any]:
+        recorded = request.app.state.demo_approvals.get(payload.approval_id)
+        if recorded is None:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "code": "APPROVAL_NOT_FOUND",
+                    "message": "server-recorded approval was not found",
+                },
+            )
+        current_case_id = request.app.state.demo_snapshot["case"]["case_id"]
+        if (
+            request.app.state.demo_approval_by_case.get(current_case_id)
+            != payload.approval_id
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "APPROVAL_NOT_AUTHORITATIVE",
+                    "message": (
+                        "approval is not the authoritative record for the current case"
+                    ),
+                },
+            )
         try:
             issued = issue_demo_receipt(
-                approval=payload.approval,
+                recorded_approval=recorded,
+                snapshot=request.app.state.demo_snapshot,
                 private_key_path=demo_private_key_path,
                 keyring_path=demo_keyring_path,
             )
         except DemoConfigurationError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except ApprovalAuthorizationError as exc:
+            raise HTTPException(
+                status_code=409,
+                detail={"code": exc.code, "message": exc.message},
+            ) from exc
         except (CanonicalSchemaError, ReceiptBuildError, ValueError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 

@@ -8,13 +8,13 @@ from dataclasses import dataclass, replace
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from aelitium_decision.approval import ApprovalAuthorizationError
 from aelitium_decision.demo import load_golden_manifest
 from aelitium_decision.hashing import canonical_json, hash_json
 from aelitium_decision.keyring import TrustedKeyring
 from aelitium_decision.paths import FIXTURES_DIR, POLICIES_DIR
 from aelitium_decision.policy import PolicyEngine, load_policy_pack
 from aelitium_decision.receipt import (
-    ReceiptBuildError,
     ReceiptMaterials,
     build_decision_content,
     issue_receipt,
@@ -157,6 +157,7 @@ def _receipt_bundle() -> ReceiptBundle:
     )
     validate_canonical(policy_result, "policy_result.v1.schema.json")
     assert policy_result["state"] == "HUMAN_APPROVAL_REQUIRED"
+    assert policy_result["selected_approval_role"] == "director"
     assert policy_result["blocking_controls"] == []
     policy_result_hash = hash_json(normalize_policy_result(policy_result))
     approval = {
@@ -453,7 +454,9 @@ def test_approval_with_blocking_controls_cannot_be_receipted():
         normalize_policy_result(blocked_result)
     )
 
-    with pytest.raises(ReceiptBuildError, match="blocking controls"):
+    with pytest.raises(
+        ApprovalAuthorizationError, match="POLICY_BLOCKING_CONTROLS"
+    ):
         build_decision_content(
             case=bundle.case,
             provider="aelitium-demo",
