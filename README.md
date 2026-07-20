@@ -25,7 +25,7 @@ Receipt verification checks integrity and Ed25519 validity under a separately tr
 ## Execution modes
 
 - `DEMO`: implemented with precomputed assessment fixtures and a deterministic post-F5 derivation. It makes no runtime model call and needs no OpenAI key. Its clickable approval → receipt → verify → tamper path is independent of the LIVE artifact.
-- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. A versioned T2-style execution passed canonical validation; its GPT-generated artifact, hash, policy route, and fact-key limitation are recorded in `EVAL.md`.
+- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. A versioned T2-style execution passed canonical validation. The checked-in artifact originated from that response and declares a later literal evidence-quote repair, with both input and current hashes, policy route, and fact-key limitation recorded in `EVAL.md`.
 
 The fictional source documents are Build Week work checked into `fixtures/documents/`; they are not authenticated external originals. Human-entered approval data is limited to the declared name, condition text, and justification. AELITIUM generates the deterministic policy result, canonical hashes, local Ed25519 signature, receipt, and verification result. Those generated outputs bind what was recorded; they do not validate the underlying documents or decision claims.
 
@@ -149,7 +149,11 @@ API transport schema, applies the narrow identifier boundary described above,
 revalidates against the canonical backend schema, and only then writes
 `fixtures/live/gpt-5.6-t2-assessment.json`. That artifact explicitly records
 `assessment_source=gpt_generated_live`, `runtime_model_call=true`, the OpenAI
-provider, and the fictional repository fixtures used as source documents.
+provider, and the fictional repository fixtures used as source documents. The
+current checked-in artifact also records a scoped post-validation transformation
+that replaced non-literal evidence paraphrases with exact source substrings and
+split combined references. It preserves the original accepted assessment hash
+and records the new hash; no additional model call produced those quote repairs.
 Attempt 1 failed closed before writing
 an artifact. Attempt 2 succeeded with GPT-5.6 and prompt
 `vendor-assessment/v2`; both executions and the live policy-fact limitation are

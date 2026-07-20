@@ -76,6 +76,7 @@ def main() -> int:
         "model": DEFAULT_MODEL,
         "provider": "openai",
         "prompt_version": DEFAULT_PROMPT_VERSION,
+        "post_validation_transformations": [],
         "source_documents": {
             "origin": "build_week_repository_fixtures",
             "classification": "fictional_build_week_work",

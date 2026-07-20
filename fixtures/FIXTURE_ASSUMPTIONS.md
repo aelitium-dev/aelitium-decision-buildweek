@@ -15,3 +15,16 @@ This means:
 - The EUR 18,000 annual price independently requires director approval.
 
 No policy rule is weakened to make the demo pass.
+
+## Golden-case evidence sources
+
+T1 and T3 intentionally isolate policy behavior and therefore cite two short,
+fictional deterministic records outside the F1–F5 dossier:
+
+- `T1-LOW-RISK` resolves to `fixtures/demo/T1_low_risk_evidence.md`.
+- `T3-AMENDMENT` resolves to `fixtures/demo/T3_price_amendment.md`.
+
+Their mappings are explicit in `fixtures/demo/golden_cases.v1.json`. Every
+`quoted_text` field in DEMO and LIVE assessment artifacts must be an exact raw
+substring of its mapped UTF-8 source; summaries belong in the surrounding
+finding fields, not inside quotation marks.

@@ -224,6 +224,24 @@ def test_demo_ui_api_approval_receipt_verify_and_tamper(tmp_path):
                 "gpt_generated_live"
             )
             assert provenance["live_assessment"]["runtime_model_call"] is True
+            assert provenance["live_assessment"][
+                "post_validation_transformations"
+            ] == [
+                {
+                    "transformation_version": "literal-evidence-repair/v1",
+                    "scope": (
+                        "quoted_text exact-source repair and evidence-reference "
+                        "splitting only"
+                    ),
+                    "input_assessment_hash": (
+                        "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4"
+                    ),
+                    "output_assessment_hash": (
+                        "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
+                    ),
+                    "original_non_literal_quote_fields": 19,
+                }
+            ]
             assert provenance["live_assessment"]["used_for_current_demo"] is False
 
             status, approval_response = await _request(

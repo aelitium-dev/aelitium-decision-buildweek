@@ -153,3 +153,21 @@ This log distinguishes work performed during OpenAI Build Week from the declared
 - Added a frontend runtime contract check so a stale pre-B2 API response produces
   an explicit backend-restart message instead of dereferencing missing
   provenance metadata.
+
+### B3 literal evidence integrity
+
+- Audited every `quoted_text` reference in the three DEMO assessments, the LIVE
+  artifact, and the generated post-F5 assessment. Found 18 non-literal DEMO
+  fields, 19 non-literal LIVE fields, and 2 non-literal generated fields.
+- Replaced paraphrases and combined fragments with exact UTF-8 source
+  substrings. Where one claim depended on multiple passages, split it into
+  separate evidence references rather than manufacturing a composite quote.
+- Added two small fictional source records for the isolated T1 and T3 golden
+  inputs, and declared their `document_id` mappings in the golden manifest.
+- Preserved the LIVE call's original accepted assessment hash and declared a
+  scoped `literal-evidence-repair/v1` transformation with the current hash. No
+  new OpenAI call was made; the assessment findings and policy route were not
+  changed by the quotation repair.
+- Added a repository-wide assessment evidence test that resolves each source
+  path and requires every `quoted_text` to occur literally in the named file,
+  including the assessment generated for the post-F5 clickable DEMO.

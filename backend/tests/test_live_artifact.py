@@ -13,6 +13,12 @@ LIVE_ARTIFACT_PATH = (
     REPOSITORY_ROOT / "fixtures/live/gpt-5.6-t2-assessment.json"
 )
 POLICY_PATH = REPOSITORY_ROOT / "policies/ai_vendor_approval.v1.json"
+LIVE_INPUT_ASSESSMENT_HASH = (
+    "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4"
+)
+LIVE_CURRENT_ASSESSMENT_HASH = (
+    "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
+)
 
 
 def test_checked_in_live_artifact_is_canonical_and_routes_fail_closed():
@@ -30,6 +36,18 @@ def test_checked_in_live_artifact_is_canonical_and_routes_fail_closed():
     assert assessment["prompt_version"] == artifact["prompt_version"]
     validate_canonical(assessment, "model_assessment.v1.schema.json")
     assert hash_json(assessment) == artifact["assessment_hash"]
+    assert artifact["assessment_hash"] == LIVE_CURRENT_ASSESSMENT_HASH
+    assert artifact["post_validation_transformations"] == [
+        {
+            "transformation_version": "literal-evidence-repair/v1",
+            "scope": (
+                "quoted_text exact-source repair and evidence-reference splitting only"
+            ),
+            "input_assessment_hash": LIVE_INPUT_ASSESSMENT_HASH,
+            "output_assessment_hash": LIVE_CURRENT_ASSESSMENT_HASH,
+            "original_non_literal_quote_fields": 19,
+        }
+    ]
     assert artifact["source_documents"] == {
         "origin": "build_week_repository_fixtures",
         "classification": "fictional_build_week_work",
@@ -80,6 +98,9 @@ def test_demo_snapshot_references_live_artifact_without_using_it():
         "prompt_version": artifact["prompt_version"],
         "artifact_path": "fixtures/live/gpt-5.6-t2-assessment.json",
         "runtime_model_call": artifact["runtime_model_call"],
+        "post_validation_transformations": artifact[
+            "post_validation_transformations"
+        ],
         "used_for_current_demo": False,
     }
     assert provenance["demo_assessment"]["runtime_model_call"] is False

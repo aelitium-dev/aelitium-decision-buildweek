@@ -52,6 +52,21 @@ DEMO_DERIVATION_DESCRIPTION = (
     "T2 assessment fixture and the fixed F5 evidence changes in demo_workflow.py."
 )
 LIVE_ARTIFACT_PATH = "fixtures/live/gpt-5.6-t2-assessment.json"
+LIVE_POST_VALIDATION_TRANSFORMATIONS = [
+    {
+        "transformation_version": "literal-evidence-repair/v1",
+        "scope": (
+            "quoted_text exact-source repair and evidence-reference splitting only"
+        ),
+        "input_assessment_hash": (
+            "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4"
+        ),
+        "output_assessment_hash": (
+            "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
+        ),
+        "original_non_literal_quote_fields": 19,
+    }
+]
 DEMO_BASE_ASSESSMENT_PATH = "fixtures/demo/T2_assessment.json"
 TRUST_LIMITATIONS = [
     "source_document_authenticity",
@@ -63,6 +78,21 @@ TRUST_LIMITATIONS = [
     "identity_authentication",
     "trusted_time",
 ]
+F5_RESIDENCY_QUOTE = (
+    "1. Customer Content, including uploaded documents, extracted text, "
+    "application records, and tenant-specific indexes, will be stored only in "
+    "infrastructure located in the European Union or European Economic Area.\n"
+    "2. Production database replicas, object-storage replicas, and "
+    "disaster-recovery backups containing Customer Content will remain in the "
+    "European Union or European Economic Area.\n"
+    "3. Processing of Customer Content by the core application and "
+    "inference-routing services will occur in the European Union or European "
+    "Economic Area."
+)
+F5_ASSURANCE_QUOTE = (
+    "NovaMind's SOC 2 Type II examination has been completed and the report was "
+    "issued on 2026-07-15."
+)
 
 
 class DemoConfigurationError(RuntimeError):
@@ -123,10 +153,7 @@ def _post_f5_assessment() -> dict[str, Any]:
         {
             "document_id": "F5",
             "locator": "section 1",
-            "quoted_text": (
-                "Customer Content, backups, and core processing will remain in "
-                "the European Union or European Economic Area."
-            ),
+            "quoted_text": F5_RESIDENCY_QUOTE,
             "reference_level": "validated_reference",
         }
     ]
@@ -143,7 +170,7 @@ def _post_f5_assessment() -> dict[str, Any]:
         {
             "document_id": "F5",
             "locator": "section 2",
-            "quoted_text": "The report was issued on 2026-07-15.",
+            "quoted_text": F5_ASSURANCE_QUOTE,
             "reference_level": "validated_reference",
         }
     ]
@@ -328,6 +355,9 @@ def _static_snapshot() -> dict[str, Any]:
                 "prompt_version": "vendor-assessment/v2",
                 "artifact_path": LIVE_ARTIFACT_PATH,
                 "runtime_model_call": True,
+                "post_validation_transformations": copy.deepcopy(
+                    LIVE_POST_VALIDATION_TRANSFORMATIONS
+                ),
                 "used_for_current_demo": False,
             },
             "human_approval": {

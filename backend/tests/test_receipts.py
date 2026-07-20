@@ -65,7 +65,17 @@ def _t4_assessment():
         {
             "document_id": "F5",
             "locator": "section 1",
-            "quoted_text": "Customer Content, backups, and core processing will remain in the European Union or European Economic Area.",
+            "quoted_text": (
+                "1. Customer Content, including uploaded documents, extracted "
+                "text, application records, and tenant-specific indexes, will be "
+                "stored only in infrastructure located in the European Union or "
+                "European Economic Area.\n2. Production database replicas, "
+                "object-storage replicas, and disaster-recovery backups containing "
+                "Customer Content will remain in the European Union or European "
+                "Economic Area.\n3. Processing of Customer Content by the core "
+                "application and inference-routing services will occur in the "
+                "European Union or European Economic Area."
+            ),
             "reference_level": "validated_reference",
         }
     ]
@@ -76,7 +86,10 @@ def _t4_assessment():
         {
             "document_id": "F5",
             "locator": "section 2",
-            "quoted_text": "The report was issued on 2026-07-15.",
+            "quoted_text": (
+                "NovaMind's SOC 2 Type II examination has been completed and the "
+                "report was issued on 2026-07-15."
+            ),
             "reference_level": "validated_reference",
         }
     ]

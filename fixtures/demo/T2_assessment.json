@@ -18,7 +18,7 @@
         {
           "document_id": "F1",
           "locator": "Commercial terms",
-          "quoted_text": "Annual subscription fee: EUR 18,000 excluding VAT.",
+          "quoted_text": "EUR 18,000 excluding VAT",
           "reference_level": "validated_reference"
         }
       ]
@@ -37,7 +37,7 @@
         {
           "document_id": "F3",
           "locator": "DATA-01",
-          "quoted_text": "Primary service regions are currently the United States and European Union and are configurable by plan.",
+          "quoted_text": "US–EU, configurable for enterprise plans.",
           "reference_level": "validated_reference"
         }
       ]
@@ -56,7 +56,7 @@
         {
           "document_id": "F4",
           "locator": "page 34 signature blocks",
-          "quoted_text": "Authorized signatory records are present for Caldera Works Europe and NovaMind AI.",
+          "quoted_text": "Executed by both fictional parties: yes; see page 34",
           "reference_level": "validated_reference"
         }
       ]
@@ -75,7 +75,7 @@
         {
           "document_id": "F3",
           "locator": "ASSURE-01",
-          "quoted_text": "SOC 2 Type II examination is in progress; no issue date is available.",
+          "quoted_text": "In progress.",
           "reference_level": "validated_reference"
         }
       ]
@@ -91,13 +91,13 @@
         {
           "document_id": "F3",
           "locator": "SUB-02",
-          "quoted_text": "Customers receive at least 30 days' advance notice before a new subprocessor is authorized.",
+          "quoted_text": "Customers receive at least 30 days' advance notice before a material new subprocessor is authorized to process Customer Data.",
           "reference_level": "validated_reference"
         },
         {
           "document_id": "F4",
           "locator": "page 23, clause 9.6",
-          "quoted_text": "Processor may appoint a new or replacement Subprocessor without prior notice to Customer.",
+          "quoted_text": "This section does not promise the 30 days' advance notice stated in questionnaire response SUB-02.",
           "reference_level": "validated_reference"
         }
       ]
@@ -130,7 +130,7 @@
         {
           "document_id": "F3",
           "locator": "DATA-01",
-          "quoted_text": "Primary service regions are currently the United States and European Union.",
+          "quoted_text": "US–EU, configurable for enterprise plans.",
           "reference_level": "validated_reference"
         }
       ]

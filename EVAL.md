@@ -81,7 +81,7 @@ authoritative.
   `runtime_model_call=true`. The artifact lists the four checked-in fictional
   source fixtures and explicitly records that their authenticity was not
   verified.
-- Canonical assessment hash:
+- Original accepted assessment hash from the LIVE response:
   `55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4`.
 - Vendor Approval Policy Pack result: `NEEDS_MORE_EVIDENCE`; blocking controls
   were `R2_EU_DATA_RESIDENCY`, `R3_DPA_SIGNED`, and `R4_CERTIFICATION`.
@@ -96,6 +96,24 @@ authoritative.
   hash, runs the unchanged policy pack, asserts the real route and blocking
   controls, and preserves the missing-fact limitation as an explicit assertion.
 - The complete backend suite passed 51 tests with the live-artifact check.
+
+### Post-validation literal evidence repair
+
+- A later evidence-integrity audit found 19 `quoted_text` fields in the LIVE
+  assessment that combined source fragments or paraphrased them. Structure and
+  canonical schema validity alone did not establish literal quotation accuracy.
+- The checked-in artifact now declares
+  `literal-evidence-repair/v1`. Its scope is limited to replacing `quoted_text`
+  with exact source substrings and splitting combined evidence references. No
+  new OpenAI call was made and the original accepted assessment hash above is
+  retained as the transformation input hash.
+- The current canonical assessment hash is
+  `1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a`.
+  The transformation record contains both hashes and the original failure count.
+- Automated evidence-integrity tests resolve every `document_id` to a
+  repository source and require each `quoted_text` value to be an exact raw
+  substring. The policy route and its documented prompt-v2 fact-key limitation
+  remain unchanged.
 
 ## D2 UI integration record
 

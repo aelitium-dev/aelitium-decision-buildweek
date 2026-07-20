@@ -3,6 +3,10 @@
   "policy_path": "policies/ai_vendor_approval.v1.json",
   "assessment_schema": "model_assessment.v1.schema.json",
   "policy_result_schema": "policy_result.v1.schema.json",
+  "evidence_sources": {
+    "T1-LOW-RISK": "fixtures/demo/T1_low_risk_evidence.md",
+    "T3-AMENDMENT": "fixtures/demo/T3_price_amendment.md"
+  },
   "cases": {
     "T1": {
       "case_id": "case-t1-low-risk",
@@ -16,7 +20,7 @@
     "T2": {
       "case_id": "case-t2-missing-evidence",
       "assessment_path": "fixtures/demo/T2_assessment.json",
-      "expected_assessment_hash": "a320c3434e8026320dccd1245a5a96028b42ad4f979f0e3b986f80ff174de85c",
+      "expected_assessment_hash": "211cc4cd6e50e8b3a3b3e42f39a233afbd26efb442647c87727e9b939efd3daf",
       "evaluated_at": "2026-07-19T09:05:00Z",
       "expected_state": "NEEDS_MORE_EVIDENCE",
       "expected_blocking_controls": [
@@ -28,7 +32,7 @@
     "T3": {
       "case_id": "case-t3-document-conflict",
       "assessment_path": "fixtures/demo/T3_assessment.json",
-      "expected_assessment_hash": "7fd8374dc8d7b1cc5a80eb5ed722371e7c9dd425237dae3d456b8f12314082e8",
+      "expected_assessment_hash": "a9dbb096217691b8713d35fb1a101fc91e9ebeedbc66d26cb2304008234434c5",
       "evaluated_at": "2026-07-19T09:10:00Z",
       "expected_state": "HUMAN_REVIEW",
       "expected_blocking_controls": [],

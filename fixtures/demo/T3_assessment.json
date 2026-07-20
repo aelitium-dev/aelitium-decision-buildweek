@@ -37,7 +37,7 @@
         {
           "document_id": "F5",
           "locator": "section 1",
-          "quoted_text": "Customer Content, backups, and core processing for this tenant will remain in the EU or EEA.",
+          "quoted_text": "1. Customer Content, including uploaded documents, extracted text, application records, and tenant-specific indexes, will be stored only in infrastructure located in the European Union or European Economic Area.\n2. Production database replicas, object-storage replicas, and disaster-recovery backups containing Customer Content will remain in the European Union or European Economic Area.\n3. Processing of Customer Content by the core application and inference-routing services will occur in the European Union or European Economic Area.",
           "reference_level": "validated_reference"
         }
       ]
@@ -56,7 +56,7 @@
         {
           "document_id": "F4",
           "locator": "page 34 signature blocks",
-          "quoted_text": "Authorized signatory records are present for Caldera Works Europe and NovaMind AI.",
+          "quoted_text": "Executed by both fictional parties: yes; see page 34",
           "reference_level": "validated_reference"
         }
       ]
@@ -91,13 +91,13 @@
         {
           "document_id": "F3",
           "locator": "SUB-02",
-          "quoted_text": "Customers receive at least 30 days' advance notice before a new subprocessor is authorized.",
+          "quoted_text": "Customers receive at least 30 days' advance notice before a material new subprocessor is authorized to process Customer Data.",
           "reference_level": "validated_reference"
         },
         {
           "document_id": "F4",
           "locator": "page 23, clause 9.6",
-          "quoted_text": "Processor may appoint a new or replacement Subprocessor without prior notice to Customer.",
+          "quoted_text": "This section does not promise the 30 days' advance notice stated in questionnaire response SUB-02.",
           "reference_level": "validated_reference"
         }
       ]
@@ -115,13 +115,13 @@
         {
           "document_id": "F3",
           "locator": "SUB-02",
-          "quoted_text": "Customers receive at least 30 days' advance notice.",
+          "quoted_text": "Customers receive at least 30 days' advance notice before a material new subprocessor is authorized to process Customer Data.",
           "reference_level": "validated_reference"
         },
         {
           "document_id": "F4",
           "locator": "page 23, clause 9.6",
-          "quoted_text": "without prior notice to Customer",
+          "quoted_text": "without providing Customer prior notice",
           "reference_level": "validated_reference"
         }
       ]

@@ -15,8 +15,8 @@
           },
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Sections 9.6.2 and 9.6.6",
-            "quoted_text": "without providing Customer prior notice ... This section does not promise the 30 days' advance notice stated in questionnaire response SUB-02.",
+            "locator": "Page 23, Section 9.6.6",
+            "quoted_text": "This section does not promise the 30 days' advance notice stated in questionnaire response SUB-02.",
             "reference_level": "decision_evidence"
           },
           {
@@ -35,14 +35,20 @@
         "evidence_refs": [
           {
             "document_id": "F3_security_questionnaire.md",
-            "locator": "Data location and transfers, DATA-02 and DATA-03",
-            "quoted_text": "Can all Customer Data be restricted to EU/EEA storage? | Yes, when the EU region flag is enabled during implementation. ... Are backups restricted to the selected region? | Generally aligned with the selected primary region.",
+            "locator": "Data location and transfers, DATA-02",
+            "quoted_text": "Yes, when the EU region flag is enabled during implementation.",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F3_security_questionnaire.md",
+            "locator": "Data location and transfers, DATA-03",
+            "quoted_text": "Generally aligned with the selected primary region.",
             "reference_level": "decision_evidence"
           },
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 28, Sections 12.2, 12.3, and 12.5",
-            "quoted_text": "A selectable interface option, sales statement, or questionnaire answer does not create a binding residency commitment ... a primary-region setting may not restrict all backups, telemetry, security logs, support access, email, or account-administration data. ... the parties have not recorded an EU-only location commitment",
+            "locator": "Page 28, Section 12.5",
+            "quoted_text": "As of this DPA's Effective Date, the parties have not recorded an EU-only location commitment for the Caldera Works Europe tenant.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -75,8 +81,8 @@
         "evidence_refs": [
           {
             "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table, Initial term and Annual subscription",
-            "quoted_text": "Annual subscription | EUR 18,000 excluding VAT; Initial term | 36 months",
+            "locator": "Commercial terms table, Initial term",
+            "quoted_text": "Initial term | 36 months",
             "reference_level": "decision_evidence"
           },
           {
@@ -151,7 +157,7 @@
           {
             "document_id": "F4_executed_data_processing_addendum.md",
             "locator": "Page 34, Execution and Execution metadata",
-            "quoted_text": "Controller signature status | Executed — fictional fixture; Processor signature status | Executed — fictional fixture",
+            "quoted_text": "| Controller signature status | Executed — fictional fixture |\n| Processor signature status | Executed — fictional fixture |",
             "reference_level": "decision_evidence"
           }
         ],
@@ -225,8 +231,8 @@
         "evidence_refs": [
           {
             "document_id": "F3_security_questionnaire.md",
-            "locator": "Governance and assurance, GOV-02 through GOV-04",
-            "quoted_text": "Do you hold ISO/IEC 27001 certification? | No. ... Is a SOC 2 Type II report currently issued? | In progress. ... Expected SOC 2 issue date | Not provided.",
+            "locator": "Governance and assurance, GOV-03",
+            "quoted_text": "Is a SOC 2 Type II report currently issued? | In progress.",
             "reference_level": "decision_evidence"
           },
           {
@@ -257,7 +263,7 @@
           {
             "document_id": "F4_executed_data_processing_addendum.md",
             "locator": "Page 21, subprocessor table",
-            "quoted_text": "Vector Forge Inc. | Model operations and overflow inference | United States; Support Loom Pte. Ltd. | Customer-support ticket platform | Singapore, Germany",
+            "quoted_text": "Support Loom Pte. Ltd. | Customer-support ticket platform | Singapore, Germany",
             "reference_level": "decision_evidence"
           }
         ],
@@ -275,8 +281,14 @@
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Sections 9.6.2 and 9.6.3",
-            "quoted_text": "without providing Customer prior notice ... Customer may object ... within ten calendar days after publication of the updated list",
+            "locator": "Page 23, Section 9.6.2",
+            "quoted_text": "NovaMind may authorize a new or replacement Subprocessor to Process Customer Data, and may permit that Processing to occur outside the EEA, without providing Customer prior notice, provided that NovaMind updates its online subprocessor list within a commercially reasonable period and implements a transfer mechanism where Applicable Data Protection Law requires one.",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 23, Section 9.6.3",
+            "quoted_text": "Customer may object on reasonable data-protection grounds by written notice received within ten calendar days after publication of the updated list.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -294,8 +306,14 @@
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Pages 17–18, Sections 8.3 and 8.4",
-            "quoted_text": "After the retrieval period, NovaMind will delete Customer Data from active production systems within 45 days ... Residual backup copies expire through ordinary rotation, normally within 90 additional days.",
+            "locator": "Page 18, Section 8.4.3",
+            "quoted_text": "After the retrieval period, NovaMind will delete Customer Data from active production systems within 45 days, except where retention is legally required.",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 18, Section 8.4.4",
+            "quoted_text": "Residual backup copies expire through ordinary rotation, normally within 90 additional days.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -332,14 +350,14 @@
         "evidence_refs": [
           {
             "document_id": "F2_internal_procurement_policy.md",
-            "locator": "Sections 1 and 5",
-            "quoted_text": "Automated assessments may support review but cannot approve a supplier. ... final approval remains with an authorized employee.",
+            "locator": "Section 1",
+            "quoted_text": "Automated assessments may support review but cannot approve a supplier.",
             "reference_level": "decision_evidence"
           },
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 26, Sections 11.2 and 11.4",
-            "quoted_text": "NovaMind provides generated output for Customer review. ... Customer must use qualified human review appropriate to the use case.",
+            "locator": "Page 26, Section 11.4",
+            "quoted_text": "Customer must use qualified human review appropriate to the use case.",
             "reference_level": "validated_reference"
           }
         ],
@@ -382,8 +400,8 @@
         "evidence_refs": [
           {
             "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Acceptance and document status",
-            "quoted_text": "This proposal is non-binding until an authorized order form is signed. ... Status: Vendor proposal supplied for review; not an order form.",
+            "locator": "Acceptance",
+            "quoted_text": "This proposal is non-binding until an authorized order form is signed.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -546,8 +564,8 @@
           },
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 28, Sections 12.1 and 12.5",
-            "quoted_text": "may Process Customer Data in the United States, European Union, and other locations ... the parties have not recorded an EU-only location commitment",
+            "locator": "Page 28, Section 12.5",
+            "quoted_text": "As of this DPA's Effective Date, the parties have not recorded an EU-only location commitment for the Caldera Works Europe tenant.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -561,8 +579,20 @@
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Sections 9.6.2–9.6.4",
-            "quoted_text": "may permit that Processing to occur outside the EEA, without providing Customer prior notice ... within ten calendar days after publication ... Customer's sole remedy is to stop using or terminate the affected feature",
+            "locator": "Page 23, Section 9.6.2",
+            "quoted_text": "NovaMind may authorize a new or replacement Subprocessor to Process Customer Data, and may permit that Processing to occur outside the EEA, without providing Customer prior notice, provided that NovaMind updates its online subprocessor list within a commercially reasonable period and implements a transfer mechanism where Applicable Data Protection Law requires one.",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 23, Section 9.6.3",
+            "quoted_text": "Customer may object on reasonable data-protection grounds by written notice received within ten calendar days after publication of the updated list.",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 23, Section 9.6.4",
+            "quoted_text": "If the parties cannot resolve the objection within 30 days, Customer's sole remedy is to stop using or terminate the affected feature; fees already committed remain governed by the Agreement.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -577,13 +607,13 @@
           {
             "document_id": "F2_internal_procurement_policy.md",
             "locator": "Section 4",
-            "quoted_text": "Statements such as 'in progress', 'planned', or 'expected' do not count as issued certification.",
+            "quoted_text": "Statements such as \"in progress\", \"planned\", or \"expected\" do not count as issued certification.",
             "reference_level": "decision_evidence"
           },
           {
             "document_id": "F3_security_questionnaire.md",
-            "locator": "Governance and assurance, GOV-03 and GOV-04",
-            "quoted_text": "In progress. ... Expected SOC 2 issue date | Not provided.",
+            "locator": "Governance and assurance, GOV-03",
+            "quoted_text": "Is a SOC 2 Type II report currently issued? | In progress.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -618,8 +648,26 @@
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Pages 21 and 24–25",
-            "quoted_text": "United States, global edge ... Singapore, Germany ... These measures reduce but cannot eliminate legal-access risk in every jurisdiction.",
+            "locator": "Page 21, subprocessor schedule",
+            "quoted_text": "Nimbus Compute Inc. | Global traffic protection and emergency infrastructure support | United States, global edge",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 21, subprocessor schedule",
+            "quoted_text": "Signal Harbor Ltd. | Security monitoring and incident alerting | Ireland, United Kingdom",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 21, subprocessor schedule",
+            "quoted_text": "Support Loom Pte. Ltd. | Customer-support ticket platform | Singapore, Germany",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 25, Section 10.1.7",
+            "quoted_text": "These measures reduce but cannot eliminate legal-access risk in every jurisdiction.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -648,8 +696,32 @@
         "evidence_refs": [
           {
             "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table",
-            "quoted_text": "Initial term | 36 months ... Additional usage | EUR 18 per 10,000 processing units ... Renewal | Automatic 12-month renewal ... Price review | Up to 5% at each renewal",
+            "locator": "Commercial terms table, Initial term",
+            "quoted_text": "Initial term | 36 months",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table, Billing",
+            "quoted_text": "Billing | Annual, payable in advance",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table, Additional usage",
+            "quoted_text": "Additional usage | EUR 18 per 10,000 processing units",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table, Renewal",
+            "quoted_text": "Renewal | Automatic 12-month renewal unless either party gives 60 days' notice",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table, Price review",
+            "quoted_text": "Price review | Up to 5% at each renewal",
             "reference_level": "decision_evidence"
           }
         ],
@@ -663,8 +735,14 @@
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 19, Sections 8.5.2 and 8.5.4",
-            "quoted_text": "Targets are planning objectives, not service-level guarantees unless the order form expressly states them. ... Recovery depends on cloud infrastructure, communications, identity services, model providers, and other Subprocessors.",
+            "locator": "Page 19, Section 8.5.2",
+            "quoted_text": "Targets are planning objectives, not service-level guarantees unless the order form expressly states them.",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 19, Section 8.5.4",
+            "quoted_text": "Recovery depends on cloud infrastructure, communications, identity services, model providers, and other Subprocessors.",
             "reference_level": "decision_evidence"
           }
         ],
@@ -676,13 +754,22 @@
     ],
     "schema_version": "model-assessment/v1"
   },
-  "assessment_hash": "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4",
+  "assessment_hash": "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a",
   "assessment_source": "gpt_generated_live",
   "executed_at": "2026-07-18T19:48:39Z",
   "execution_mode": "LIVE",
   "model": "gpt-5.6",
   "prompt_version": "vendor-assessment/v2",
   "provider": "openai",
+  "post_validation_transformations": [
+    {
+      "input_assessment_hash": "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4",
+      "original_non_literal_quote_fields": 19,
+      "output_assessment_hash": "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a",
+      "scope": "quoted_text exact-source repair and evidence-reference splitting only",
+      "transformation_version": "literal-evidence-repair/v1"
+    }
+  ],
   "runtime_model_call": true,
   "scenario": "T2-style F1–F4 missing-evidence case",
   "source_documents": {
