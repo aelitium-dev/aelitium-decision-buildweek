@@ -210,3 +210,24 @@ The clickable path is a DEMO fixture execution, not a replay of the LIVE call.
 Its post-F5 assessment is derived deterministically from a checked-in fixture,
 records `runtime_model_call=false`, and is evaluated separately from the LIVE
 artifact above.
+
+## B7 Decision Timeline validation
+
+- The deterministic initial DEMO chain contains nine ordered events: case
+  creation; F1–F4 ingestion; pre-F5 assessment, policy and routing; F5 ingestion;
+  and post-F5 assessment, policy and routing. Independent builds return the
+  same event payloads and head hash.
+- An ASGI workflow test records the authoritative approval, issues a receipt,
+  verifies the original as `VALID`, and verifies the EUR 18,000 → EUR 14,000
+  alteration as `INVALID`. The API Timeline grows from 9 to 13 events in that
+  exact operation order.
+- The issued receipt commits event 10 (`HUMAN_APPROVAL_RECORDED`). Events 11–13
+  are the receipt issuance and two verifier results; they extend the API chain
+  and are deliberately outside the earlier receipt commitment.
+- Negative tests reject backward timestamps, incompatible origins, incomplete
+  references, modified event data, non-contiguous sequence, cross-case events,
+  count/head drift, mixed legacy/versioned receipt material, and a server-held
+  event changed after append.
+- The Timeline tests establish behavior for this fixed DEMO workflow. They do
+  not establish trusted time, durable audit storage, source truth, decision
+  correctness, fairness, compliance, or legal validity.

@@ -658,3 +658,130 @@ def test_approval_authorization_blocking_controls_reject_receipt(tmp_path):
             assert app.state.demo_receipts == {}
 
     asyncio.run(scenario())
+
+
+def test_demo_timeline_tracks_the_real_approval_receipt_and_verification_flow(
+    tmp_path,
+):
+    async def scenario():
+        private_key_path, keyring_path = _demo_signing_paths(tmp_path)
+        timestamps = iter(
+            [
+                "2026-07-20T10:00:00Z",
+                "2026-07-20T10:00:01Z",
+                "2026-07-20T10:00:02Z",
+                "2026-07-20T10:00:03Z",
+            ]
+        )
+        app = create_app(
+            database_path=tmp_path / "timeline-flow.db",
+            demo_private_key_path=private_key_path,
+            demo_keyring_path=keyring_path,
+            clock=lambda: next(timestamps),
+        )
+        async with app.router.lifespan_context(app):
+            status, initial = await _request(app, "GET", "/v1/demo/timeline")
+            assert status == 200
+            assert initial["event_count"] == 9
+            assert initial["events"][-1]["event_type"] == "ROUTING_DECIDED"
+            assert initial["events"][-1]["state"] == "HUMAN_APPROVAL_REQUIRED"
+
+            approval = await _record_valid_demo_approval(app)
+            status, after_approval = await _request(
+                app, "GET", "/v1/demo/timeline"
+            )
+            assert status == 200
+            assert after_approval["event_count"] == 10
+            assert after_approval["events"][-1]["event_type"] == (
+                "HUMAN_APPROVAL_RECORDED"
+            )
+            assert after_approval["events"][-1]["state"] == (
+                "APPROVE_WITH_CONDITIONS"
+            )
+            assert after_approval["events"][-1]["occurred_at"] == (
+                "2026-07-20T10:00:00Z"
+            )
+
+            status, receipt_response = await _request(
+                app,
+                "POST",
+                "/v1/demo/receipts",
+                {"approval_id": approval["approval_id"]},
+            )
+            assert status == 201
+            receipt = receipt_response["receipt"]
+            assert receipt["decision_content"]["timeline"] == {
+                "event_count": 10,
+                "head_hash": after_approval["head_hash"],
+            }
+            status, after_receipt = await _request(
+                app, "GET", "/v1/demo/timeline"
+            )
+            assert status == 200
+            assert after_receipt["event_count"] == 11
+            assert after_receipt["events"][-1]["event_type"] == "RECEIPT_ISSUED"
+            receipt_id = receipt["signed_receipt_payload"]["receipt_id"]
+            assert any(
+                reference["reference_type"] == "receipt"
+                and reference["reference_id"] == receipt_id
+                for reference in after_receipt["events"][-1]["references"]
+            )
+
+            status, valid = await _request(
+                app,
+                "POST",
+                "/v1/demo/receipts/verify",
+                {"receipt": receipt},
+            )
+            assert status == 200
+            assert valid["status"] == "VALID"
+            status, after_valid = await _request(
+                app, "GET", "/v1/demo/timeline"
+            )
+            assert status == 200
+            assert after_valid["event_count"] == 12
+            assert after_valid["events"][-1]["event_type"] == "RECEIPT_VERIFIED"
+            assert after_valid["events"][-1]["state"] == "VALID"
+
+            tampered = copy.deepcopy(receipt)
+            price = next(
+                fact
+                for fact in tampered["decision_content"]["model_assessment"]["facts"]
+                if fact["fact_key"] == "commercial.annual_price_eur"
+            )
+            price["value"]["integer_value"] = 14000
+            status, invalid = await _request(
+                app,
+                "POST",
+                "/v1/demo/receipts/verify",
+                {"receipt": tampered},
+            )
+            assert status == 200
+            assert invalid["status"] == "INVALID"
+            assert invalid["reason"] == "ASSESSMENT_HASH_MISMATCH"
+            status, final = await _request(app, "GET", "/v1/demo/timeline")
+            assert status == 200
+            assert final["event_count"] == 13
+            assert final["events"][-1]["state"] == "INVALID"
+            assert final["events"][-1]["references"][-1]["reference_id"] == (
+                "ASSESSMENT_HASH_MISMATCH"
+            )
+            assert final["head_hash"] == final["events"][-1]["event_hash"]
+
+    asyncio.run(scenario())
+
+
+def test_demo_timeline_endpoint_fails_closed_for_a_modified_event(tmp_path):
+    async def scenario():
+        app = create_app(database_path=tmp_path / "timeline-invalid.db")
+        async with app.router.lifespan_context(app):
+            app.state.demo_timeline._events[0]["summary"] = "Modified after append."
+
+            status, response = await _request(
+                app, "GET", "/v1/demo/timeline"
+            )
+
+            assert status == 500
+            assert _error_code(response) == "TIMELINE_EVENT_HASH_MISMATCH"
+
+    asyncio.run(scenario())

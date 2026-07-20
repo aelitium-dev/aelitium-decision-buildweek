@@ -83,6 +83,20 @@ def normalize_decision_content(content: dict[str, Any]) -> dict[str, Any]:
 def build_timeline_commitment(events: list[dict[str, Any]]) -> dict[str, Any]:
     if not events:
         raise ReceiptBuildError("timeline requires at least one event")
+    versioned_events = [
+        event.get("schema_version") == "decision-timeline-event/v1"
+        for event in events
+        if isinstance(event, dict)
+    ]
+    if any(versioned_events):
+        if len(versioned_events) != len(events) or not all(versioned_events):
+            raise ReceiptBuildError("timeline mixes incompatible event contracts")
+        from .timeline import TimelineContractError, timeline_commitment_from_events
+
+        try:
+            return timeline_commitment_from_events(events)
+        except TimelineContractError as exc:
+            raise ReceiptBuildError("timeline event chain is invalid") from exc
     head_hash = "0" * 64
     for sequence, event in enumerate(events, start=1):
         validate_json_value(event)

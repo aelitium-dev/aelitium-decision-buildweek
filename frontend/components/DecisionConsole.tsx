@@ -2,6 +2,12 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+import {
+  DecisionTimeline,
+  TimelineEvent,
+  requireDecisionTimeline,
+} from "@/lib/timeline";
+
 const API_ROOT = "/api/backend";
 
 type TypedValue = {
@@ -210,6 +216,8 @@ type Verification = {
   };
 };
 
+type ConsoleStep = 0 | 1 | 2 | 3;
+
 const FACT_LABELS: Record<string, string> = {
   "commercial.annual_price_eur": "Annual recurring price",
   "privacy.eu_eea_only_residency_confirmed": "EU / EEA-only residency",
@@ -311,7 +319,8 @@ function BrandMark() {
 
 export function DecisionConsole() {
   const [snapshot, setSnapshot] = useState<DemoSnapshot | null>(null);
-  const [activeStep, setActiveStep] = useState<0 | 1 | 2>(0);
+  const [timeline, setTimeline] = useState<DecisionTimeline | null>(null);
+  const [activeStep, setActiveStep] = useState<ConsoleStep>(0);
   const [receiptResponse, setReceiptResponse] = useState<ReceiptResponse | null>(null);
   const [verification, setVerification] = useState<Verification | null>(null);
   const [verificationMode, setVerificationMode] = useState<"original" | "tampered" | null>(null);
@@ -327,9 +336,20 @@ export function DecisionConsole() {
 
   useEffect(() => {
     let cancelled = false;
-    callApi<unknown>("/v1/demo/case")
-      .then((data) => {
-        if (!cancelled) setSnapshot(requireDemoSnapshotProvenance(data));
+    Promise.all([
+      callApi<unknown>("/v1/demo/case"),
+      callApi<unknown>("/v1/demo/timeline"),
+    ])
+      .then(([caseData, timelineData]) => {
+        const validatedSnapshot = requireDemoSnapshotProvenance(caseData);
+        const validatedTimeline = requireDecisionTimeline(
+          timelineData,
+          validatedSnapshot.case.case_id,
+        );
+        if (!cancelled) {
+          setSnapshot(validatedSnapshot);
+          setTimeline(validatedTimeline);
+        }
       })
       .catch((reason: unknown) => {
         if (!cancelled) {
@@ -349,6 +369,11 @@ export function DecisionConsole() {
     [snapshot],
   );
 
+  async function refreshTimeline(caseId: string) {
+    const data = await callApi<unknown>("/v1/demo/timeline");
+    setTimeline(requireDecisionTimeline(data, caseId));
+  }
+
   async function approveAndIssue(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setWorking(true);
@@ -366,6 +391,7 @@ export function DecisionConsole() {
           condition,
         }),
       });
+      await refreshTimeline(snapshot.case.case_id);
       const issued = await callApi<ReceiptResponse>("/v1/demo/receipts", {
         method: "POST",
         body: JSON.stringify({ approval_id: approvalResponse.approval.approval_id }),
@@ -373,6 +399,7 @@ export function DecisionConsole() {
       setReceiptResponse(issued);
       setVerification(null);
       setVerificationMode(null);
+      await refreshTimeline(snapshot.case.case_id);
       setActiveStep(2);
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : "Approval could not be recorded");
@@ -400,6 +427,7 @@ export function DecisionConsole() {
       });
       setVerification(result);
       setVerificationMode(tamper ? "tampered" : "original");
+      if (snapshot) await refreshTimeline(snapshot.case.case_id);
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : "Verification failed");
     } finally {
@@ -407,7 +435,7 @@ export function DecisionConsole() {
     }
   }
 
-  if (!snapshot && !error) {
+  if ((!snapshot || !timeline) && !error) {
     return (
       <main className="loading-shell">
         <BrandMark />
@@ -416,7 +444,7 @@ export function DecisionConsole() {
     );
   }
 
-  if (!snapshot) {
+  if (!snapshot || !timeline) {
     return (
       <main className="loading-shell error-shell">
         <BrandMark />
@@ -432,6 +460,7 @@ export function DecisionConsole() {
     { label: "Case & evidence", caption: "Review the record" },
     { label: "Human approval", caption: "Exercise authority" },
     { label: "Receipt & verify", caption: "Test integrity" },
+    { label: "Decision timeline", caption: "Inspect the chain" },
   ];
 
   return (
@@ -445,6 +474,13 @@ export function DecisionConsole() {
           </span>
         </a>
         <div className="topbar-meta">
+          <button
+            className="timeline-shortcut"
+            onClick={() => setActiveStep(3)}
+            type="button"
+          >
+            {timeline.event_count} CHAINED EVENTS
+          </button>
           <span className="mode-badge"><i /> BUILD WEEK · DEMO</span>
           <span className="case-code">{snapshot.case.case_id}</span>
         </div>
@@ -466,7 +502,7 @@ export function DecisionConsole() {
                   className={`step-button ${activeStep === index ? "active" : ""} ${complete ? "complete" : ""}`}
                   disabled={disabled}
                   key={step.label}
-                  onClick={() => setActiveStep(index as 0 | 1 | 2)}
+                  onClick={() => setActiveStep(index as ConsoleStep)}
                   type="button"
                 >
                   <span className="step-index">{complete ? "✓" : `0${index + 1}`}</span>
@@ -523,6 +559,7 @@ export function DecisionConsole() {
               working={working}
             />
           )}
+          {activeStep === 3 && <TimelineView timeline={timeline} />}
         </main>
       </div>
     </div>
@@ -950,6 +987,136 @@ function ReceiptView({
             <div><span>01</span><p><strong>Decision content</strong>Evidence commitments, assessment provenance, AELITIUM policy result and recorded human approval.</p></div>
             <div><span>02</span><p><strong>Signed metadata</strong>Content hash, issue time, version and signing identity.</p></div>
             <div><span>03</span><p><strong>External trust</strong>The receipt cannot substitute its own verification key.</p></div>
+          </article>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+const TIMELINE_LABELS: Record<TimelineEvent["event_type"], string> = {
+  CASE_CREATED: "Case created",
+  EVIDENCE_INGESTED: "Evidence ingested",
+  ASSESSMENT_RECORDED: "Assessment recorded",
+  POLICY_EVALUATED: "Policy evaluated",
+  ROUTING_DECIDED: "Routing decided",
+  HUMAN_APPROVAL_RECORDED: "Human approval recorded",
+  RECEIPT_ISSUED: "Receipt issued",
+  RECEIPT_VERIFIED: "Receipt verified",
+};
+
+function TimelineView({ timeline }: { timeline: DecisionTimeline }) {
+  const receiptEvent = timeline.events.find(
+    (event) => event.event_type === "RECEIPT_ISSUED",
+  );
+  const committedThrough = receiptEvent ? receiptEvent.sequence - 1 : null;
+
+  return (
+    <section className="screen-section timeline-screen">
+      <div className="screen-header">
+        <div>
+          <p className="eyebrow">APPEND-ONLY WORKFLOW RECORD</p>
+          <h1>Decision Timeline</h1>
+          <p>Validated events from evidence ingestion through verification. States are rendered exactly as recorded by the API.</p>
+        </div>
+        <span className="timeline-count-badge">{timeline.event_count} CHAINED EVENTS</span>
+      </div>
+
+      <div className="timeline-overview">
+        <article>
+          <small>CASE</small>
+          <strong>{timeline.case_id}</strong>
+        </article>
+        <article>
+          <small>CURRENT HEAD</small>
+          <code>{truncate(timeline.head_hash, 20, 14)}</code>
+        </article>
+        <article>
+          <small>RECEIPT BOUNDARY</small>
+          <strong>
+            {committedThrough === null
+              ? "Not issued yet"
+              : `Committed through event ${String(committedThrough).padStart(2, "0")}`}
+          </strong>
+        </article>
+      </div>
+
+      <div className="timeline-layout">
+        <div className="timeline-chain" aria-label="Decision event chain">
+          {timeline.events.map((event) => (
+            <article className="timeline-event" key={event.event_id}>
+              <div className="timeline-node" aria-hidden="true">
+                <span>{String(event.sequence).padStart(2, "0")}</span>
+              </div>
+              <div className="panel timeline-event-card">
+                <div className="timeline-event-head">
+                  <div>
+                    <p className="eyebrow">{TIMELINE_LABELS[event.event_type]}</p>
+                    <h2>{event.summary}</h2>
+                  </div>
+                  <span className={`timeline-state state-${event.state.toLowerCase()}`}>
+                    {event.state.replaceAll("_", " ")}
+                  </span>
+                </div>
+
+                <div className="timeline-metadata">
+                  <div>
+                    <small>OCCURRED AT</small>
+                    <time dateTime={event.occurred_at}>{event.occurred_at}</time>
+                  </div>
+                  <div>
+                    <small>ORIGIN</small>
+                    <strong>{event.origin.origin_type.replaceAll("_", " ")}</strong>
+                    <code>{event.origin.actor_id}</code>
+                  </div>
+                  <div>
+                    <small>MODE</small>
+                    <strong>{event.origin.execution_mode}</strong>
+                  </div>
+                </div>
+
+                <div className="timeline-references">
+                  {event.references.map((item) => (
+                    <span key={`${item.reference_type}-${item.reference_id}`}>
+                      <small>{item.reference_type.replaceAll("_", " ")}</small>
+                      <strong>{item.reference_id}</strong>
+                      {item.commitment_sha256 && (
+                        <code>{truncate(item.commitment_sha256, 10, 8)}</code>
+                      )}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="timeline-hashes">
+                  <span>previous <code>{truncate(event.previous_event_hash, 12, 8)}</code></span>
+                  <span>event <code>{truncate(event.event_hash, 12, 8)}</code></span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <aside className="timeline-aside">
+          <article className="panel timeline-contract-card">
+            <p className="eyebrow">CONTRACT</p>
+            <h2>What each link records</h2>
+            <dl>
+              <div><dt>Type</dt><dd>Workflow transition</dd></div>
+              <div><dt>State</dt><dd>Exact recorded outcome</dd></div>
+              <div><dt>Origin</dt><dd>Actor and execution mode</dd></div>
+              <div><dt>References</dt><dd>Objects and commitments</dd></div>
+              <div><dt>Hash link</dt><dd>Previous event plus this event</dd></div>
+            </dl>
+          </article>
+
+          <article className="timeline-limitations">
+            <p className="eyebrow">LIMITATIONS</p>
+            <ul>
+              {timeline.limitations.map((limitation) => (
+                <li key={limitation}>{limitation.replaceAll("_", " ")}</li>
+              ))}
+            </ul>
+            <p>The receipt commits the chain only through the human approval. Receipt issuance and verification extend the API timeline afterwards and cannot be circularly included in that receipt.</p>
           </article>
         </aside>
       </div>

@@ -15,6 +15,7 @@ The D1 backend contains:
 - `src/aelitium_decision/keyring.py` and `verification.py` — external-keyring, offline, fail-closed verification
 - `src/aelitium_decision/demo_keys.py` — non-overwriting local DEMO key bootstrap with exact `0600` private-key permissions
 - `src/aelitium_decision/offline_receipts.py` — portable sample material serialization, local sample issuance, and public-input-only verification
+- `src/aelitium_decision/timeline.py` — closed, append-only event contract with deterministic sequence, chronology checks, object references, and canonical hash links
 
 The policy engine consumes thresholds and effects only from the versioned policy pack. Model output supplies observed facts and conflicts; it cannot replace routing, alter a threshold, or waive a blocking control.
 
@@ -23,6 +24,19 @@ ownership does not create an additional approval requirement. The DEMO approval
 route records that single approval in server state; receipt creation accepts only
 its `approval_id` and fails closed if the record or its bound decision inputs no
 longer match.
+
+`GET /v1/demo/timeline` exposes the validated Timeline independently of the
+case snapshot. The initial DEMO history is derived from validated fixture,
+assessment, and policy objects. Approval, receipt issuance, and verification
+events are appended only after those API operations succeed. Reads recompute
+the complete chain and fail with a stable timeline error if an event was
+modified or became inconsistent.
+
+Interactive receipts commit the Timeline head through the authoritative human
+approval. The later receipt and verification events extend the in-memory API
+chain; they are not claimed to be signed by the receipt they follow. Application
+timestamps are explicit but are not trusted time, and the DEMO event log is not
+durable across server restarts.
 
 Receipt construction, signing, and verification are implemented as a core
 library and tested through T4/T5. The clickable DEMO API adds case, approval,

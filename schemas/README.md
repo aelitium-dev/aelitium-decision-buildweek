@@ -20,3 +20,10 @@ remaining schema-valid.
 authoritative role selected by deterministic routing, or `null` while approval
 is blocked. `HumanApproval.conditions[].owner_role` records operational
 ownership and does not grant approval authority.
+
+The Decision Timeline is an API/event-log contract rather than a sixth domain
+artifact schema. Its strict Pydantic models live in
+`backend/src/aelitium_decision/timeline.py`, are exposed in FastAPI/OpenAPI, and
+reject additional fields. Interactive receipts retain the existing
+`DecisionReceipt.timeline` commitment shape (`event_count` and `head_hash`)
+while committing the validated event chain through human approval.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import os
+from collections.abc import Callable
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
@@ -24,11 +25,19 @@ from .demo_workflow import (
     record_demo_approval,
     verify_demo_receipt,
 )
+from .hashing import CanonicalizationError, hash_json
 from .paths import POLICIES_DIR, REPOSITORY_ROOT
 from .persistence import SQLiteStore, StoreConflictError
 from .policy import PolicyEngine, load_policy_pack
 from .receipt import ReceiptBuildError
 from .schema_validation import CanonicalSchemaError, validate_canonical
+from .timeline import (
+    DecisionTimeline,
+    TimelineContractError,
+    build_demo_timeline,
+    origin,
+    reference,
+)
 
 
 def _utc_now() -> str:
@@ -84,6 +93,7 @@ def create_app(
     database_path: Path | None = None,
     demo_private_key_path: Path = DEMO_PRIVATE_KEY_PATH,
     demo_keyring_path: Path = DEMO_KEYRING_PATH,
+    clock: Callable[[], str] = _utc_now,
 ) -> FastAPI:
     store = SQLiteStore(database_path or _default_database_path())
 
@@ -92,6 +102,7 @@ def create_app(
         store.initialize()
         app.state.store = store
         app.state.demo_snapshot = build_demo_snapshot()
+        app.state.demo_timeline = build_demo_timeline(app.state.demo_snapshot)
         app.state.demo_approvals = {}
         app.state.demo_approval_by_case = {}
         app.state.demo_receipts = {}
@@ -113,6 +124,18 @@ def create_app(
 
         return copy.deepcopy(request.app.state.demo_snapshot)
 
+    @app.get("/v1/demo/timeline", response_model=DecisionTimeline)
+    async def demo_timeline(request: Request) -> dict[str, Any]:
+        """Return the validated append-only timeline for the current DEMO run."""
+
+        try:
+            return request.app.state.demo_timeline.snapshot()
+        except TimelineContractError as exc:
+            raise HTTPException(
+                status_code=500,
+                detail={"code": exc.code, "message": exc.message},
+            ) from exc
+
     @app.post("/v1/demo/approvals")
     async def demo_approval(
         request: Request, payload: DemoApprovalInput
@@ -124,6 +147,7 @@ def create_app(
                 approver_role=payload.approver_role,
                 justification=payload.justification,
                 condition=payload.condition,
+                decided_at=clock(),
             )
             recorded = record_demo_approval(
                 approval=approval,
@@ -147,6 +171,35 @@ def create_app(
                     ),
                 },
             )
+        try:
+            request.app.state.demo_timeline.append(
+                event_type="HUMAN_APPROVAL_RECORDED",
+                state=approval["decision"].upper(),
+                occurred_at=approval["decided_at"],
+                origin=origin(
+                    "declared_human", approval["approver"]["declared_id"], "DEMO"
+                ),
+                summary=(
+                    f"{approval['decision']} recorded by the policy-selected "
+                    f"{approval['approver']['role']} role."
+                ),
+                references=[
+                    reference(
+                        "approval", approval["approval_id"], recorded.approval_hash
+                    ),
+                    reference(
+                        "policy_result",
+                        "policy-result-post-f5",
+                        recorded.policy_result_hash,
+                    ),
+                    reference("role", approval["approver"]["role"], None),
+                ],
+            )
+        except TimelineContractError as exc:
+            raise HTTPException(
+                status_code=500,
+                detail={"code": exc.code, "message": exc.message},
+            ) from exc
         request.app.state.demo_approvals[approval["approval_id"]] = recorded
         request.app.state.demo_approval_by_case[case_id] = approval["approval_id"]
         return {
@@ -207,6 +260,10 @@ def create_app(
                 snapshot=request.app.state.demo_snapshot,
                 private_key_path=demo_private_key_path,
                 keyring_path=demo_keyring_path,
+                issued_at=clock(),
+                timeline_events=(
+                    request.app.state.demo_timeline.receipt_events()
+                ),
             )
         except DemoConfigurationError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
@@ -220,6 +277,31 @@ def create_app(
 
         signed_payload = issued.receipt["signed_receipt_payload"]
         receipt_id = signed_payload["receipt_id"]
+        try:
+            request.app.state.demo_timeline.append(
+                event_type="RECEIPT_ISSUED",
+                state="ISSUED",
+                occurred_at=signed_payload["issued_at"],
+                origin=origin(
+                    "receipt_builder", "aelitium-ed25519-receipt-builder", "DEMO"
+                ),
+                summary=(
+                    "Decision Receipt issued after authoritative human approval."
+                ),
+                references=[
+                    reference("receipt", receipt_id, hash_json(issued.receipt)),
+                    reference(
+                        "approval",
+                        recorded.approval["approval_id"],
+                        recorded.approval_hash,
+                    ),
+                ],
+            )
+        except TimelineContractError as exc:
+            raise HTTPException(
+                status_code=500,
+                detail={"code": exc.code, "message": exc.message},
+            ) from exc
         request.app.state.demo_receipts[receipt_id] = issued
         signing_metadata = signed_payload["signing_metadata"]
         return {
@@ -267,6 +349,31 @@ def create_app(
             materials=issued.materials,
             keyring=issued.keyring,
         )
+        try:
+            try:
+                verification_input_hash = hash_json(payload.receipt)
+            except (CanonicalizationError, TypeError, ValueError):
+                verification_input_hash = None
+            request.app.state.demo_timeline.append(
+                event_type="RECEIPT_VERIFIED",
+                state=result.status,
+                occurred_at=clock(),
+                origin=origin(
+                    "integrity_verifier", "aelitium-local-integrity-verifier", "DEMO"
+                ),
+                summary=(
+                    f"Receipt verification returned {result.status}: {result.reason}."
+                ),
+                references=[
+                    reference("receipt", receipt_id, verification_input_hash),
+                    reference("verification_result", result.reason, None),
+                ],
+            )
+        except TimelineContractError as exc:
+            raise HTTPException(
+                status_code=500,
+                detail={"code": exc.code, "message": exc.message},
+            ) from exc
         return _verification_response(result.status, result.reason)
 
     @app.post("/v1/cases", status_code=status.HTTP_201_CREATED)

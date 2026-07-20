@@ -163,6 +163,29 @@ material and never accepts a receipt-supplied public key. A valid result proves
 only the integrity and signature properties in this ADR, not truth,
 authenticity, correctness, fairness, compliance, or legal validity.
 
+### Decision Timeline API contract
+
+The interactive DEMO keeps an append-only `decision-timeline/v1` event chain.
+Each closed event records `event_type`, exact recorded `state`, UTC application
+timestamp, actor/origin and execution mode, typed object references, sequence,
+`previous_event_hash`, and `event_hash`. Its deterministic ID is derived from
+sequence and type. The event hash is canonical SHA-256 over every event field
+except `event_hash` itself, including the preceding hash.
+
+Backend validation recomputes every link and rejects extra fields, invalid
+chronology, case drift, missing/duplicate references, incompatible state or
+origin, broken workflow ordering, count drift, and head drift. The frontend
+validates the closed response shape, order, timestamp syntax, case and hash-link
+continuity before rendering; backend recomputation remains authoritative.
+
+A receipt can commit only the Timeline that precedes it. Interactive receipt
+content therefore records the validated head through
+`HUMAN_APPROVAL_RECORDED`; `RECEIPT_ISSUED` and `RECEIPT_VERIFIED` extend the API
+chain afterwards and are not claimed to be protected by that earlier receipt.
+The DEMO history before runtime interaction is reconstructed from validated
+repository fixtures, timestamps are not trusted time, and the runtime chain is
+in-memory rather than durable audit storage.
+
 Consequences of alteration:
 
 - Changing decision content without changing `content_hash` causes `CONTENT_HASH_MISMATCH`.

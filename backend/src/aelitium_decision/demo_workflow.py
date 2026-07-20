@@ -231,7 +231,11 @@ def _decision_case() -> dict[str, Any]:
             "media_type": "text/markdown",
             "sha256": document["sha256"],
             "version": document["version"],
-            "added_at": "2026-07-18T12:00:00Z",
+            "added_at": (
+                "2026-07-19T11:00:00Z"
+                if document["document_id"] == "F5"
+                else "2026-07-18T12:00:00Z"
+            ),
         }
         for document in manifest["documents"]
     ]
@@ -519,7 +523,11 @@ def record_demo_approval(
 
 
 def _receipt_materials(
-    *, case: dict[str, Any], policy_result: dict[str, Any], approval: dict[str, Any]
+    *,
+    case: dict[str, Any],
+    policy_result: dict[str, Any],
+    approval: dict[str, Any],
+    timeline_events: list[dict[str, Any]] | None = None,
 ) -> ReceiptMaterials:
     policy_pack = _load_json(POLICIES_DIR / "ai_vendor_approval.v1.json")
     return ReceiptMaterials(
@@ -537,30 +545,34 @@ def _receipt_materials(
             "derivation_version": DEMO_DERIVATION_VERSION,
             "schema_version": "model-assessment/v1",
         },
-        timeline_events=[
-            {"event_type": "case_created", "occurred_at": case["created_at"]},
-            {
-                "event_type": "documents_added",
-                "occurred_at": "2026-07-18T12:00:00Z",
-            },
-            {
-                "event_type": "evidence_added",
-                "occurred_at": "2026-07-19T11:00:00Z",
-                "document_id": "F5",
-            },
-            {
-                "event_type": "assessment_recorded",
-                "occurred_at": "2026-07-19T11:04:00Z",
-            },
-            {
-                "event_type": "policy_evaluated",
-                "occurred_at": policy_result["evaluated_at"],
-            },
-            {
-                "event_type": "human_approved",
-                "occurred_at": approval["decided_at"],
-            },
-        ],
+        timeline_events=(
+            copy.deepcopy(timeline_events)
+            if timeline_events is not None
+            else [
+                {"event_type": "case_created", "occurred_at": case["created_at"]},
+                {
+                    "event_type": "documents_added",
+                    "occurred_at": "2026-07-18T12:00:00Z",
+                },
+                {
+                    "event_type": "evidence_added",
+                    "occurred_at": "2026-07-19T11:00:00Z",
+                    "document_id": "F5",
+                },
+                {
+                    "event_type": "assessment_recorded",
+                    "occurred_at": "2026-07-19T11:04:00Z",
+                },
+                {
+                    "event_type": "policy_evaluated",
+                    "occurred_at": policy_result["evaluated_at"],
+                },
+                {
+                    "event_type": "human_approved",
+                    "occurred_at": approval["decided_at"],
+                },
+            ]
+        ),
     )
 
 
@@ -597,6 +609,7 @@ def issue_demo_receipt(
     keyring_path: Path = DEMO_KEYRING_PATH,
     issued_at: str | None = None,
     receipt_id: str | None = None,
+    timeline_events: list[dict[str, Any]] | None = None,
 ) -> IssuedDemoReceipt:
     try:
         current_approval_hash = hash_json(recorded_approval.approval)
@@ -647,7 +660,10 @@ def issue_demo_receipt(
     )
     approval = copy.deepcopy(approval)
     materials = _receipt_materials(
-        case=case, policy_result=policy_result, approval=approval
+        case=case,
+        policy_result=policy_result,
+        approval=approval,
+        timeline_events=timeline_events,
     )
     content = build_decision_content(
         case=case,

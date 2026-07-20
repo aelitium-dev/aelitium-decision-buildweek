@@ -2,7 +2,7 @@
 
 Turn AI recommendations into evidence-backed, human-approved, and tamper-evident decision records.
 
-> Build status: the D1 backend, D2 receipt core, and clickable UI screens 1–3 are implemented. DEMO T1–T5 are green without an OpenAI key; a canonical GPT-5.6 LIVE smoke artifact is recorded with its evaluation limits.
+> Build status: the D1 backend, D2 receipt core, and all four clickable UI screens—including the validated Decision Timeline—are implemented. DEMO T1–T5 are green without an OpenAI key; a canonical GPT-5.6 LIVE smoke artifact is recorded with its evaluation limits.
 
 ## Build Week workflow
 
@@ -13,6 +13,7 @@ The MVP evaluates whether a fictional European company should adopt the fictiona
 3. A human approves, rejects, requests evidence, or approves with conditions.
 4. A Decision Receipt binds the recorded evidence, assessment, policy result, and human decision.
 5. An offline verifier detects changes to decision content or signed receipt metadata.
+6. A hash-linked Decision Timeline records the workflow transitions and their actual API origins.
 
 GPT-5.6 performs interpretation. Deterministic code validates and routes. A human retains decision authority.
 
@@ -28,6 +29,32 @@ Receipt verification checks integrity and Ed25519 validity under a separately tr
 - `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. The checked-in v3.1 T2-style execution passed canonical validation and contains each controlled policy fact exactly once. It declares one later literal evidence-quote repair, preserving both the provider assessment hash and current assessment hash; its actual policy route is recorded in `EVAL.md`.
 
 The fictional source documents are Build Week work checked into `fixtures/documents/`; they are not authenticated external originals. Human-entered approval data is limited to the declared name, condition text, and justification. AELITIUM generates the deterministic policy result, canonical hashes, local Ed25519 signature, receipt, and verification result. Those generated outputs bind what was recorded; they do not validate the underlying documents or decision claims.
+
+## Decision Timeline contract
+
+`GET /v1/demo/timeline` returns a closed `decision-timeline/v1` API contract.
+Every event contains a deterministic sequence and ID, exact UTC application
+timestamp, event type, recorded state, actor/origin, relevant object references,
+the preceding event hash, and its own canonical SHA-256 event hash. The backend
+revalidates the complete chain on every read and append; malformed structure,
+case mismatch, missing references, impossible event origin/state, backward
+timestamps, non-contiguous ordering, or changed hashes fail closed.
+
+The initial nine DEMO events are reconstructed deterministically from validated
+repository fixture objects: case creation, F1–F4 ingestion, pre-F5 assessment,
+policy and routing, F5 ingestion, post-F5 assessment, policy and routing. They
+accurately identify both assessments as precomputed and make no GPT-call claim.
+Runtime API operations append the recorded human approval, receipt issuance,
+and each valid or invalid verification result. The browser refetches these API
+events and does not manufacture workflow states.
+
+The receipt commits the timeline head that exists through human approval.
+Receipt issuance and verification necessarily occur afterwards, so they extend
+the API chain but cannot be circularly committed by that earlier receipt. DEMO
+timestamps are application records rather than trusted time, reconstructed
+fixture history is labelled as such, and runtime timeline state is currently
+in-memory and resets with the demo server. The B6 public offline receipt remains
+a compact verification fixture, not a capture of the interactive B7 timeline.
 
 ## Planned architecture
 
@@ -113,6 +140,8 @@ SQLite defaults to the ignored `runtime/aelitium.db`; override it with
 `AELITIUM_DB_PATH`. The generic API surface remains intentionally small: health,
 create/read case, deterministic evaluation, and latest policy result. The
 `/v1/demo/*` routes expose the fixed Build Week scenario to the Decision Console.
+The timeline is available independently at `GET /v1/demo/timeline` before,
+during, and after the approval/receipt workflow.
 
 ### Offline receipt sample
 

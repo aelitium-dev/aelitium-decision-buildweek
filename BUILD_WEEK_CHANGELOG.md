@@ -266,3 +266,22 @@ This log distinguishes work performed during OpenAI Build Week from the declared
   bootstrap success/idempotence, partial or invalid states, issuance without a
   key, verification after private-key removal, external-material failure, and
   tamper detection.
+
+### B7 validated Decision Timeline
+
+- Added a closed append-only event contract covering case creation, evidence
+  ingestion, assessment recording, deterministic policy evaluation and routing,
+  authoritative human approval, receipt issuance, and valid/invalid receipt
+  verification.
+- Derived the nine initial DEMO events from validated case, document,
+  assessment, and policy objects. Precomputed assessments are labelled as such;
+  no event claims a DEMO GPT call.
+- Added deterministic sequence/IDs, explicit UTC application timestamps, typed
+  origins and references, canonical previous/event hashes, full-chain
+  revalidation, and stable fail-closed errors for structural or semantic drift.
+- Interactive receipts now commit the validated Timeline head through the human
+  approval. Receipt and verification events extend the API chain afterwards,
+  avoiding a circular receipt commitment.
+- Added `GET /v1/demo/timeline`, runtime event appends at successful workflow
+  boundaries, backend completeness/determinism/tamper tests, and a fourth UI
+  screen with a frontend runtime contract boundary.
