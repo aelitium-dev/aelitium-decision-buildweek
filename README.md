@@ -25,7 +25,7 @@ Receipt verification checks integrity and Ed25519 validity under a separately tr
 ## Execution modes
 
 - `DEMO`: implemented with precomputed assessment fixtures and a deterministic post-F5 derivation. It makes no runtime model call and needs no OpenAI key. Its clickable approval → receipt → verify → tamper path is independent of the LIVE artifact.
-- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. A versioned T2-style execution passed canonical validation. The checked-in artifact originated from that response and declares a later literal evidence-quote repair, with both input and current hashes, policy route, and fact-key limitation recorded in `EVAL.md`.
+- `LIVE`: GPT-5.6 Responses API adapter implemented with strict Structured Outputs. The checked-in v3.1 T2-style execution passed canonical validation and contains each controlled policy fact exactly once. It declares one later literal evidence-quote repair, preserving both the provider assessment hash and current assessment hash; its actual policy route is recorded in `EVAL.md`.
 
 The fictional source documents are Build Week work checked into `fixtures/documents/`; they are not authenticated external originals. Human-entered approval data is limited to the declared name, condition text, and justification. AELITIUM generates the deterministic policy result, canonical hashes, local Ed25519 signature, receipt, and verification result. Those generated outputs bind what was recorded; they do not validate the underlying documents or decision claims.
 
@@ -120,6 +120,17 @@ the adapter may lowercase only already well-formed, correctly prefixed identifie
 tokens (`FACT-001` → `fact-001`). It rejects ambiguous repairs and collisions and
 never normalizes findings, evidence, free text, fact keys, or `control_hint`.
 
+The prompt-v3 line gives GPT-5.6 the four exact
+`fact_key` names consumed by the Vendor Approval Policy Pack. It contains no
+policy thresholds, permits free-form keys for other facts, and does not add a
+semantic mapping layer: model output using an alias remains an alias and the
+policy engine still fails closed on a missing controlled key. The first v3 call
+was rejected canonically because five risk categories contained spaces. The
+corrected `vendor-assessment/v3.1` prompt states the required lowercase
+`snake_case` pattern explicitly and still performs no category normalization.
+Its LIVE execution passed canonical validation; the four controlled facts now
+drive the policy rules from observed values rather than missing-key fallbacks.
+
 ## Decision Receipt core
 
 The receipt implementation now has one internal canonicalization boundary, a new
@@ -144,20 +155,25 @@ be performed with:
 PYTHONPATH=backend/src backend/.venv/bin/python backend/scripts/live_smoke.py
 ```
 
-The script never reads a key file or logs the key. It uses the strict Responses
+The script never reads a key file, persists the key, or includes it in its own
+output. It uses the strict Responses
 API transport schema, applies the narrow identifier boundary described above,
 revalidates against the canonical backend schema, and only then writes
-`fixtures/live/gpt-5.6-t2-assessment.json`. That artifact explicitly records
+`fixtures/live/gpt-5.6-t2-assessment.json`. The checked-in artifact records
 `assessment_source=gpt_generated_live`, `runtime_model_call=true`, the OpenAI
-provider, and the fictional repository fixtures used as source documents. The
-current checked-in artifact also records a scoped post-validation transformation
-that replaced non-literal evidence paraphrases with exact source substrings and
-split combined references. It preserves the original accepted assessment hash
-and records the new hash; no additional model call produced those quote repairs.
-Attempt 1 failed closed before writing
-an artifact. Attempt 2 succeeded with GPT-5.6 and prompt
-`vendor-assessment/v2`; both executions and the live policy-fact limitation are
-documented in `EVAL.md`.
+provider response ID when available, the installed SDK version, and hashes of
+the instructions, input, canonical schema, transport schema, and provider
+output text. The output hash is a recorded commitment; the raw provider text is
+not persisted, so that one hash is not independently recomputable from the
+repository alone. The artifact preserves the provider assessment hash and
+declares one scoped post-validation repair that removed a non-literal heading
+prefix from a quoted source passage. No additional model call produced that
+repair.
+
+The historical v1/v2 attempts and their fail-closed boundaries remain documented
+in `EVAL.md`. The current `vendor-assessment/v3.1` run maps all four controlled
+facts and routes to `NEEDS_MORE_EVIDENCE` with R2 and R4 blocking; R3 passes from
+the observed executed-DPA fact.
 
 ## Build Week records
 

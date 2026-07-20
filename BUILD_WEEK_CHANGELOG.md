@@ -188,3 +188,50 @@ This log distinguishes work performed during OpenAI Build Week from the declared
   transformation and retains the full prior hash chain; no model call was made.
 - Extended the scaffold and backend gates to reject the previous vendor identity
   or identifiers and to require the corrected F4 retention reference.
+
+### LIVE smoke iteration 3 — fail-closed category contract
+
+- Prepared `vendor-assessment/v3` with an exact-use list for the four
+  fact-driven Vendor Approval Policy Pack keys. The prompt contains no policy
+  threshold, keeps free-form keys available for unrelated facts, and forbids
+  aliases for the four catalog concepts.
+- Ran one externally approved GPT-5.6 call. Canonical validation rejected five
+  prose-like risk categories containing spaces, so no artifact was written and
+  no policy result was produced.
+- Versioned the corrected prompt as `vendor-assessment/v3.1` rather than
+  silently changing the already executed v3 text. It requires
+  `risks[].category` to match `^[a-z][a-z0-9_]{1,63}$` and supplies lowercase
+  `snake_case` examples.
+- Kept the transport boundary mechanical: it still normalizes only safe
+  identifier casing and never remaps a semantic `fact_key` or repairs a risk
+  category. Added tests that
+  bind the prompt catalog to the policy pack so either side cannot drift
+  silently and prove a category containing spaces fails canonically.
+- Extended the manual LIVE path to retain non-secret call provenance after a
+  canonical response: provider response ID when available, installed OpenAI SDK
+  version, effective request settings, and SHA-256 hashes for instructions,
+  input, both schemas, and provider output.
+- At this checkpoint, the failed call did not replace or relabel the checked-in
+  v2 artifact; prompt v3.1 remained pending the next explicitly approved gate.
+
+### LIVE smoke iteration 4 — canonical v3.1 artifact
+
+- Ran the externally approved GPT-5.6 smoke with
+  `vendor-assessment/v3.1`; it passed transport and canonical validation without
+  identifier normalization.
+- Recorded the provider response ID, OpenAI SDK `2.46.0`, effective request
+  settings, and hashes for instructions, input, canonical schema, transport
+  schema, provider output text, and the accepted assessment. No credential or
+  private key was persisted.
+- Confirmed all four controlled policy facts exactly once. The actual route is
+  `NEEDS_MORE_EVIDENCE` with R2 and R4 blocking; R3 now passes from the observed
+  executed-DPA value rather than failing on a missing key.
+- The literal-evidence gate found one heading prefix that was not present in the
+  source passage. Removed only that prefix and declared the repair with provider
+  assessment hash
+  `5f4c37d53a6573c060527db3d46994a53dc76455b54420f6eb9f0a50badc9789`
+  and current assessment hash
+  `b59cdb611035cb900d35d871c08046a74bf7938b88294df5b9ca48907feff8a3`.
+- Replaced hard-coded historical LIVE metadata in the DEMO snapshot with a
+  checked-in-artifact reader that validates the assessment and its hash before
+  exposing provenance.

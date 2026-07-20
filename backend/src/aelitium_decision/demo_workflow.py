@@ -52,31 +52,6 @@ DEMO_DERIVATION_DESCRIPTION = (
     "T2 assessment fixture and the fixed F5 evidence changes in demo_workflow.py."
 )
 LIVE_ARTIFACT_PATH = "fixtures/live/gpt-5.6-t2-assessment.json"
-LIVE_POST_VALIDATION_TRANSFORMATIONS = [
-    {
-        "transformation_version": "literal-evidence-repair/v1",
-        "scope": (
-            "quoted_text exact-source repair and evidence-reference splitting only"
-        ),
-        "input_assessment_hash": (
-            "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4"
-        ),
-        "output_assessment_hash": (
-            "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
-        ),
-        "original_non_literal_quote_fields": 19,
-    },
-    {
-        "transformation_version": "fictional-vendor-rename/v1",
-        "scope": "fictional vendor and product names only",
-        "input_assessment_hash": (
-            "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
-        ),
-        "output_assessment_hash": (
-            "3b5863bb233c433c935a6dce7f670c0c2df4ee54751784116bdc24809d58f3c2"
-        ),
-    }
-]
 DEMO_BASE_ASSESSMENT_PATH = "fixtures/demo/T2_assessment.json"
 TRUST_LIMITATIONS = [
     "source_document_authenticity",
@@ -88,6 +63,30 @@ TRUST_LIMITATIONS = [
     "identity_authentication",
     "trusted_time",
 ]
+
+
+def _live_assessment_provenance() -> dict[str, Any]:
+    """Read and verify the checked-in LIVE metadata shown by the DEMO UI."""
+
+    artifact_path = REPOSITORY_ROOT / LIVE_ARTIFACT_PATH
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    assessment = artifact["assessment"]
+    validate_canonical(assessment, "model_assessment.v1.schema.json")
+    if hash_json(assessment) != artifact["assessment_hash"]:
+        raise CanonicalSchemaError("LIVE artifact assessment_hash mismatch")
+    return {
+        "execution_mode": artifact["execution_mode"],
+        "assessment_source": artifact["assessment_source"],
+        "provider": artifact["provider"],
+        "model": artifact["model"],
+        "prompt_version": artifact["prompt_version"],
+        "artifact_path": LIVE_ARTIFACT_PATH,
+        "runtime_model_call": artifact["runtime_model_call"],
+        "post_validation_transformations": copy.deepcopy(
+            artifact["post_validation_transformations"]
+        ),
+        "used_for_current_demo": False,
+    }
 F5_RESIDENCY_QUOTE = (
     "1. Customer Content, including uploaded documents, extracted text, "
     "application records, and tenant-specific indexes, will be stored only in "
@@ -357,19 +356,7 @@ def _static_snapshot() -> dict[str, Any]:
                 "runtime_model_call": False,
                 "used_for_current_demo": True,
             },
-            "live_assessment": {
-                "execution_mode": "LIVE",
-                "assessment_source": "gpt_generated_live",
-                "provider": "openai",
-                "model": "gpt-5.6",
-                "prompt_version": "vendor-assessment/v2",
-                "artifact_path": LIVE_ARTIFACT_PATH,
-                "runtime_model_call": True,
-                "post_validation_transformations": copy.deepcopy(
-                    LIVE_POST_VALIDATION_TRANSFORMATIONS
-                ),
-                "used_for_current_demo": False,
-            },
+            "live_assessment": _live_assessment_provenance(),
             "human_approval": {
                 "source": "human_entered_at_runtime",
                 "human_entered_fields": [

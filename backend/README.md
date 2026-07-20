@@ -35,3 +35,16 @@ artifact records `gpt_generated_live`, provider `openai`, model `gpt-5.6`, and
 `runtime_model_call=true`. API provenance also distinguishes fictional source
 fixtures, human-entered approval fields, and AELITIUM-generated policy, hash,
 signature, receipt, and verification outputs.
+
+The adapter default and checked-in LIVE artifact use
+`vendor-assessment/v3.1`. Its prompt lists the
+four exact fact keys consumed by the Vendor Approval Policy Pack while retaining
+free-form keys for unrelated facts; it does not expose thresholds or perform
+semantic alias mapping. It also states the canonical lowercase `snake_case`
+risk-category pattern; categories are never repaired after transport. The
+successful LIVE artifact records the provider response ID, OpenAI SDK version,
+and hashes
+for the instructions, input, canonical schema, transport schema, and provider
+output text. Its four controlled facts produce observed policy values and route
+to `NEEDS_MORE_EVIDENCE` with R2 and R4 blocking. The preceding v3 attempt was
+rejected canonically and created no artifact.

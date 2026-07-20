@@ -224,34 +224,18 @@ def test_demo_ui_api_approval_receipt_verify_and_tamper(tmp_path):
                 "gpt_generated_live"
             )
             assert provenance["live_assessment"]["runtime_model_call"] is True
+            live_artifact = json.loads(
+                (
+                    REPOSITORY_ROOT
+                    / "fixtures/live/gpt-5.6-t2-assessment.json"
+                ).read_text(encoding="utf-8")
+            )
+            assert provenance["live_assessment"]["prompt_version"] == (
+                live_artifact["prompt_version"]
+            )
             assert provenance["live_assessment"][
                 "post_validation_transformations"
-            ] == [
-                {
-                    "transformation_version": "literal-evidence-repair/v1",
-                    "scope": (
-                        "quoted_text exact-source repair and evidence-reference "
-                        "splitting only"
-                    ),
-                    "input_assessment_hash": (
-                        "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4"
-                    ),
-                    "output_assessment_hash": (
-                        "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
-                    ),
-                    "original_non_literal_quote_fields": 19,
-                },
-                {
-                    "transformation_version": "fictional-vendor-rename/v1",
-                    "scope": "fictional vendor and product names only",
-                    "input_assessment_hash": (
-                        "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
-                    ),
-                    "output_assessment_hash": (
-                        "3b5863bb233c433c935a6dce7f670c0c2df4ee54751784116bdc24809d58f3c2"
-                    ),
-                }
-            ]
+            ] == live_artifact["post_validation_transformations"]
             assert provenance["live_assessment"]["used_for_current_demo"] is False
 
             status, approval_response = await _request(

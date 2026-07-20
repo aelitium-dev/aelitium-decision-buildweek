@@ -1,8 +1,8 @@
 {
-  "artifact_version": "aelitium-live-assessment/v1",
+  "artifact_version": "aelitium-live-assessment/v2",
   "assessment": {
-    "case_summary": "Nerythica proposes an AI workspace for about 80 employees at EUR 18,000 annually under a 36-month term, with Customer Data expressly in scope. The DPA is executed and contains retention, deletion, subprocessor, security, AI-training, and human-review terms. However, no binding EU/EEA-only commitment exists for Customer Data and backups: the DPA permits global processing and states that a later signed assurance is required. F5, identified as that later assurance, was not supplied. This leaves the policy's EU/EEA residency control blocking. Required purchasing approvals, a named internal service owner, and sufficient current security-assurance evidence are also not supplied. The executed DPA contradicts the questionnaire's promised 30-day advance subprocessor notice and expressly allows non-EEA processing without prior notice. An authorized human must resolve the conflict and make the final decision.",
-    "confidence": 98,
+    "case_summary": "F1–F4 establish a EUR 18,000 annual subscription, an executed DPA, intended processing of customer-related material, and several documented controls. They also establish that no customer-specific EU/EEA-only commitment exists and that the SOC 2 Type II examination remains in progress. F5, described as the later supplemental residency assurance, was not supplied. The evidence record therefore contains a blocking residency gap, outstanding internal approval routing, a security-assurance gap, and a material conflict concerning advance notice of new subprocessors. No final vendor decision is made.",
+    "confidence": 97,
     "conflicts": [
       {
         "conflict_id": "conflict-001",
@@ -10,51 +10,25 @@
           {
             "document_id": "F3_security_questionnaire.md",
             "locator": "Subprocessors, SUB-02",
-            "quoted_text": "Customers receive at least 30 days' advance notice before a material new subprocessor is authorized to process Customer Data.",
-            "reference_level": "decision_evidence"
+            "quoted_text": "Yes. Customers receive at least 30 days' advance notice before a material new subprocessor is authorized to process Customer Data.",
+            "reference_level": "source_reference"
           },
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Section 9.6.6",
-            "quoted_text": "This section does not promise the 30 days' advance notice stated in questionnaire response SUB-02.",
+            "locator": "Page 23, sections 9.6.2 and 9.6.6",
+            "quoted_text": "This section does not promise the 30 days' advance notice stated in questionnaire response SUB-02. The executed DPA controls unless the parties sign a specific amendment.",
             "reference_level": "decision_evidence"
           },
           {
             "document_id": "F2_internal_procurement_policy.md",
-            "locator": "Section 4",
+            "locator": "Section 4 — Security evidence",
             "quoted_text": "Conflicting answers across a proposal, questionnaire, security page, contract, or letter require human review. The conflict must remain visible even if a later document resolves the operational question.",
             "reference_level": "decision_evidence"
           }
         ],
         "requires_resolution": true,
         "severity": "high",
-        "summary": "Questionnaire response SUB-02 promises at least 30 days' advance notice before a material new subprocessor is authorized, while the executed DPA expressly disclaims that promise and permits processing before notice, with only post-publication objection rights."
-      },
-      {
-        "conflict_id": "conflict-002",
-        "evidence_refs": [
-          {
-            "document_id": "F3_security_questionnaire.md",
-            "locator": "Data location and transfers, DATA-02",
-            "quoted_text": "Yes, when the EU region flag is enabled during implementation.",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F3_security_questionnaire.md",
-            "locator": "Data location and transfers, DATA-03",
-            "quoted_text": "Generally aligned with the selected primary region.",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 28, Section 12.5",
-            "quoted_text": "As of this DPA's Effective Date, the parties have not recorded an EU-only location commitment for the Caldera Works Europe tenant.",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "requires_resolution": true,
-        "severity": "high",
-        "summary": "The questionnaire states that all Customer Data can be restricted to EU/EEA storage by enabling an EU flag, while the executed DPA states that a regional setting may not restrict backups, telemetry, support access, or other categories and confirms no customer-specific commitment exists."
+        "summary": "Questionnaire response SUB-02 promises at least 30 days' advance notice before a material new subprocessor is authorized, but executed DPA section 9.6 permits authorization and non-EEA processing without prior notice. The DPA expressly acknowledges the discrepancy and controls contractually, while policy requires the conflict to remain visible and receive human review."
       }
     ],
     "facts": [
@@ -62,14 +36,14 @@
         "evidence_refs": [
           {
             "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table, Annual subscription",
-            "quoted_text": "EUR 18,000 excluding VAT",
+            "locator": "Commercial terms table — Annual subscription",
+            "quoted_text": "Annual subscription | EUR 18,000 excluding VAT",
             "reference_level": "decision_evidence"
           }
         ],
         "fact_id": "fact-001",
-        "fact_key": "annual_recurring_cost_eur",
-        "statement": "The proposed annual subscription is EUR 18,000 excluding VAT.",
+        "fact_key": "commercial.annual_price_eur",
+        "statement": "The written proposal states an annual subscription price of EUR 18,000 excluding VAT.",
         "value": {
           "boolean_value": null,
           "integer_value": 18000,
@@ -80,21 +54,96 @@
       {
         "evidence_refs": [
           {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table, Initial term",
-            "quoted_text": "Initial term | 36 months",
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 28, sections 12.1–12.5",
+            "quoted_text": "As of this DPA's Effective Date, the parties have not recorded an EU-only location commitment for the Caldera Works Europe tenant.",
             "reference_level": "decision_evidence"
           },
           {
-            "document_id": "F2_internal_procurement_policy.md",
-            "locator": "Section 2, final paragraph",
-            "quoted_text": "Multi-year commitments are assessed using annual recurring cost for the approval threshold and total committed value for the risk summary.",
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 28, section 12.3",
+            "quoted_text": "Unless a customer-specific term expressly includes them, a primary-region setting may not restrict all backups, telemetry, security logs, support access, email, or account-administration data.",
             "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Hosting and service delivery",
+            "quoted_text": "This commercial proposal does not itself create an EU-only data-residency commitment.",
+            "reference_level": "validated_reference"
           }
         ],
         "fact_id": "fact-002",
-        "fact_key": "initial_term_months",
-        "statement": "The proposed initial subscription term is 36 months, representing a base committed subscription value of EUR 54,000 excluding VAT and additional usage.",
+        "fact_key": "privacy.eu_eea_only_residency_confirmed",
+        "statement": "The supplied evidence establishes that written EU/EEA-only residency confirmation covering customer content, backups, and core processing is not currently in place.",
+        "value": {
+          "boolean_value": false,
+          "integer_value": null,
+          "string_value": null,
+          "value_type": "boolean"
+        }
+      },
+      {
+        "evidence_refs": [
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 34 — Execution",
+            "quoted_text": "Controller signature status | Executed — fictional fixture",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 34 — Execution",
+            "quoted_text": "Processor signature status | Executed — fictional fixture",
+            "reference_level": "decision_evidence"
+          }
+        ],
+        "fact_id": "fact-003",
+        "fact_key": "privacy.dpa_executed_by_both_parties",
+        "statement": "DPA version 4.3 was executed by both fictional parties with an effective date of 2026-07-12.",
+        "value": {
+          "boolean_value": true,
+          "integer_value": null,
+          "string_value": null,
+          "value_type": "boolean"
+        }
+      },
+      {
+        "evidence_refs": [
+          {
+            "document_id": "F3_security_questionnaire.md",
+            "locator": "Governance and assurance, GOV-03",
+            "quoted_text": "Is a SOC 2 Type II report currently issued? | In progress. | Readiness summary only | Missing issued report",
+            "reference_level": "decision_evidence"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 11, section 6.3.7",
+            "quoted_text": "This DPA does not convert an unfinished examination into an issued report.",
+            "reference_level": "validated_reference"
+          }
+        ],
+        "fact_id": "fact-004",
+        "fact_key": "security.assurance_report_issued",
+        "statement": "No issued SOC 2 Type II or documented equivalent assurance report is established by the supplied evidence; the SOC 2 examination is in progress.",
+        "value": {
+          "boolean_value": false,
+          "integer_value": null,
+          "string_value": null,
+          "value_type": "boolean"
+        }
+      },
+      {
+        "evidence_refs": [
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table — Initial term",
+            "quoted_text": "Initial term | 36 months",
+            "reference_level": "source_reference"
+          }
+        ],
+        "fact_id": "fact-005",
+        "fact_key": "commercial.initial_term_months",
+        "statement": "The proposed initial subscription term is 36 months.",
         "value": {
           "boolean_value": null,
           "integer_value": 36,
@@ -105,8 +154,33 @@
       {
         "evidence_refs": [
           {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table",
+            "quoted_text": "Annual subscription | EUR 18,000 excluding VAT",
+            "reference_level": "source_reference"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table",
+            "quoted_text": "Initial term | 36 months",
+            "reference_level": "source_reference"
+          }
+        ],
+        "fact_id": "fact-006",
+        "fact_key": "commercial.base_initial_term_value_eur",
+        "statement": "The base subscription commitment over the 36-month initial term is EUR 54,000 excluding VAT and any additional usage, calculated from the stated annual subscription and initial term.",
+        "value": {
+          "boolean_value": null,
+          "integer_value": 54000,
+          "string_value": null,
+          "value_type": "integer"
+        }
+      },
+      {
+        "evidence_refs": [
+          {
             "document_id": "F2_internal_procurement_policy.md",
-            "locator": "Section 2, Approval thresholds table",
+            "locator": "Section 2 — Approval thresholds",
             "quoted_text": "Above EUR 15,000 | Director approval in addition to Budget owner and Operations",
             "reference_level": "decision_evidence"
           },
@@ -117,14 +191,14 @@
             "reference_level": "validated_reference"
           }
         ],
-        "fact_id": "fact-003",
-        "fact_key": "required_approval_route",
-        "statement": "The annual recurring cost is above EUR 15,000, so policy requires Budget owner, Operations, and Director approval.",
+        "fact_id": "fact-007",
+        "fact_key": "procurement.director_approval_required",
+        "statement": "The annual price exceeds EUR 15,000, so policy requires Director approval in addition to Budget owner and Operations approval.",
         "value": {
-          "boolean_value": null,
+          "boolean_value": true,
           "integer_value": null,
-          "string_value": "budget_owner_operations_director",
-          "value_type": "string"
+          "string_value": null,
+          "value_type": "boolean"
         }
       },
       {
@@ -137,139 +211,14 @@
           },
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 32, Annex I, Personal Data categories",
-            "quoted_text": "Names, roles, business contact details, account identifiers, support communications, commercial records, contract text, customer-service content, and other ordinary business information chosen by Customer.",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "fact_id": "fact-004",
-        "fact_key": "customer_data_in_scope",
-        "statement": "The proposed use includes internal documents and limited customer-related material, and the DPA covers identifiable customer and business information.",
-        "value": {
-          "boolean_value": true,
-          "integer_value": null,
-          "string_value": null,
-          "value_type": "boolean"
-        }
-      },
-      {
-        "evidence_refs": [
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 34, Execution and Execution metadata",
-            "quoted_text": "| Controller signature status | Executed — fictional fixture |\n| Processor signature status | Executed — fictional fixture |",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "fact_id": "fact-005",
-        "fact_key": "dpa_executed",
-        "statement": "DPA version 4.3 was executed by both fictional parties with an effective date of 2026-07-12.",
-        "value": {
-          "boolean_value": true,
-          "integer_value": null,
-          "string_value": null,
-          "value_type": "boolean"
-        }
-      },
-      {
-        "evidence_refs": [
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 28, Section 12.5",
-            "quoted_text": "As of this DPA's Effective Date, the parties have not recorded an EU-only location commitment for the Caldera Works Europe tenant.",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 34, Execution metadata",
-            "quoted_text": "Customer-specific EU-only term | Not present at execution; later assurance required",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Hosting and service delivery",
-            "quoted_text": "This commercial proposal does not itself create an EU-only data-residency commitment.",
-            "reference_level": "validated_reference"
-          }
-        ],
-        "fact_id": "fact-006",
-        "fact_key": "eu_only_commitment_present",
-        "statement": "No customer-specific written EU-only data-location commitment was present at DPA execution.",
-        "value": {
-          "boolean_value": false,
-          "integer_value": null,
-          "string_value": null,
-          "value_type": "boolean"
-        }
-      },
-      {
-        "evidence_refs": [
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 28, Section 12.1",
-            "quoted_text": "The Service uses global cloud infrastructure and may Process Customer Data in the United States, European Union, and other locations where Nerythica or an authorized Subprocessor operates",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Hosting and service delivery",
-            "quoted_text": "Unless a regional commitment is stated in an executed order form or later written assurance, Nerythica may select infrastructure locations",
-            "reference_level": "validated_reference"
-          }
-        ],
-        "fact_id": "fact-007",
-        "fact_key": "default_processing_locations",
-        "statement": "Absent a customer-specific commitment, Nerythica may process Customer Data in the United States, European Union, and other locations.",
-        "value": {
-          "boolean_value": null,
-          "integer_value": null,
-          "string_value": "global_including_us_eu_and_other_locations",
-          "value_type": "string"
-        }
-      },
-      {
-        "evidence_refs": [
-          {
-            "document_id": "F3_security_questionnaire.md",
-            "locator": "Governance and assurance, GOV-03",
-            "quoted_text": "Is a SOC 2 Type II report currently issued? | In progress.",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 11, Section 6.3.7",
-            "quoted_text": "This DPA does not convert an unfinished examination into an issued report.",
+            "locator": "Page 32, Annex I, sections E–F",
+            "quoted_text": "Customer personnel, business contacts, customer contacts, prospective customers, suppliers, and individuals mentioned in documents submitted by Authorized Users.",
             "reference_level": "validated_reference"
           }
         ],
         "fact_id": "fact-008",
-        "fact_key": "issued_security_certification",
-        "statement": "Nerythica has no ISO/IEC 27001 certification, and its SOC 2 Type II examination is in progress rather than issued.",
-        "value": {
-          "boolean_value": false,
-          "integer_value": null,
-          "string_value": null,
-          "value_type": "boolean"
-        }
-      },
-      {
-        "evidence_refs": [
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 21, Section 9.1",
-            "quoted_text": "The following fictional entities are authorized as of the Effective Date",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 21, subprocessor table",
-            "quoted_text": "Support Loom Pte. Ltd. | Customer-support ticket platform | Singapore, Germany",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "fact_id": "fact-009",
-        "fact_key": "subprocessor_schedule_supplied",
-        "statement": "The executed DPA includes a current-at-execution subprocessor schedule identifying purposes and primary processing locations, including several non-EEA locations.",
+        "fact_key": "privacy.customer_data_in_scope",
+        "statement": "The proposed use permits users to submit internal documents and limited customer-related material, and the DPA processing scope includes customer contacts and customer-service content.",
         "value": {
           "boolean_value": true,
           "integer_value": null,
@@ -281,135 +230,85 @@
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Section 9.6.2",
-            "quoted_text": "Nerythica may authorize a new or replacement Subprocessor to Process Customer Data, and may permit that Processing to occur outside the EEA, without providing Customer prior notice, provided that Nerythica updates its online subprocessor list within a commercially reasonable period and implements a transfer mechanism where Applicable Data Protection Law requires one.",
-            "reference_level": "decision_evidence"
-          },
+            "locator": "Page 26, section 11.3",
+            "quoted_text": "Nerythica will not use Customer Content from an enterprise tenant to train a shared foundation model unless Customer gives separate express written authorization.",
+            "reference_level": "validated_reference"
+          }
+        ],
+        "fact_id": "fact-009",
+        "fact_key": "ai.shared_model_training_requires_written_authorization",
+        "statement": "The executed DPA prohibits use of enterprise Customer Content to train a shared foundation model unless the customer gives separate express written authorization.",
+        "value": {
+          "boolean_value": true,
+          "integer_value": null,
+          "string_value": null,
+          "value_type": "boolean"
+        }
+      },
+      {
+        "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Section 9.6.3",
-            "quoted_text": "Customer may object on reasonable data-protection grounds by written notice received within ten calendar days after publication of the updated list.",
+            "locator": "Page 23, section 9.6.2",
+            "quoted_text": "Nerythica may authorize a new or replacement Subprocessor to Process Customer Data, and may permit that Processing to occur outside the EEA, without providing Customer prior notice",
             "reference_level": "decision_evidence"
           }
         ],
         "fact_id": "fact-010",
-        "fact_key": "contractual_subprocessor_notice",
-        "statement": "The executed DPA does not require prior notice before a new or replacement subprocessor processes Customer Data; it requires an online-list update within a commercially reasonable period and allows a ten-day post-publication objection.",
+        "fact_key": "privacy.subprocessor_prior_notice_required_by_contract",
+        "statement": "The executed DPA does not require prior notice before a new or replacement subprocessor begins processing Customer Data.",
         "value": {
-          "boolean_value": null,
+          "boolean_value": false,
           "integer_value": null,
-          "string_value": "no_prior_notice_and_ten_day_post_publication_objection",
-          "value_type": "string"
+          "string_value": null,
+          "value_type": "boolean"
         }
       },
       {
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 18, Section 8.4.3",
-            "quoted_text": "After the retrieval period, Nerythica will delete Customer Data from active production systems within 45 days, except where retention is legally required.",
-            "reference_level": "decision_evidence"
+            "locator": "Page 17, section 8.3.4",
+            "quoted_text": "Encrypted backups use rolling retention and ordinarily expire within 90 days after deletion from active systems.",
+            "reference_level": "validated_reference"
           },
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 18, Section 8.4.4",
+            "locator": "Page 18, section 8.4.4",
             "quoted_text": "Residual backup copies expire through ordinary rotation, normally within 90 additional days.",
-            "reference_level": "decision_evidence"
+            "reference_level": "validated_reference"
           }
         ],
         "fact_id": "fact-011",
-        "fact_key": "retention_and_deletion_terms",
-        "statement": "The DPA documents active-term retention, active-system deletion after the retrieval period, and ordinary backup expiry within 90 additional days.",
+        "fact_key": "privacy.backup_ordinary_expiry_days",
+        "statement": "Encrypted backups ordinarily expire within 90 days after deletion from active systems, and termination-related residual backups normally expire within 90 additional days after active-system deletion.",
         "value": {
-          "boolean_value": true,
-          "integer_value": null,
+          "boolean_value": null,
+          "integer_value": 90,
           "string_value": null,
-          "value_type": "boolean"
+          "value_type": "integer"
         }
       },
       {
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 26, Section 11.3",
-            "quoted_text": "Nerythica will not use Customer Content from an enterprise tenant to train a shared foundation model unless Customer gives separate express written authorization.",
-            "reference_level": "decision_evidence"
+            "locator": "Page 26, sections 11.2 and 11.4",
+            "quoted_text": "Customer must use qualified human review appropriate to the use case.",
+            "reference_level": "validated_reference"
+          },
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 29, section 13.4",
+            "quoted_text": "Customer is responsible for appropriate human review of model output and for final business decisions.",
+            "reference_level": "validated_reference"
           }
         ],
         "fact_id": "fact-012",
-        "fact_key": "shared_model_training_term",
-        "statement": "The executed DPA prohibits use of enterprise Customer Content to train a shared foundation model unless the customer separately gives express written authorization.",
+        "fact_key": "ai.human_review_required",
+        "statement": "The executed DPA requires qualified human review of model output and leaves final business decisions with the customer.",
         "value": {
           "boolean_value": true,
-          "integer_value": null,
-          "string_value": null,
-          "value_type": "boolean"
-        }
-      },
-      {
-        "evidence_refs": [
-          {
-            "document_id": "F2_internal_procurement_policy.md",
-            "locator": "Section 1",
-            "quoted_text": "Automated assessments may support review but cannot approve a supplier.",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 26, Section 11.4",
-            "quoted_text": "Customer must use qualified human review appropriate to the use case.",
-            "reference_level": "validated_reference"
-          }
-        ],
-        "fact_id": "fact-013",
-        "fact_key": "human_review_required",
-        "statement": "The proposal, procurement policy, and DPA all require human review of AI-generated output and reserve final decisions to people.",
-        "value": {
-          "boolean_value": true,
-          "integer_value": null,
-          "string_value": null,
-          "value_type": "boolean"
-        }
-      },
-      {
-        "evidence_refs": [
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Data use",
-            "quoted_text": "The customer must avoid uploading special-category personal data, payment-card data, health records, government identifiers, or authentication secrets unless Nerythica has expressly approved the relevant use case in writing.",
-            "reference_level": "validated_reference"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 26, Section 11.7",
-            "quoted_text": "Customer will not submit special-category data or highly sensitive regulated records unless expressly approved with suitable controls.",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "fact_id": "fact-014",
-        "fact_key": "prohibited_data_categories_documented",
-        "statement": "The supplied documents prohibit special-category and other highly sensitive data unless separately approved with suitable controls.",
-        "value": {
-          "boolean_value": true,
-          "integer_value": null,
-          "string_value": null,
-          "value_type": "boolean"
-        }
-      },
-      {
-        "evidence_refs": [
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Acceptance",
-            "quoted_text": "This proposal is non-binding until an authorized order form is signed.",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "fact_id": "fact-015",
-        "fact_key": "proposal_binding_status",
-        "statement": "F1 is a non-binding proposal rather than an executed order form.",
-        "value": {
-          "boolean_value": false,
           "integer_value": null,
           "string_value": null,
           "value_type": "boolean"
@@ -420,362 +319,300 @@
       {
         "blocking": true,
         "control_hint": "R2_EU_DATA_RESIDENCY",
-        "description": "F5 was not supplied. The available documents identify it as the later supplemental assurance needed to establish customer-specific EU/EEA location restrictions. Without it, written confirmation covering Customer Data and backups is absent.",
+        "description": "F5 was not supplied. The current documents expressly state that no customer-specific EU/EEA-only commitment exists. Because Customer Data is in scope, policy treats the missing written residency confirmation as a blocking control.",
         "item_id": "missing-001",
-        "requested_evidence": "Provide the signed customer-specific F5 assurance, or an executed order-form amendment, confirming that all Customer Data and its backups will be stored and processed only in the EU/EEA. The scope should expressly address content, backups, inference, support access, telemetry, security logs, and subprocessors."
+        "requested_evidence": "Supply the signed customer-specific F5 assurance or an executed amendment confirming that Customer Content, backups, and core processing for the identified tenant will be stored and processed only in the EU/EEA, with explicit coverage of inference, restoration, support access, telemetry, and subprocessors."
       },
       {
         "blocking": false,
-        "control_hint": "S1_SECURITY_ASSURANCE",
-        "description": "No issued SOC 2 Type II report, ISO/IEC 27001 certificate, or clearly documented and dated equivalent assurance package was supplied. References to a Security Overview, readiness summary, penetration-test executive letter, and internal procedures do not include those underlying documents in F1–F4.",
+        "control_hint": "R4_SECURITY_ASSURANCE",
+        "description": "The SOC 2 Type II examination is only in progress, ISO/IEC 27001 certification is absent, and no issued documented equivalent was supplied.",
         "item_id": "missing-002",
-        "requested_evidence": "Provide a current SOC 2 Type II report or ISO/IEC 27001 certificate, or submit a dated equivalent-assurance package for security review, including the referenced Security Overview and independent penetration-test evidence."
+        "requested_evidence": "Provide a current issued SOC 2 Type II report, ISO/IEC 27001 certificate, or documented equivalent assurance, including issue date, scope, period covered, exceptions, and any required bridge documentation."
       },
       {
         "blocking": true,
-        "control_hint": "P1_PURCHASE_APPROVALS",
-        "description": "No recorded approvals from the Budget owner, Operations, and Director were supplied for the EUR 18,000 annual recurring cost and EUR 54,000 base multi-year commitment.",
+        "control_hint": "P2_APPROVAL_ROUTING",
+        "description": "No recorded Budget owner, Operations, or Director approval was supplied. The EUR 18,000 annual recurring price requires all three approval roles.",
         "item_id": "missing-003",
-        "requested_evidence": "Provide recorded approval identities, roles, decisions, conditions, and timestamps for the Budget owner, Operations, and Director approval route."
+        "requested_evidence": "Provide the recorded approvals, approver identities and roles, conditions, timestamps, and final authorized human decision required by policy."
       },
       {
         "blocking": false,
-        "control_hint": "D5_INTERNAL_SERVICE_OWNER",
-        "description": "The policy requires a named internal service owner before Customer Data is uploaded, but no named service owner is supplied. The DPA's generic Annex I contact role of Operations Lead does not identify the internal service owner.",
+        "control_hint": "P3_SERVICE_OWNER",
+        "description": "No named internal service owner was supplied, although policy requires one before Customer Data is uploaded.",
         "item_id": "missing-004",
-        "requested_evidence": "Record the named internal service owner, responsibilities, and acceptance of ownership."
+        "requested_evidence": "Identify and record the accountable internal service owner, including responsibility for configuration, access, retention, output review, vendor monitoring, and offboarding."
       },
       {
         "blocking": false,
-        "control_hint": "D6_SUPPORT_ACCESS_LOCATIONS",
-        "description": "The questionnaire says support access may occur outside the EEA, but the relevant countries and specific transfer treatment are not supplied.",
+        "control_hint": "R3_SUPPORT_ACCESS_LOCATIONS",
+        "description": "The evidence permits support access from approved locations and non-EEA processing, but does not identify all support-access countries applicable to this tenant.",
         "item_id": "missing-005",
-        "requested_evidence": "Provide a dated list of support-access countries, roles, subprocessors, data categories, access controls, and applicable transfer mechanisms for each non-EEA location."
-      },
-      {
-        "blocking": false,
-        "control_hint": "A2_USER_HUMAN_REVIEW_NOTICE",
-        "description": "Contractual language requires human review, but no evidence shows that users will receive the policy-required notice or training before using AI output.",
-        "item_id": "missing-006",
-        "requested_evidence": "Provide the proposed user notice, acceptable-use guidance, or training material stating that AI output requires qualified human review and may not be treated as verified fact."
+        "requested_evidence": "Provide a dated list of support-access countries, relevant entities and subprocessors, access purposes, transfer mechanisms, and whether the requested EU/EEA-only assurance restricts such access."
       },
       {
         "blocking": false,
         "control_hint": "C1_EXECUTED_ORDER_FORM",
-        "description": "F1 is expressly non-binding and not an order form. No executed order form establishing the final commercial scope, tenant configuration, or regional setting was supplied.",
-        "item_id": "missing-007",
-        "requested_evidence": "Provide the proposed final order form for review and, before activation, the properly authorized executed order form reflecting approved commercial and configuration terms."
-      },
-      {
-        "blocking": false,
-        "control_hint": "L1_TRANSFER_LEGAL_REVIEW",
-        "description": "The DPA materially permits processing outside the EEA, so policy requires human legal review. No legal review record or disposition was supplied.",
-        "item_id": "missing-008",
-        "requested_evidence": "Provide the human legal review of the non-EEA transfer clauses, SCC framework, subprocessor locations, support access, and the effect of any later residency assurance."
+        "description": "F1 is expressly non-binding and not an order form. No executed enterprise order form containing the final price, regional configuration, term, and incorporated documents was supplied.",
+        "item_id": "missing-006",
+        "requested_evidence": "Provide the final executed order form and applicable Master Subscription Agreement, and verify that their commercial, location, precedence, renewal, and usage terms match the reviewed record."
       }
     ],
     "model": "gpt-5.6",
     "options": [
       {
         "benefits": [
-          "Preserves the mandatory EU/EEA residency and executed-DPA controls without waiver.",
-          "Allows the human reviewers to assess the exact F5 scope and resolve contractual conflicts.",
-          "Avoids commitment or Customer Data processing before the required approval route is documented."
+          "Preserves the mandatory residency and approval controls.",
+          "Allows F5 and the final contractual documents to be evaluated before commitment.",
+          "Keeps the subprocessor-notice conflict visible for legal and procurement review."
         ],
-        "description": "Keep the case open without approval or Customer Data upload while obtaining F5 or an equivalent signed residency term, required purchasing approvals, security assurance, conflict review, and other missing evidence.",
-        "label": "hold the approval case pending required evidence",
+        "description": "Keep the case open without approving, rejecting, activating, or uploading Customer Data while the blocking residency evidence, approval routing, and human conflict review are completed.",
+        "label": "Hold the approval decision pending required evidence",
         "option_id": "option-001",
         "preconditions": [
-          "No Customer Data is uploaded while the residency blocker remains.",
-          "No supplier approval is recorded by the automated assessment.",
-          "The conflicting subprocessor and residency statements remain visible for human review."
+          "Do not upload Customer Data or activate production processing.",
+          "Request F5 and all other identified missing evidence.",
+          "Route the conflict and non-EEA transfer clauses to human legal review."
         ],
         "risks": [
-          "Delays deployment and may extend beyond the proposal validity date.",
-          "The vendor may not agree to the required residency or subprocessor-notice terms.",
-          "Additional assurance review may identify further remediation requirements."
+          "Delays deployment and may require commercial validity or pricing to be reconfirmed.",
+          "The vendor may not provide an assurance broad enough to cover backups, core processing, support, telemetry, and subprocessors."
         ]
       },
       {
         "benefits": [
-          "Allows limited product evaluation without relying on missing Customer Data residency evidence.",
-          "Can validate administrative controls, human-review workflow, and feature restrictions before a wider deployment."
+          "Allows limited usability and administrative-control testing while evidence is collected.",
+          "Avoids invoking the Customer Data residency and executed-DPA upload conditions for the test dataset."
         ],
-        "description": "If separately authorized under internal procedures, evaluate functionality using only synthetic or approved public data, without purchasing activation or Customer Data, while the approval case remains pending.",
-        "label": "conduct a restricted non-production evaluation",
+        "description": "Permit only a separately authorized technical evaluation using synthetic or public test data, with no Customer Data, no production activation, and no representation that vendor approval has been granted.",
+        "label": "Conduct a restricted non-customer-data evaluation",
         "option_id": "option-002",
         "preconditions": [
-          "Written authorization for the restricted evaluation is obtained from the appropriate internal roles.",
-          "Only synthetic or specifically approved public data is used.",
-          "Technical controls, user instructions, monitoring, and immediate shutdown procedures prevent Customer Data upload.",
-          "The evaluation creates no unapproved paid commitment or production dependency."
+          "Obtain explicit human authorization for the evaluation.",
+          "Use only synthetic or approved public data.",
+          "Disable integrations and workflows that could ingest company or customer documents.",
+          "Apply access restrictions, user instructions, monitoring, and a fixed end date.",
+          "Do not sign or activate a production order through this option."
         ],
         "risks": [
-          "Users may accidentally enter Customer Data unless technical and procedural restrictions are effective.",
-          "A trial must not be treated as procurement approval or evidence that vendor claims are true.",
-          "Security, confidentiality, or account data may still be generated and require review."
+          "Test controls may fail to prevent accidental entry of Customer Data.",
+          "A synthetic-data evaluation may not demonstrate production performance or compliance.",
+          "Commercial or contractual commitments could be created if the evaluation is not separately controlled."
         ]
       },
       {
         "benefits": [
-          "May resolve the material residency and subprocessor-governance issues contractually.",
-          "Creates leverage to align the service with policy before a multi-year commitment.",
-          "An alternative supplier may provide stronger issued assurance and clearer regional controls."
+          "Provides a route to evaluate the vendor against complete residency, security, commercial, and contractual evidence.",
+          "Allows conditions and ownership responsibilities to be recorded by authorized employees."
         ],
-        "description": "Request amendments addressing EU/EEA-only processing, advance subprocessor notice, support access, and assurance evidence, or compare another vendor able to satisfy the controls.",
-        "label": "seek revised contractual terms or an alternative vendor",
+        "description": "Once blocking evidence is supplied, prepare a refreshed evidence record for the Budget owner, Operations, Director, legal reviewer, and other authorized reviewers without treating remediation as automatic approval.",
+        "label": "Resume the full human approval workflow after remediation",
         "option_id": "option-003",
         "preconditions": [
-          "Procurement and legal define the required contractual language without reducing policy thresholds.",
-          "Any alternative vendor is assessed under the same current policy and evidence requirements.",
-          "No existing blocking control is treated as waived during negotiations."
+          "Validate F5 against DPA sections 12 and 14 and the final order form.",
+          "Obtain the required security assurance or document the resulting policy treatment.",
+          "Resolve or formally review the subprocessor-notice conflict without hiding it.",
+          "Record a named internal service owner.",
+          "Complete Budget owner, Operations, and Director routing.",
+          "Record the final decision only through an authorized human approver."
         ],
         "risks": [
-          "Renegotiation or replacement may increase cost and delay.",
-          "The vendor may reject customer-specific terms.",
-          "A replacement vendor would require a separate full assessment."
+          "F5 may conflict with the DPA or have insufficient scope.",
+          "The issued assurance report may contain qualifications or scope exclusions.",
+          "Human reviewers may determine that residual transfer, subprocessor, security, or commercial risks are unacceptable."
         ]
       }
     ],
-    "prompt_version": "vendor-assessment/v2",
+    "prompt_version": "vendor-assessment/v3.1",
     "recommendation": {
       "conditions": [
-        "Obtain and validate F5 or an equivalent signed customer-specific EU/EEA residency term covering Customer Data and backups before any Customer Data upload.",
-        "Obtain Budget owner, Operations, and Director approvals under policy version 3.2 before commitment or activation.",
-        "Complete human legal review of non-EEA transfers and both documented conflicts.",
-        "Obtain and assess an issued SOC 2 Type II report, ISO/IEC 27001 certificate, or dated documented equivalent assurance.",
-        "Name the internal service owner and document user human-review guidance and prohibited-data controls.",
-        "Review the final order form and verify required regional and retention settings before activation.",
-        "Record the final human decision, approver identity and role, conditions, timestamp, documents reviewed, and unresolved matters."
+        "Maintain the residency item as blocking until compliant written evidence is validated.",
+        "Do not upload Customer Data or activate production service.",
+        "Do not treat the executed DPA, vendor questionnaire, or this assessment as final vendor approval.",
+        "Require an authorized employee to make and record the final decision."
       ],
       "option_id": "option-001",
-      "rationale": "For consideration by the authorized human approvers, holding the case is the control-preserving option because Customer Data is in scope and the required written EU/EEA residency confirmation is absent. F4 expressly states that no such commitment exists and that a later assurance is required, while F5 was not supplied. The executed DPA satisfies the DPA-execution requirement but does not cure residency, purchasing approvals, security assurance, or the visible questionnaire-versus-contract conflicts. This recommendation is not supplier approval, rejection, or a waiver; the final decision remains with authorized employees."
+      "rationale": "Option 001 is the appropriate procedural next step because F5 is absent, the current contract affirmatively lacks the mandatory EU/EEA-only commitment, required internal approvals are not evidenced, and a material contractual conflict requires human review. This recommendation preserves controls and does not constitute approval or rejection of the vendor."
     },
     "requires_human_review": true,
     "risks": [
       {
-        "category": "data_residency",
+        "category": "international_transfers",
         "evidence_refs": [
           {
-            "document_id": "F2_internal_procurement_policy.md",
-            "locator": "Section 3",
-            "quoted_text": "If items 1 or 2 are missing, the case has a blocking control and cannot be approved.",
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 28, sections 12.1–12.6",
+            "quoted_text": "The Service uses global cloud infrastructure and may Process Customer Data in the United States, European Union, and other locations",
             "reference_level": "decision_evidence"
           },
           {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 28, Section 12.5",
-            "quoted_text": "As of this DPA's Effective Date, the parties have not recorded an EU-only location commitment for the Caldera Works Europe tenant.",
+            "document_id": "F2_internal_procurement_policy.md",
+            "locator": "Section 3 — Customer-data controls",
+            "quoted_text": "If items 1 or 2 are missing, the case has a blocking control and cannot be approved.",
             "reference_level": "decision_evidence"
           }
         ],
         "likelihood": "likely",
         "risk_id": "risk-001",
         "severity": "critical",
-        "summary": "Uploading Customer Data under the current documents could result in processing or backup storage outside the EU/EEA and would breach the policy's written-residency prerequisite."
+        "summary": "The current contract permits processing in the United States and other locations, support access from approved locations, and subprocessor processing outside the EEA. This does not satisfy the mandatory EU/EEA-only control for Customer Data."
+      },
+      {
+        "category": "security_assurance",
+        "evidence_refs": [
+          {
+            "document_id": "F3_security_questionnaire.md",
+            "locator": "Governance and assurance, GOV-02–GOV-04",
+            "quoted_text": "Do you hold ISO/IEC 27001 certification? | No.",
+            "reference_level": "source_reference"
+          },
+          {
+            "document_id": "F3_security_questionnaire.md",
+            "locator": "Governance and assurance, GOV-03",
+            "quoted_text": "In progress. | Readiness summary only | Missing issued report",
+            "reference_level": "decision_evidence"
+          }
+        ],
+        "likelihood": "likely",
+        "risk_id": "risk-002",
+        "severity": "high",
+        "summary": "The vendor describes a security programme and annual testing, but no issued SOC 2 Type II, ISO/IEC 27001 certificate, or documented equivalent assurance report was supplied."
       },
       {
         "category": "subprocessor_governance",
         "evidence_refs": [
           {
             "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Section 9.6.2",
-            "quoted_text": "Nerythica may authorize a new or replacement Subprocessor to Process Customer Data, and may permit that Processing to occur outside the EEA, without providing Customer prior notice, provided that Nerythica updates its online subprocessor list within a commercially reasonable period and implements a transfer mechanism where Applicable Data Protection Law requires one.",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Section 9.6.3",
+            "locator": "Page 23, sections 9.6.2–9.6.4",
             "quoted_text": "Customer may object on reasonable data-protection grounds by written notice received within ten calendar days after publication of the updated list.",
             "reference_level": "decision_evidence"
           },
           {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 23, Section 9.6.4",
-            "quoted_text": "If the parties cannot resolve the objection within 30 days, Customer's sole remedy is to stop using or terminate the affected feature; fees already committed remain governed by the Agreement.",
-            "reference_level": "decision_evidence"
+            "document_id": "F3_security_questionnaire.md",
+            "locator": "Subprocessors, SUB-02",
+            "quoted_text": "Customers receive at least 30 days' advance notice before a material new subprocessor is authorized",
+            "reference_level": "source_reference"
           }
         ],
         "likelihood": "possible",
-        "risk_id": "risk-002",
-        "severity": "high",
-        "summary": "Nerythica may add or replace subprocessors, including for non-EEA processing, without prior notice; the customer has only a short post-publication objection period and limited remedies."
-      },
-      {
-        "category": "security_assurance",
-        "evidence_refs": [
-          {
-            "document_id": "F2_internal_procurement_policy.md",
-            "locator": "Section 4",
-            "quoted_text": "Statements such as \"in progress\", \"planned\", or \"expected\" do not count as issued certification.",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F3_security_questionnaire.md",
-            "locator": "Governance and assurance, GOV-03",
-            "quoted_text": "Is a SOC 2 Type II report currently issued? | In progress.",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "likelihood": "unknown",
         "risk_id": "risk-003",
         "severity": "high",
-        "summary": "The absence of issued or fully supplied equivalent assurance limits independent verification of the vendor's stated security-control design and operating effectiveness."
+        "summary": "The executed DPA permits new subprocessors and non-EEA processing without prior notice, contrary to the questionnaire's 30-day advance-notice statement. The customer may learn of changes only after publication and then has ten days to object."
       },
       {
-        "category": "procurement_governance",
+        "category": "financial_commitment",
         "evidence_refs": [
           {
-            "document_id": "F2_internal_procurement_policy.md",
-            "locator": "Section 2",
-            "quoted_text": "Above EUR 15,000 | Director approval in addition to Budget owner and Operations",
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table",
+            "quoted_text": "Initial term | 36 months",
+            "reference_level": "source_reference"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table",
+            "quoted_text": "Renewal | Automatic 12-month renewal unless either party gives 60 days' notice",
+            "reference_level": "source_reference"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Commercial terms table",
+            "quoted_text": "Price review | Up to 5% at each renewal",
+            "reference_level": "source_reference"
+          }
+        ],
+        "likelihood": "likely",
+        "risk_id": "risk-004",
+        "severity": "medium",
+        "summary": "The proposal creates a base 36-month subscription exposure of EUR 54,000 excluding VAT, additional usage charges, automatic 12-month renewal, and potential renewal price increases of up to 5%."
+      },
+      {
+        "category": "ai_output_reliability",
+        "evidence_refs": [
+          {
+            "document_id": "F4_executed_data_processing_addendum.md",
+            "locator": "Page 26, section 11.4",
+            "quoted_text": "Model output may be incomplete, inconsistent, or incorrect.",
+            "reference_level": "validated_reference"
+          },
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Executive summary",
+            "quoted_text": "The service is intended for approximately 80 employees across operations, legal, sales, and customer-success teams.",
+            "reference_level": "source_reference"
+          }
+        ],
+        "likelihood": "possible",
+        "risk_id": "risk-005",
+        "severity": "medium",
+        "summary": "The service may produce incomplete, inconsistent, or incorrect output. Use across legal, sales, operations, and customer-success workflows creates reliance risk unless qualified human review and use-case restrictions are implemented."
+      },
+      {
+        "category": "contract_completion",
+        "evidence_refs": [
+          {
+            "document_id": "F1_vendor_commercial_proposal.md",
+            "locator": "Acceptance",
+            "quoted_text": "This proposal is non-binding until an authorized order form is signed.",
             "reference_level": "decision_evidence"
           },
           {
             "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms",
-            "quoted_text": "Annual subscription | EUR 18,000 excluding VAT",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "likelihood": "possible",
-        "risk_id": "risk-004",
-        "severity": "high",
-        "summary": "Activation or commitment without the Budget owner, Operations, and Director approvals would violate the mandatory price-routing control."
-      },
-      {
-        "category": "international_transfers",
-        "evidence_refs": [
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 21, subprocessor schedule",
-            "quoted_text": "Nimbus Compute Inc. | Global traffic protection and emergency infrastructure support | United States, global edge",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 21, subprocessor schedule",
-            "quoted_text": "Signal Harbor Ltd. | Security monitoring and incident alerting | Ireland, United Kingdom",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 21, subprocessor schedule",
-            "quoted_text": "Support Loom Pte. Ltd. | Customer-support ticket platform | Singapore, Germany",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 25, Section 10.1.7",
-            "quoted_text": "These measures reduce but cannot eliminate legal-access risk in every jurisdiction.",
+            "locator": "Acceptance",
+            "quoted_text": "Status: Vendor proposal supplied for review; not an order form.",
             "reference_level": "decision_evidence"
           }
         ],
         "likelihood": "likely",
-        "risk_id": "risk-005",
-        "severity": "high",
-        "summary": "The subprocessor schedule and support model include the United States, Singapore, United Kingdom, and global infrastructure, creating transfer, government-access, and legal-review dependencies even where SCCs are used."
-      },
-      {
-        "category": "ai_output",
-        "evidence_refs": [
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 26, Section 11.4",
-            "quoted_text": "Model output may be incomplete, inconsistent, or incorrect. Customer must use qualified human review appropriate to the use case.",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "likelihood": "possible",
         "risk_id": "risk-006",
         "severity": "medium",
-        "summary": "Model output may be incomplete, inconsistent, or incorrect, creating operational or legal error risk if users fail to perform qualified human review."
-      },
-      {
-        "category": "commercial_commitment",
-        "evidence_refs": [
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table, Initial term",
-            "quoted_text": "Initial term | 36 months",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table, Billing",
-            "quoted_text": "Billing | Annual, payable in advance",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table, Additional usage",
-            "quoted_text": "Additional usage | EUR 18 per 10,000 processing units",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table, Renewal",
-            "quoted_text": "Renewal | Automatic 12-month renewal unless either party gives 60 days' notice",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F1_vendor_commercial_proposal.md",
-            "locator": "Commercial terms table, Price review",
-            "quoted_text": "Price review | Up to 5% at each renewal",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "likelihood": "likely",
-        "risk_id": "risk-007",
-        "severity": "medium",
-        "summary": "The 36-month term creates a EUR 54,000 base commitment before VAT, with annual advance billing, additional-usage charges, automatic renewal, and potential renewal price increases."
-      },
-      {
-        "category": "service_resilience",
-        "evidence_refs": [
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 19, Section 8.5.2",
-            "quoted_text": "Targets are planning objectives, not service-level guarantees unless the order form expressly states them.",
-            "reference_level": "decision_evidence"
-          },
-          {
-            "document_id": "F4_executed_data_processing_addendum.md",
-            "locator": "Page 19, Section 8.5.4",
-            "quoted_text": "Recovery depends on cloud infrastructure, communications, identity services, model providers, and other Subprocessors.",
-            "reference_level": "decision_evidence"
-          }
-        ],
-        "likelihood": "possible",
-        "risk_id": "risk-008",
-        "severity": "medium",
-        "summary": "The stated 12-hour recovery-time and 24-hour recovery-point objectives are planning targets rather than contractual service-level guarantees, and recovery depends on cloud, model, identity, and subprocessor services."
+        "summary": "The commercial proposal is non-binding and the final order form was not supplied, so final configuration, pricing, regional terms, and incorporated contractual obligations cannot yet be verified against the assessment."
       }
     ],
     "schema_version": "model-assessment/v1"
   },
-  "assessment_hash": "3b5863bb233c433c935a6dce7f670c0c2df4ee54751784116bdc24809d58f3c2",
+  "assessment_hash": "b59cdb611035cb900d35d871c08046a74bf7938b88294df5b9ca48907feff8a3",
   "assessment_source": "gpt_generated_live",
-  "executed_at": "2026-07-18T19:48:39Z",
+  "executed_at": "2026-07-20T11:44:42Z",
   "execution_mode": "LIVE",
   "model": "gpt-5.6",
-  "prompt_version": "vendor-assessment/v2",
-  "provider": "openai",
   "post_validation_transformations": [
     {
-      "input_assessment_hash": "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4",
-      "original_non_literal_quote_fields": 19,
-      "output_assessment_hash": "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a",
-      "scope": "quoted_text exact-source repair and evidence-reference splitting only",
+      "input_assessment_hash": "5f4c37d53a6573c060527db3d46994a53dc76455b54420f6eb9f0a50badc9789",
+      "original_non_literal_quote_fields": 1,
+      "output_assessment_hash": "b59cdb611035cb900d35d871c08046a74bf7938b88294df5b9ca48907feff8a3",
+      "scope": "quoted_text exact-source repair only",
       "transformation_version": "literal-evidence-repair/v1"
-    },
-    {
-      "input_assessment_hash": "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a",
-      "output_assessment_hash": "3b5863bb233c433c935a6dce7f670c0c2df4ee54751784116bdc24809d58f3c2",
-      "scope": "fictional vendor and product names only",
-      "transformation_version": "fictional-vendor-rename/v1"
     }
   ],
+  "prompt_version": "vendor-assessment/v3.1",
+  "provider": "openai",
+  "provider_assessment_hash": "5f4c37d53a6573c060527db3d46994a53dc76455b54420f6eb9f0a50badc9789",
+  "provider_response_id": "resp_0a3a867f505ae2f3016a5e09c2330081a19dc68d0503ee6129",
+  "provider_sdk": {
+    "package": "openai",
+    "version": "2.46.0"
+  },
+  "request_configuration": {
+    "canonical_schema_sha256": "8daad21156d3824a737cfc70691a10b97923c4e95a86d32703795187fffc4e19",
+    "endpoint": "responses.create",
+    "input_sha256": "fcbc02583197caf4ae09dc9df59e76940fec407ee09384cd48a8d29543bd79b8",
+    "instructions_sha256": "31ec7ec955f7441591733bcd889ab567e059cbc91fd4f89f5a38c3d3c70547b0",
+    "model": "gpt-5.6",
+    "prompt_version": "vendor-assessment/v3.1",
+    "store": false,
+    "structured_outputs": {
+      "name": "model_assessment_v1",
+      "strict": true,
+      "type": "json_schema"
+    },
+    "transport_schema_sha256": "87164d8d40552634e6887e8159beb6e559c847dd2e5a2fe9be44eab428daee2c"
+  },
+  "response_transport": {
+    "identifier_case_normalization_applied": false,
+    "provider_output_sha256": "91bc510cabaf225757535938ddb3e0795ed92a985171c5ba4eb412535e72ba83"
+  },
   "runtime_model_call": true,
   "scenario": "T2-style F1–F4 missing-evidence case",
   "source_documents": {

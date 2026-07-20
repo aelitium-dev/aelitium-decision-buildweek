@@ -129,6 +129,68 @@ authoritative.
   No finding, risk, recommendation, policy fact, or route was changed by the
   rename. A later final LIVE run may replace this derived artifact explicitly.
 
+### Prompt v3 attempt — canonical category rejection
+
+- An externally invoked GPT-5.6 request used `vendor-assessment/v3`. The response
+  reached the transport boundary, but canonical validation rejected five
+  `risks[].category` values containing spaces: `security assurance`,
+  `contract and subprocessor management`, `international transfers`,
+  `ai governance`, and `approval governance`.
+- The rejected response did not replace the checked-in artifact and did not
+  reach policy evaluation. No model-quality, fact-key mapping, or routing result
+  is claimed for this attempt.
+- The executed v3 instructions hash was
+  `aabace7f503893faa98bd0a1fc837d5c5fad9f65e58e0d153ad03fdca19a5c7d`.
+- The prompt lists the four exact policy-pack fact keys for annual price,
+  EU/EEA-only residency, DPA execution, and issued assurance. It includes no
+  thresholds, permits free-form keys for other facts, and does not authorize
+  semantic alias mapping or policy overrides.
+- Tests require that this prompt catalog exactly matches the four fact-driven
+  rules in `policies/ai_vendor_approval.v1.json`. The identifier boundary still
+  leaves every `fact_key` unchanged.
+- The corrected prompt is versioned separately as `vendor-assessment/v3.1`; it
+  explicitly requires every risk category to match
+  `^[a-z][a-z0-9_]{1,63}$` and gives lowercase `snake_case` examples. There is
+  no category normalizer: invalid model output must still fail canonical
+  validation.
+- The prepared LIVE artifact writer will record the provider response ID when
+  available, OpenAI SDK version, effective request settings, and SHA-256 hashes
+  of the instructions, input, canonical schema, transport schema, and provider
+  structured output text. It does not record the API key.
+- This failed v3 attempt left the checked-in artifact and
+  `test_live_artifact.py` on prompt v2. The successful v3.1 replacement is
+  recorded in the following section.
+
+### Prompt v3.1 — canonical LIVE artifact accepted
+
+- Execution: `2026-07-20T11:44:42Z`, externally invoked with GPT-5.6, prompt
+  `vendor-assessment/v3.1`, OpenAI Python SDK `2.46.0`, `store=false`, and strict
+  Structured Outputs.
+- Result: `LIVE_SMOKE_OK`. The response passed the transport boundary and full
+  canonical `ModelAssessment` validation before artifact creation. Identifier
+  casing normalization was not applied.
+- Provider assessment hash:
+  `5f4c37d53a6573c060527db3d46994a53dc76455b54420f6eb9f0a50badc9789`.
+  The artifact records a provider response ID plus hashes for instructions,
+  input, canonical schema, transport schema, and provider output text. The raw
+  provider text is not stored, so its text hash is a recorded commitment rather
+  than a repository-recomputable check.
+- Evidence integrity found one non-literal quote caused only by the heading
+  prefix `Data Subjects:`. A declared `literal-evidence-repair/v1`
+  transformation removed that prefix; the exact source wording is otherwise
+  unchanged. Current assessment hash:
+  `b59cdb611035cb900d35d871c08046a74bf7938b88294df5b9ca48907feff8a3`.
+- Each controlled fact key occurs exactly once with observed values: annual
+  price `18000`, EU/EEA-only residency `false`, DPA executed by both parties
+  `true`, and issued assurance report `false`.
+- Actual Vendor Approval Policy Pack route: `NEEDS_MORE_EVIDENCE`. R1 fails at
+  EUR 18,000 and requires director routing; R2 fails and blocks; R3 passes; R4
+  fails and blocks; R5 requires human review for the documented conflict; R6
+  passes at confidence 97. Because blockers take routing precedence, no approval
+  role is selected yet.
+- This result demonstrates one fixture run, not generalized extraction quality,
+  truth, compliance, fairness, correctness, or legal validity.
+
 ## D2 UI integration record
 
 - The no-key API flow passed through the ASGI boundary: load the post-F5 case,
