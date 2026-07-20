@@ -1,0 +1,565 @@
+{
+  "assessment_schema": {
+    "$defs": {
+      "conflict": {
+        "additionalProperties": false,
+        "properties": {
+          "conflict_id": {
+            "pattern": "^conflict-[a-z0-9][a-z0-9-]{0,63}$",
+            "type": "string"
+          },
+          "evidence_refs": {
+            "items": {
+              "$ref": "#/$defs/evidenceReference"
+            },
+            "maxItems": 20,
+            "minItems": 2,
+            "type": "array"
+          },
+          "requires_resolution": {
+            "type": "boolean"
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "summary": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "conflict_id",
+          "summary",
+          "severity",
+          "requires_resolution",
+          "evidence_refs"
+        ],
+        "type": "object"
+      },
+      "evidenceReference": {
+        "additionalProperties": false,
+        "properties": {
+          "document_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+            "type": "string"
+          },
+          "locator": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "quoted_text": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_level": {
+            "enum": [
+              "source_reference",
+              "validated_reference",
+              "decision_evidence"
+            ]
+          }
+        },
+        "required": [
+          "document_id",
+          "locator",
+          "quoted_text",
+          "reference_level"
+        ],
+        "type": "object"
+      },
+      "fact": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_refs": {
+            "items": {
+              "$ref": "#/$defs/evidenceReference"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "type": "array"
+          },
+          "fact_id": {
+            "pattern": "^fact-[a-z0-9][a-z0-9-]{0,63}$",
+            "type": "string"
+          },
+          "fact_key": {
+            "pattern": "^[a-z][a-z0-9_.]{2,127}$",
+            "type": "string"
+          },
+          "statement": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/$defs/typedValue"
+          }
+        },
+        "required": [
+          "fact_id",
+          "fact_key",
+          "statement",
+          "value",
+          "evidence_refs"
+        ],
+        "type": "object"
+      },
+      "missingEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "blocking": {
+            "type": "boolean"
+          },
+          "control_hint": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "item_id": {
+            "pattern": "^missing-[a-z0-9][a-z0-9-]{0,63}$",
+            "type": "string"
+          },
+          "requested_evidence": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "control_hint",
+          "description",
+          "requested_evidence",
+          "blocking"
+        ],
+        "type": "object"
+      },
+      "option": {
+        "additionalProperties": false,
+        "properties": {
+          "benefits": {
+            "items": {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "option_id": {
+            "pattern": "^option-[a-z0-9][a-z0-9-]{0,63}$",
+            "type": "string"
+          },
+          "preconditions": {
+            "items": {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "risks": {
+            "items": {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "option_id",
+          "label",
+          "description",
+          "benefits",
+          "risks",
+          "preconditions"
+        ],
+        "type": "object"
+      },
+      "recommendation": {
+        "additionalProperties": false,
+        "properties": {
+          "conditions": {
+            "items": {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "option_id": {
+            "pattern": "^option-[a-z0-9][a-z0-9-]{0,63}$",
+            "type": "string"
+          },
+          "rationale": {
+            "maxLength": 3000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "option_id",
+          "rationale",
+          "conditions"
+        ],
+        "type": "object"
+      },
+      "risk": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "pattern": "^[a-z][a-z0-9_]{1,63}$",
+            "type": "string"
+          },
+          "evidence_refs": {
+            "items": {
+              "$ref": "#/$defs/evidenceReference"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "likelihood": {
+            "enum": [
+              "unlikely",
+              "possible",
+              "likely",
+              "unknown"
+            ]
+          },
+          "risk_id": {
+            "pattern": "^risk-[a-z0-9][a-z0-9-]{0,63}$",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "summary": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "risk_id",
+          "category",
+          "summary",
+          "severity",
+          "likelihood",
+          "evidence_refs"
+        ],
+        "type": "object"
+      },
+      "typedValue": {
+        "additionalProperties": false,
+        "properties": {
+          "boolean_value": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "integer_value": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "string_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "value_type": {
+            "enum": [
+              "string",
+              "integer",
+              "boolean",
+              "unknown"
+            ]
+          }
+        },
+        "required": [
+          "value_type",
+          "string_value",
+          "integer_value",
+          "boolean_value"
+        ],
+        "type": "object"
+      }
+    },
+    "$id": "https://aelitium.dev/schemas/model_assessment.v1.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "description": "Strict structured assessment contract used by GPT-generated LIVE artifacts and deterministic precomputed DEMO fixtures; every instance is revalidated by the backend.",
+    "properties": {
+      "case_summary": {
+        "maxLength": 4000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "confidence": {
+        "description": "Integer percentage; floats are prohibited by ADR-001.",
+        "maximum": 100,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "conflicts": {
+        "items": {
+          "$ref": "#/$defs/conflict"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "facts": {
+        "items": {
+          "$ref": "#/$defs/fact"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "missing_evidence": {
+        "items": {
+          "$ref": "#/$defs/missingEvidence"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "model": {
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+      },
+      "options": {
+        "items": {
+          "$ref": "#/$defs/option"
+        },
+        "maxItems": 10,
+        "minItems": 1,
+        "type": "array"
+      },
+      "prompt_version": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,63}$",
+        "type": "string"
+      },
+      "recommendation": {
+        "$ref": "#/$defs/recommendation"
+      },
+      "requires_human_review": {
+        "type": "boolean"
+      },
+      "risks": {
+        "items": {
+          "$ref": "#/$defs/risk"
+        },
+        "maxItems": 50,
+        "type": "array"
+      },
+      "schema_version": {
+        "const": "model-assessment/v1"
+      }
+    },
+    "required": [
+      "schema_version",
+      "model",
+      "prompt_version",
+      "case_summary",
+      "facts",
+      "conflicts",
+      "missing_evidence",
+      "risks",
+      "options",
+      "recommendation",
+      "confidence",
+      "requires_human_review"
+    ],
+    "title": "ModelAssessment v1",
+    "type": "object"
+  },
+  "materials_version": "aelitium-receipt-materials/v1",
+  "model_request": {
+    "assessment_source": "precomputed_fixture",
+    "base_artifact_path": "fixtures/demo/T2_assessment.json",
+    "case_id": "case-nerythica-conditional-approval",
+    "derivation_version": "demo-fixture-derivation/v1",
+    "document_hashes": [
+      "25728f7bd3e1bdcd92b04ad5e395dd633ceda2890f1f4604e364f8c063c944ec",
+      "2aa04b0adc51f43c26ce3099765941d3e0720517d54702767a35331702728392",
+      "a6cdf37714dd5d47f00d06e0296aed2c909107589ace2453347bbe281ec5cd21",
+      "5591da6d5fc2572026f8ade04b4d586251e0ce61df9cc3b43fb194d98e6cdbb2",
+      "ae4e8747fca714c082b1229a3f447886746626d997731850a2430beb7d509378"
+    ],
+    "execution_mode": "DEMO",
+    "record_type": "no_model_request",
+    "runtime_model_call": false,
+    "schema_version": "model-assessment/v1"
+  },
+  "policy_pack": {
+    "confidence_floor": 70,
+    "decision_domain": "ai_vendor_approval",
+    "description": "Deterministic minimum controls for the fictional Nerythica AI vendor approval workflow.",
+    "policy_schema_version": "aelitium-policy/v1",
+    "policy_version": "ai-vendor-approval/1.1.0",
+    "routing_precedence": [
+      {
+        "condition": "blocking_controls_not_empty",
+        "priority": 1,
+        "selected_approval_role": null,
+        "state": "NEEDS_MORE_EVIDENCE"
+      },
+      {
+        "condition": "director_approval_required",
+        "priority": 2,
+        "selected_approval_role": "director",
+        "state": "HUMAN_APPROVAL_REQUIRED"
+      },
+      {
+        "condition": "human_review_required",
+        "priority": 3,
+        "selected_approval_role": "operations_reviewer",
+        "state": "HUMAN_REVIEW"
+      },
+      {
+        "condition": "otherwise",
+        "priority": 4,
+        "selected_approval_role": "operations_reviewer",
+        "state": "READY_FOR_APPROVAL"
+      }
+    ],
+    "rules": [
+      {
+        "blocking": false,
+        "control_id": "R1_PRICE_CEILING",
+        "description": "Annual recurring cost above EUR 15,000 requires director approval.",
+        "expected_value": 15000,
+        "fact_key": "commercial.annual_price_eur",
+        "failure_effect": "REQUIRE_DIRECTOR_APPROVAL",
+        "missing_evidence": "Current written annual recurring price",
+        "missing_fact_result": "FAIL",
+        "operator": "fact_integer_at_most",
+        "suggested_request": "Provide the current written offer showing annual recurring cost and all mandatory charges.",
+        "version": "1.0.0"
+      },
+      {
+        "blocking": true,
+        "control_id": "R2_EU_DATA_RESIDENCY",
+        "description": "Customer Data and backups require written EU or EEA-only confirmation.",
+        "expected_value": true,
+        "fact_key": "privacy.eu_eea_only_residency_confirmed",
+        "failure_effect": "BLOCK_APPROVAL",
+        "missing_evidence": "Written confirmation covering Customer Content, backups, and core processing in the EU or EEA",
+        "missing_fact_result": "FAIL",
+        "operator": "fact_boolean_equals",
+        "suggested_request": "Confirm in writing that Customer Content, backups, and core processing for this tenant will remain in the EU or EEA.",
+        "version": "1.0.0"
+      },
+      {
+        "blocking": true,
+        "control_id": "R3_DPA_SIGNED",
+        "description": "A DPA executed by both parties is required before Customer Data is uploaded.",
+        "expected_value": true,
+        "fact_key": "privacy.dpa_executed_by_both_parties",
+        "failure_effect": "BLOCK_APPROVAL",
+        "missing_evidence": "DPA execution evidence for both parties",
+        "missing_fact_result": "FAIL",
+        "operator": "fact_boolean_equals",
+        "suggested_request": "Provide a Data Processing Addendum executed by authorized representatives of both parties.",
+        "version": "1.0.0"
+      },
+      {
+        "blocking": true,
+        "control_id": "R4_CERTIFICATION",
+        "description": "SOC 2 Type II or equivalent assurance must be issued; planned or in-progress status is insufficient.",
+        "expected_value": true,
+        "fact_key": "security.assurance_report_issued",
+        "failure_effect": "REQUEST_EVIDENCE",
+        "missing_evidence": "Issued SOC 2 Type II report or documented equivalent assurance",
+        "missing_fact_result": "FAIL",
+        "operator": "fact_boolean_equals",
+        "suggested_request": "Provide the issued SOC 2 Type II report, a dated issuance confirmation, or documented equivalent assurance.",
+        "version": "1.0.0"
+      },
+      {
+        "blocking": false,
+        "control_id": "R5_CONFLICT_GATE",
+        "description": "Any material conflict in the assessment requires human review.",
+        "expected_value": 0,
+        "fact_key": "assessment.conflicts_count",
+        "failure_effect": "REQUIRE_HUMAN_REVIEW",
+        "missing_evidence": "Resolution or acknowledgement of each material document conflict",
+        "missing_fact_result": "FAIL",
+        "operator": "assessment_conflicts_count_equals",
+        "suggested_request": "Resolve or explicitly acknowledge the conflicting vendor statements before the final decision.",
+        "version": "1.0.0"
+      },
+      {
+        "blocking": false,
+        "control_id": "R6_CONFIDENCE_FLOOR",
+        "description": "Assessment confidence below 70 percent requires human review.",
+        "expected_value": 70,
+        "fact_key": "assessment.confidence",
+        "failure_effect": "REQUIRE_HUMAN_REVIEW",
+        "missing_evidence": "Higher-confidence evidence or explicit human assessment of uncertainty",
+        "missing_fact_result": "FAIL",
+        "operator": "assessment_confidence_at_least",
+        "suggested_request": "Review the low-confidence findings and obtain additional evidence where material.",
+        "version": "1.0.0"
+      }
+    ]
+  },
+  "prompt_text": "Deterministically derive the post-F5 DEMO assessment from the checked-in T2 assessment fixture and the fixed F5 evidence changes in demo_workflow.py.",
+  "timeline_events": [
+    {
+      "event_type": "case_created",
+      "occurred_at": "2026-07-18T10:00:00Z"
+    },
+    {
+      "event_type": "documents_added",
+      "occurred_at": "2026-07-18T12:00:00Z"
+    },
+    {
+      "document_id": "F5",
+      "event_type": "evidence_added",
+      "occurred_at": "2026-07-19T11:00:00Z"
+    },
+    {
+      "event_type": "assessment_recorded",
+      "occurred_at": "2026-07-19T11:04:00Z"
+    },
+    {
+      "event_type": "policy_evaluated",
+      "occurred_at": "2026-07-19T11:05:00Z"
+    },
+    {
+      "event_type": "human_approved",
+      "occurred_at": "2026-07-19T11:15:00Z"
+    }
+  ]
+}

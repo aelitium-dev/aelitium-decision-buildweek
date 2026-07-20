@@ -147,6 +147,22 @@ Verification is offline and deterministic. It must:
 8. Canonicalize `signed_receipt_payload`, decode exactly one 64-byte Ed25519 signature, and verify it with the trusted public key.
 9. Return `VALID` only if every check succeeds; otherwise return `INVALID` with a stable machine-readable reason.
 
+### DEMO key bootstrap and public sample
+
+Local DEMO issuance and public sample verification use separate lifecycle
+boundaries. A clone creates a random local Ed25519 private key with exact mode
+`0600` and a matching ignored runtime keyring. Bootstrap never overwrites
+material: an existing pair is validated, a secure private-key-only state may
+derive its public keyring, and a keyring-only, malformed, insecurely
+permissioned, or mismatched state fails closed.
+
+The checked-in sample contains only a receipt envelope, its external
+verification materials, and a separately selected public keyring. Its private
+key is neither versioned nor needed. Offline verification reads no signing
+material and never accepts a receipt-supplied public key. A valid result proves
+only the integrity and signature properties in this ADR, not truth,
+authenticity, correctness, fairness, compliance, or legal validity.
+
 Consequences of alteration:
 
 - Changing decision content without changing `content_hash` causes `CONTENT_HASH_MISMATCH`.

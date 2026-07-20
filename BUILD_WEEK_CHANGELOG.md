@@ -249,3 +249,20 @@ This log distinguishes work performed during OpenAI Build Week from the declared
 - Added regression tests for execution from an unrelated working directory,
   absence of machine-local paths, pinned-commit blob verification, and upstream
   hash mismatch rejection.
+
+### B6 reproducible DEMO key bootstrap and offline sample
+
+- Added a non-overwriting local Ed25519 bootstrap command. It creates a private
+  key with exact mode `0600` and a matching public runtime keyring under ignored
+  paths, validates an existing pair, and fails closed for missing, invalid,
+  insecurely permissioned, symlinked, or mismatched material.
+- Separated per-clone issuance trust from the checked-in public sample trust
+  anchor. No private key, seed, password, credential, or receipt-supplied trust
+  key is used for public sample verification.
+- Added a fixed sample receipt envelope plus all external committed materials
+  and a CLI verifier that requires only those files and the separately selected
+  public keyring. Verification is offline and deterministic.
+- Added local sample issuance to ignored runtime storage and focused tests for
+  bootstrap success/idempotence, partial or invalid states, issuance without a
+  key, verification after private-key removal, external-material failure, and
+  tamper detection.

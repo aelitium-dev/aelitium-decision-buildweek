@@ -1,0 +1,377 @@
+{
+  "decision_content": {
+    "assessment_hash": "98d0628e9616c06b2359002cead06f4eb71cf106b40e9caadd769569523a6e0d",
+    "case": {
+      "case_id": "case-nerythica-conditional-approval",
+      "case_version": 2,
+      "created_at": "2026-07-18T10:00:00Z",
+      "decision_domain": "ai_vendor_approval",
+      "documents": [
+        {
+          "document_id": "F1",
+          "document_type": "commercial_proposal",
+          "filename": "F1_vendor_commercial_proposal.md",
+          "sha256": "25728f7bd3e1bdcd92b04ad5e395dd633ceda2890f1f4604e364f8c063c944ec",
+          "version": "1.0"
+        },
+        {
+          "document_id": "F2",
+          "document_type": "internal_policy",
+          "filename": "F2_internal_procurement_policy.md",
+          "sha256": "2aa04b0adc51f43c26ce3099765941d3e0720517d54702767a35331702728392",
+          "version": "3.2"
+        },
+        {
+          "document_id": "F3",
+          "document_type": "security_questionnaire",
+          "filename": "F3_security_questionnaire.md",
+          "sha256": "a6cdf37714dd5d47f00d06e0296aed2c909107589ace2453347bbe281ec5cd21",
+          "version": "1.0"
+        },
+        {
+          "document_id": "F4",
+          "document_type": "executed_dpa",
+          "filename": "F4_executed_data_processing_addendum.md",
+          "sha256": "5591da6d5fc2572026f8ade04b4d586251e0ce61df9cc3b43fb194d98e6cdbb2",
+          "version": "4.3"
+        },
+        {
+          "document_id": "F5",
+          "document_type": "vendor_assurance_letter",
+          "filename": "F5_vendor_assurance_letter.md",
+          "sha256": "ae4e8747fca714c082b1229a3f447886746626d997731850a2430beb7d509378",
+          "version": "1.0"
+        }
+      ]
+    },
+    "human_approval": {
+      "approval_id": "approval-demo-sample-2026",
+      "approver": {
+        "declared_id": "demo-director-01",
+        "display_name": "Mara Ellison",
+        "identity_assurance": "declared_only",
+        "role": "director"
+      },
+      "case_id": "case-nerythica-conditional-approval",
+      "conditions": [
+        {
+          "condition_id": "condition-renegotiate-subprocessors",
+          "due_event": "before contract renewal",
+          "owner_role": "operations_reviewer",
+          "text": "Renegotiate the subprocessor clause before renewal."
+        }
+      ],
+      "decided_at": "2026-07-19T11:15:00Z",
+      "decision": "approve_with_conditions",
+      "decision_evidence_refs": [
+        {
+          "document_id": "F4",
+          "locator": "page 23, clause 9.6",
+          "note": "Contractual conflict accepted only with remediation condition."
+        },
+        {
+          "document_id": "F5",
+          "locator": "sections 1 and 2",
+          "note": "Residency and issued-assurance evidence accepted."
+        }
+      ],
+      "justification": "Blocking evidence is complete; the contractual conflict remains an explicit condition.",
+      "override": false,
+      "override_controls": [],
+      "policy_result_hash": "92df671c40ba14bb48907422cf6a49b79a2390c1d0dff9b820002eab25e52da3",
+      "requested_evidence": [],
+      "schema_version": "human-approval/v1"
+    },
+    "model_assessment": {
+      "case_summary": "F1–F5 satisfy the blocking residency, DPA, and assurance controls; director approval and human conflict review remain required.",
+      "confidence": 93,
+      "conflicts": [
+        {
+          "conflict_id": "conflict-subprocessor-notice",
+          "evidence_refs": [
+            {
+              "document_id": "F3",
+              "locator": "SUB-02",
+              "quoted_text": "Customers receive at least 30 days' advance notice before a material new subprocessor is authorized to process Customer Data.",
+              "reference_level": "validated_reference"
+            },
+            {
+              "document_id": "F4",
+              "locator": "page 23, clause 9.6",
+              "quoted_text": "This section does not promise the 30 days' advance notice stated in questionnaire response SUB-02.",
+              "reference_level": "validated_reference"
+            }
+          ],
+          "requires_resolution": true,
+          "severity": "high",
+          "summary": "F3 promises at least 30 days' advance notice while executed DPA clause 9.6 permits changes without prior notice."
+        }
+      ],
+      "facts": [
+        {
+          "evidence_refs": [
+            {
+              "document_id": "F1",
+              "locator": "Commercial terms",
+              "quoted_text": "EUR 18,000 excluding VAT",
+              "reference_level": "validated_reference"
+            }
+          ],
+          "fact_id": "fact-annual-price",
+          "fact_key": "commercial.annual_price_eur",
+          "statement": "The annual recurring subscription price is EUR 18,000.",
+          "value": {
+            "boolean_value": null,
+            "integer_value": 18000,
+            "string_value": null,
+            "value_type": "integer"
+          }
+        },
+        {
+          "evidence_refs": [
+            {
+              "document_id": "F5",
+              "locator": "section 1",
+              "quoted_text": "1. Customer Content, including uploaded documents, extracted text, application records, and tenant-specific indexes, will be stored only in infrastructure located in the European Union or European Economic Area.\n2. Production database replicas, object-storage replicas, and disaster-recovery backups containing Customer Content will remain in the European Union or European Economic Area.\n3. Processing of Customer Content by the core application and inference-routing services will occur in the European Union or European Economic Area.",
+              "reference_level": "validated_reference"
+            }
+          ],
+          "fact_id": "fact-eu-residency",
+          "fact_key": "privacy.eu_eea_only_residency_confirmed",
+          "statement": "F5 confirms EU or EEA-only residency for the tenant.",
+          "value": {
+            "boolean_value": true,
+            "integer_value": null,
+            "string_value": null,
+            "value_type": "boolean"
+          }
+        },
+        {
+          "evidence_refs": [
+            {
+              "document_id": "F4",
+              "locator": "page 34 signature blocks",
+              "quoted_text": "Executed by both fictional parties: yes; see page 34",
+              "reference_level": "validated_reference"
+            }
+          ],
+          "fact_id": "fact-dpa-executed",
+          "fact_key": "privacy.dpa_executed_by_both_parties",
+          "statement": "The DPA contains execution records for both fictional parties.",
+          "value": {
+            "boolean_value": true,
+            "integer_value": null,
+            "string_value": null,
+            "value_type": "boolean"
+          }
+        },
+        {
+          "evidence_refs": [
+            {
+              "document_id": "F5",
+              "locator": "section 2",
+              "quoted_text": "Nerythica's SOC 2 Type II examination has been completed and the report was issued on 2026-07-15.",
+              "reference_level": "validated_reference"
+            }
+          ],
+          "fact_id": "fact-assurance-issued",
+          "fact_key": "security.assurance_report_issued",
+          "statement": "F5 confirms the fictional assurance report was issued.",
+          "value": {
+            "boolean_value": true,
+            "integer_value": null,
+            "string_value": null,
+            "value_type": "boolean"
+          }
+        }
+      ],
+      "missing_evidence": [],
+      "model": "demo-precomputed",
+      "options": [
+        {
+          "benefits": [
+            "Blocking evidence controls are satisfied."
+          ],
+          "description": "Approve with an explicit contract-remediation condition.",
+          "label": "Conditional director approval",
+          "option_id": "option-conditional-approval",
+          "preconditions": [
+            "Director reviews the conflict and records a condition."
+          ],
+          "risks": [
+            "Subprocessor notice language remains unresolved."
+          ]
+        }
+      ],
+      "prompt_version": "demo-fixture-derivation/v1",
+      "recommendation": {
+        "conditions": [
+          "Renegotiate the subprocessor clause before renewal."
+        ],
+        "option_id": "option-conditional-approval",
+        "rationale": "Evidence gates pass, but price and contractual conflict require human authority."
+      },
+      "requires_human_review": true,
+      "risks": [
+        {
+          "category": "contract",
+          "evidence_refs": [
+            {
+              "document_id": "F3",
+              "locator": "SUB-02",
+              "quoted_text": "Customers receive at least 30 days' advance notice before a material new subprocessor is authorized to process Customer Data.",
+              "reference_level": "validated_reference"
+            },
+            {
+              "document_id": "F4",
+              "locator": "page 23, clause 9.6",
+              "quoted_text": "This section does not promise the 30 days' advance notice stated in questionnaire response SUB-02.",
+              "reference_level": "validated_reference"
+            }
+          ],
+          "likelihood": "likely",
+          "risk_id": "risk-contract-conflict",
+          "severity": "high",
+          "summary": "The questionnaire and executed DPA conflict on subprocessor notice."
+        }
+      ],
+      "schema_version": "model-assessment/v1"
+    },
+    "model_execution": {
+      "assessment_schema_hash": "8daad21156d3824a737cfc70691a10b97923c4e95a86d32703795187fffc4e19",
+      "assessment_schema_version": "model-assessment/v1",
+      "assessment_source": "precomputed_fixture",
+      "execution_mode": "DEMO",
+      "model": "demo-precomputed",
+      "model_config": [],
+      "model_request_hash": "3e9a402449393bc4a13d7b65945ba741b44b13b88872e505ca666cf2e0afad5a",
+      "prompt_hash": "136533a7968ffcbcf20819cdaaa6ba8338baa940eb51c3d5f338f7eab360f85a",
+      "prompt_version": "demo-fixture-derivation/v1",
+      "provider": "repository-fixture",
+      "runtime_model_call": false
+    },
+    "policy": {
+      "policy_result": {
+        "assessment_hash": "98d0628e9616c06b2359002cead06f4eb71cf106b40e9caadd769569523a6e0d",
+        "blocking_controls": [],
+        "case_id": "case-nerythica-conditional-approval",
+        "evaluated_at": "2026-07-19T11:05:00Z",
+        "missing_evidence": [
+          {
+            "description": "Resolution or acknowledgement of each material document conflict",
+            "item_id": "missing-r5-conflict-gate",
+            "required_by_controls": [
+              "R5_CONFLICT_GATE"
+            ]
+          }
+        ],
+        "policy_version": "ai-vendor-approval/1.1.0",
+        "routing_reasons": [
+          "R1_PRICE_CEILING failed: REQUIRE_DIRECTOR_APPROVAL",
+          "R5_CONFLICT_GATE failed: REQUIRE_HUMAN_REVIEW"
+        ],
+        "rules_evaluated": [
+          {
+            "control_id": "R1_PRICE_CEILING",
+            "description": "Annual recurring cost above EUR 15,000 requires director approval.",
+            "effect": "REQUIRE_DIRECTOR_APPROVAL",
+            "expected_value": 15000,
+            "fact_keys": [
+              "commercial.annual_price_eur"
+            ],
+            "observed_value": 18000,
+            "result": "FAIL",
+            "version": "1.0.0"
+          },
+          {
+            "control_id": "R2_EU_DATA_RESIDENCY",
+            "description": "Customer Data and backups require written EU or EEA-only confirmation.",
+            "effect": "NONE",
+            "expected_value": true,
+            "fact_keys": [
+              "privacy.eu_eea_only_residency_confirmed"
+            ],
+            "observed_value": true,
+            "result": "PASS",
+            "version": "1.0.0"
+          },
+          {
+            "control_id": "R3_DPA_SIGNED",
+            "description": "A DPA executed by both parties is required before Customer Data is uploaded.",
+            "effect": "NONE",
+            "expected_value": true,
+            "fact_keys": [
+              "privacy.dpa_executed_by_both_parties"
+            ],
+            "observed_value": true,
+            "result": "PASS",
+            "version": "1.0.0"
+          },
+          {
+            "control_id": "R4_CERTIFICATION",
+            "description": "SOC 2 Type II or equivalent assurance must be issued; planned or in-progress status is insufficient.",
+            "effect": "NONE",
+            "expected_value": true,
+            "fact_keys": [
+              "security.assurance_report_issued"
+            ],
+            "observed_value": true,
+            "result": "PASS",
+            "version": "1.0.0"
+          },
+          {
+            "control_id": "R5_CONFLICT_GATE",
+            "description": "Any material conflict in the assessment requires human review.",
+            "effect": "REQUIRE_HUMAN_REVIEW",
+            "expected_value": 0,
+            "fact_keys": [
+              "assessment.conflicts_count"
+            ],
+            "observed_value": 1,
+            "result": "FAIL",
+            "version": "1.0.0"
+          },
+          {
+            "control_id": "R6_CONFIDENCE_FLOOR",
+            "description": "Assessment confidence below 70 percent requires human review.",
+            "effect": "NONE",
+            "expected_value": 70,
+            "fact_keys": [
+              "assessment.confidence"
+            ],
+            "observed_value": 93,
+            "result": "PASS",
+            "version": "1.0.0"
+          }
+        ],
+        "schema_version": "policy-result/v1",
+        "selected_approval_role": "director",
+        "state": "HUMAN_APPROVAL_REQUIRED",
+        "suggested_request": "Resolve or explicitly acknowledge the conflicting vendor statements before the final decision."
+      },
+      "policy_result_hash": "92df671c40ba14bb48907422cf6a49b79a2390c1d0dff9b820002eab25e52da3",
+      "policy_rules_hash": "35d9d66f99f8898ae0c7299cf67cda52c1c1082c25d660eaa9f99e611030cdee",
+      "policy_version": "ai-vendor-approval/1.1.0"
+    },
+    "timeline": {
+      "event_count": 6,
+      "head_hash": "7ef9edb6f5efd5714eab19135376200301e08979f6baa4d7b5657728400307e0"
+    }
+  },
+  "signature": "JjG2N5NARfhTLKllR7+2phrUYUR0H2RgKl75u0FBh/w+WjEar5EU0PQn8HgU31RevIq8/SV53VuOTZzHLdliCg==",
+  "signed_receipt_payload": {
+    "content_hash": "df00717b3c5aa68553596bb8bdac9c9d4f0efe8a72361c3870c94dff26aed0e2",
+    "content_hash_algorithm": "sha256",
+    "content_schema_version": "aelitium-decision-content/v1",
+    "issued_at": "2026-07-19T11:16:00Z",
+    "receipt_id": "rec-demo-sample-2026",
+    "receipt_version": "aelitium-decision-receipt/v1",
+    "signing_metadata": {
+      "key_id": "buildweek-demo-2026",
+      "payload_canonicalization": "json_sorted_keys_no_whitespace_utf8",
+      "public_key_fingerprint_sha256": "6fa378abbdbc64d19459e421a3a32575d32432529f093bdb855afe865ebe281e",
+      "signature_algorithm": "Ed25519",
+      "signature_encoding": "base64"
+    }
+  }
+}

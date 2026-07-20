@@ -54,7 +54,7 @@ Decision Receipt + offline verifier
 - `fixtures/` — fictional English-language demo documents and pre-computed assessments
 - `schemas/` — the five versioned JSON Schemas
 - `policies/` — deterministic, versioned policy rules
-- `config/` — public trusted-keyring examples only
+- `config/` — public trusted-keyring examples only; never private keys
 - `third_party/` — allowlisted pre-existing source and its original notices
 
 ## Provenance
@@ -94,7 +94,16 @@ backend/.venv/bin/python -m pytest backend/tests -q
 python3 scripts/validate_scaffold.py
 ```
 
-Start the API locally:
+Bootstrap the local DEMO signing key before starting the API or issuing a new
+receipt. This command is safe to rerun: it creates a random Ed25519 private key
+with mode `0600` and its matching public keyring under Git-ignored `runtime/`,
+or validates the pair already there. It never overwrites either file.
+
+```bash
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli keys bootstrap
+```
+
+Then start the API locally:
 
 ```bash
 PYTHONPATH=backend/src backend/.venv/bin/python -m uvicorn aelitium_decision.api:app --host 127.0.0.1 --port 8000
@@ -104,6 +113,46 @@ SQLite defaults to the ignored `runtime/aelitium.db`; override it with
 `AELITIUM_DB_PATH`. The generic API surface remains intentionally small: health,
 create/read case, deterministic evaluation, and latest policy result. The
 `/v1/demo/*` routes expose the fixed Build Week scenario to the Decision Console.
+
+### Offline receipt sample
+
+A fresh clone can verify the checked-in sample without bootstrapping a private
+key, starting FastAPI, using a network connection, or setting an OpenAI key:
+
+```bash
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli receipt verify
+```
+
+Expected result:
+
+```json
+{
+  "reason": "VERIFIED",
+  "status": "VALID"
+}
+```
+
+The command reads three separate public inputs: the receipt envelope at
+`fixtures/sample_receipt/decision-receipt.json`, its committed external
+materials at `fixtures/sample_receipt/verification-materials.json`, and the
+trusted public keyring at `config/trusted-keyring.demo.json`. Verification never
+loads a private key and never accepts a public key from the receipt.
+
+To reproduce local issuance with the clone's newly bootstrapped key, run:
+
+```bash
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli sample issue
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli receipt verify \
+  --receipt runtime/sample_receipt/decision-receipt.json \
+  --materials runtime/sample_receipt/verification-materials.json \
+  --keyring runtime/keys/trusted-keyring.local.json
+```
+
+Local sample outputs are ignored and are never overwritten. Delete or archive
+them deliberately before issuing another local sample. Bootstrap
+reproducibility means every clone can create and validate its own random local
+keypair; it does not mean reproducing the private key used for the checked-in
+public sample.
 
 Start the frontend in a second terminal:
 
@@ -145,12 +194,14 @@ Verification requires both an external public keyring and the external policy,
 prompt/derivation description, schema, assessment-input record, and timeline materials whose hashes are committed
 by the receipt. No public key is accepted from a receipt.
 
-The local demo private key is ignored under `runtime/keys/`; only its public key
-and SHA-256 fingerprint are present in `config/trusted-keyring.demo.json`.
-Verification establishes integrity and signature validity under that separately
-trusted key. It does not establish source-document authenticity, truth,
-assessment or decision correctness, fairness, legal validity, identity
-authentication, or independently trusted time.
+The local demo private key and matching runtime keyring are ignored under
+`runtime/keys/`. The checked-in `config/trusted-keyring.demo.json` contains only
+the public trust record needed for the checked-in sample; its private key is not
+versioned or needed for verification. Verification establishes integrity and
+signature validity under the public key selected by the verifier. It does not
+establish source-document authenticity, truth, assessment or decision
+correctness, fairness, legal validity, identity authentication, or independently
+trusted time.
 
 ## Manual LIVE smoke gate
 

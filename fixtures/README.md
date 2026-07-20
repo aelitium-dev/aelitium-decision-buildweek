@@ -10,6 +10,11 @@ All demo fixtures are fictional, written in English, and contain no real persona
 
 `demo/` contains the three pre-computed ModelAssessment fixtures, their golden manifest, and two short evidence variants used to isolate the T1 low-risk and T3 conflict routes.
 
+`sample_receipt/` contains one fixed public receipt envelope and the external
+materials it commits. Together with the separately selected public keyring in
+`config/trusted-keyring.demo.json`, they support deterministic offline
+verification in a fresh clone. No signing material is present in this fixture.
+
 The golden manifest maps the two synthetic document IDs to their source files.
 Automated evidence-integrity tests also resolve F1–F5 by both document ID and
 filename and require every assessment `quoted_text` value to be a literal source

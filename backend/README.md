@@ -13,6 +13,8 @@ The D1 backend contains:
 - `src/aelitium_decision/hashing.py` — sole internal wrapper around the allowlisted canonical JSON helper
 - `src/aelitium_decision/receipt.py` and `signing.py` — normalized ADR-001 content assembly and detached Ed25519 issuance
 - `src/aelitium_decision/keyring.py` and `verification.py` — external-keyring, offline, fail-closed verification
+- `src/aelitium_decision/demo_keys.py` — non-overwriting local DEMO key bootstrap with exact `0600` private-key permissions
+- `src/aelitium_decision/offline_receipts.py` — portable sample material serialization, local sample issuance, and public-input-only verification
 
 The policy engine consumes thresholds and effects only from the versioned policy pack. Model output supplies observed facts and conflicts; it cannot replace routing, alter a threshold, or waive a blocking control.
 
@@ -27,6 +29,22 @@ library and tested through T4/T5. The clickable DEMO API adds case, approval,
 receipt, and verification routes without requiring an OpenAI key. No private
 signing key is present in Git; the locally generated demo key is an ignored
 runtime file and is never returned by the API.
+
+A fresh clone prepares local signing material with:
+
+```bash
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli keys bootstrap
+```
+
+The API and local sample issuer use the ignored keypair in `runtime/keys/`.
+Missing, malformed, insecurely permissioned, or mismatched material fails
+closed. The checked-in receipt sample is independently verifiable using only
+its receipt envelope, external material bundle, and the public keyring selected
+by the verifier:
+
+```bash
+PYTHONPATH=backend/src backend/.venv/bin/python -m aelitium_decision.cli receipt verify
+```
 
 DEMO assessment provenance is `precomputed_fixture` with
 `runtime_model_call=false`; its receipt commits an explicit no-model-request

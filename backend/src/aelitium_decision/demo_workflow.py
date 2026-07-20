@@ -26,6 +26,7 @@ from .approval import (
     validate_policy_receipt_eligibility,
 )
 from .demo import load_golden_manifest
+from .demo_keys import DEMO_KEY_ID, DEMO_KEYRING_PATH, DEMO_PRIVATE_KEY_PATH
 from .hashing import hash_json
 from .keyring import TrustedKeyring, load_trusted_keyring
 from .paths import FIXTURES_DIR, POLICIES_DIR, REPOSITORY_ROOT
@@ -42,9 +43,6 @@ from .signing import load_private_key, public_key_fingerprint
 from .verification import VerificationResult, verify_receipt
 
 
-DEMO_KEY_ID = "buildweek-demo-2026"
-DEMO_PRIVATE_KEY_PATH = REPOSITORY_ROOT / "runtime" / "keys" / f"{DEMO_KEY_ID}.key"
-DEMO_KEYRING_PATH = REPOSITORY_ROOT / "config" / "trusted-keyring.demo.json"
 DEMO_ASSESSMENT_SOURCE = "precomputed_fixture"
 DEMO_DERIVATION_VERSION = "demo-fixture-derivation/v1"
 DEMO_DERIVATION_DESCRIPTION = (
@@ -570,8 +568,10 @@ def _load_signing_material(
     *, private_key_path: Path, keyring_path: Path
 ) -> tuple[Ed25519PrivateKey, TrustedKeyring]:
     try:
+        if private_key_path.is_symlink():
+            raise DemoConfigurationError("DEMO private key must not be a symlink")
         mode = private_key_path.stat().st_mode & 0o777
-        if mode & 0o077:
+        if mode != 0o600:
             raise DemoConfigurationError("DEMO private key permissions must be 0600")
         private_key = load_private_key(private_key_path)
         keyring = load_trusted_keyring(keyring_path)
@@ -596,6 +596,7 @@ def issue_demo_receipt(
     private_key_path: Path = DEMO_PRIVATE_KEY_PATH,
     keyring_path: Path = DEMO_KEYRING_PATH,
     issued_at: str | None = None,
+    receipt_id: str | None = None,
 ) -> IssuedDemoReceipt:
     try:
         current_approval_hash = hash_json(recorded_approval.approval)
@@ -667,7 +668,7 @@ def issue_demo_receipt(
     )
     receipt = issue_receipt(
         decision_content=content,
-        receipt_id=f"rec-demo-{secrets.token_hex(8)}",
+        receipt_id=receipt_id or f"rec-demo-{secrets.token_hex(8)}",
         issued_at=issued_at or _utc_now(),
         key_id=DEMO_KEY_ID,
         private_key=private_key,
