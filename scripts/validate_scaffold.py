@@ -3,17 +3,20 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
 import subprocess
 import sys
-from pathlib import Path
-from typing import Any
+from collections.abc import Iterator
+from pathlib import Path, PurePosixPath
+from typing import Any, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+GIT_COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 class ValidationFailure(RuntimeError):
@@ -28,6 +31,10 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
 def load_json(path: Path) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -40,34 +47,140 @@ def require(condition: bool, reason: str) -> None:
         raise ValidationFailure(reason)
 
 
-def validate_preexisting_assets() -> None:
+def iter_strings(value: Any) -> Iterator[str]:
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for child in value.values():
+            yield from iter_strings(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from iter_strings(child)
+
+
+def is_local_absolute_path(value: str) -> bool:
+    return (
+        value.startswith("/")
+        or value.startswith("\\\\")
+        or value.lower().startswith("file:")
+        or re.match(r"^[A-Za-z]:[\\/]", value) is not None
+    )
+
+
+def validate_relative_path(value: Any, *, reason: str) -> PurePosixPath:
+    require(isinstance(value, str) and bool(value), reason)
+    require("\\" not in value, reason)
+    path = PurePosixPath(value)
+    require(not path.is_absolute() and ".." not in path.parts, reason)
+    return path
+
+
+def _git_bytes(checkout: Path, arguments: list[str], failure: str) -> bytes:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(checkout), *arguments],
+            check=False,
+            capture_output=True,
+        )
+    except OSError as exc:
+        raise ValidationFailure(failure) from exc
+    require(completed.returncode == 0, failure)
+    return completed.stdout
+
+
+def validate_optional_upstream_checkout(
+    checkout: Path, assets: list[dict[str, Any]]
+) -> str:
+    """Verify pinned source blobs when a reviewer supplies an upstream clone."""
+
+    require(checkout.is_dir(), "UPSTREAM_CHECKOUT_NOT_DIRECTORY")
+    inside = _git_bytes(
+        checkout,
+        ["rev-parse", "--is-inside-work-tree"],
+        "UPSTREAM_CHECKOUT_NOT_GIT",
+    )
+    require(inside.strip() == b"true", "UPSTREAM_CHECKOUT_NOT_GIT")
+
+    commits = {asset["source_commit"] for asset in assets}
+    require(len(commits) == 1, "ALLOWLIST_SOURCE_COMMIT_INCONSISTENT")
+    commit = next(iter(commits))
+    _git_bytes(
+        checkout,
+        ["cat-file", "-e", f"{commit}^{{commit}}"],
+        "UPSTREAM_PINNED_COMMIT_MISSING",
+    )
+    for asset in assets:
+        source_path = asset["source_path"]
+        source_bytes = _git_bytes(
+            checkout,
+            ["cat-file", "blob", f"{commit}:{source_path}"],
+            f"UPSTREAM_SOURCE_MISSING {source_path}",
+        )
+        require(
+            sha256_bytes(source_bytes) == asset["source_sha256"],
+            f"UPSTREAM_SOURCE_HASH_MISMATCH {source_path}",
+        )
+    return commit
+
+
+def validate_preexisting_assets(upstream_checkout: Path | None = None) -> str | None:
     manifest = load_json(ROOT / "PREEXISTING_ASSETS.json")
+    require(manifest.get("manifest_version") == "1.1", "ALLOWLIST_MANIFEST_VERSION_INVALID")
+    require(
+        not any(is_local_absolute_path(value) for value in iter_strings(manifest)),
+        "ALLOWLIST_LOCAL_ABSOLUTE_PATH_PROHIBITED",
+    )
     assets = manifest.get("assets")
     require(isinstance(assets, list) and len(assets) == 3, "ALLOWLIST_MUST_HAVE_EXACTLY_THREE_ASSETS")
 
     expected_fields = {
+        "component",
         "source_repository",
         "source_commit",
         "source_path",
+        "source_sha256",
         "destination_path",
         "modification_status",
         "classification",
     }
 
     for asset in assets:
+        require(isinstance(asset, dict), "ALLOWLIST_ASSET_INVALID")
         require(expected_fields.issubset(asset), f"ALLOWLIST_FIELDS_MISSING {asset.get('component', 'unknown')}")
+        require("source_checkout" not in asset, "ALLOWLIST_LOCAL_CHECKOUT_FIELD_PROHIBITED")
         require(asset["classification"] == "pre-existing", "ALLOWLIST_CLASSIFICATION_INVALID")
-        require(SHA256_RE.fullmatch(asset["source_sha256"]) is not None, "ALLOWLIST_SOURCE_HASH_INVALID")
+        require(
+            isinstance(asset["source_sha256"], str)
+            and SHA256_RE.fullmatch(asset["source_sha256"]) is not None,
+            "ALLOWLIST_SOURCE_HASH_INVALID",
+        )
+        require(
+            isinstance(asset["source_commit"], str)
+            and GIT_COMMIT_RE.fullmatch(asset["source_commit"]) is not None,
+            "ALLOWLIST_SOURCE_COMMIT_INVALID",
+        )
+        require(isinstance(asset["source_repository"], str) and asset["source_repository"], "ALLOWLIST_SOURCE_REPOSITORY_INVALID")
+        require(isinstance(asset["modification_status"], str) and asset["modification_status"], "ALLOWLIST_MODIFICATION_STATUS_INVALID")
 
-        source = Path(asset["source_checkout"]) / asset["source_path"]
-        destination = ROOT / asset["destination_path"]
-        require(source.is_file(), f"ALLOWLIST_SOURCE_MISSING {source}")
+        validate_relative_path(asset["source_path"], reason="ALLOWLIST_SOURCE_PATH_INVALID")
+        destination_relative = validate_relative_path(
+            asset["destination_path"], reason="ALLOWLIST_DESTINATION_PATH_INVALID"
+        )
+        destination = (ROOT / Path(destination_relative)).resolve()
+        require(destination.is_relative_to(ROOT), "ALLOWLIST_DESTINATION_ESCAPES_REPOSITORY")
         require(destination.is_file(), f"ALLOWLIST_DESTINATION_MISSING {destination.relative_to(ROOT)}")
-        require(sha256_file(source) == asset["source_sha256"], f"ALLOWLIST_SOURCE_HASH_MISMATCH {source}")
         require(
             sha256_file(destination) == asset["source_sha256"],
             f"ALLOWLIST_DESTINATION_HASH_MISMATCH {destination.relative_to(ROOT)}",
         )
+
+    repositories = {asset["source_repository"] for asset in assets}
+    commits = {asset["source_commit"] for asset in assets}
+    require(len(repositories) == 1, "ALLOWLIST_SOURCE_REPOSITORY_INCONSISTENT")
+    require(len(commits) == 1, "ALLOWLIST_SOURCE_COMMIT_INCONSISTENT")
+    if upstream_checkout is None:
+        return None
+    return validate_optional_upstream_checkout(upstream_checkout, assets)
 
 
 def validate_fixture_manifest() -> None:
@@ -177,15 +290,39 @@ def validate_no_key_material() -> None:
         require(not any(marker in text for marker in markers), f"PRIVATE_KEY_MARKER_DETECTED {path.relative_to(ROOT)}")
 
 
-def main() -> int:
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Validate the standalone Build Week repository; optionally verify "
+            "allowlisted blobs against a local upstream Git checkout."
+        )
+    )
+    parser.add_argument(
+        "--upstream-checkout",
+        type=Path,
+        help=(
+            "optional path to an aelitium-v3 Git checkout containing the pinned "
+            "commit; never required for standalone validation"
+        ),
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv)
     checks = [
-        ("PREEXISTING_ASSETS", validate_preexisting_assets),
         ("FIXTURES", validate_fixture_manifest),
         ("SCHEMAS", validate_schemas),
         ("LONG_DPA", validate_long_dpa),
         ("KEY_MATERIAL", validate_no_key_material),
     ]
     try:
+        upstream_commit = validate_preexisting_assets(args.upstream_checkout)
+        print("PREEXISTING_ASSETS=VALID")
+        if upstream_commit is None:
+            print("UPSTREAM_CHECKOUT=SKIPPED optional")
+        else:
+            print(f"UPSTREAM_CHECKOUT=VALID commit={upstream_commit}")
         for name, check in checks:
             check()
             print(f"{name}=VALID")

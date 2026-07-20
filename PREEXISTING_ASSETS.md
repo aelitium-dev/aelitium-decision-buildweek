@@ -4,6 +4,10 @@ This repository is a new OpenAI Build Week implementation started on 2026-07-18.
 
 The authoritative machine-readable record is [`PREEXISTING_ASSETS.json`](PREEXISTING_ASSETS.json). Every reused component records its source repository, source commit, source path, destination path, modification status, and classification.
 
+The manifest contains no workstation checkout path. Standalone validation uses
+the pinned source hashes and the vendored destination files, so a fresh clone of
+this repository does not require `aelitium-v3` to be present alongside it.
+
 ## Approved allowlist
 
 All approved source material comes from `git@github.com:aelitium-dev/aelitium-v3.git` at commit `727afff1f26081a05d66d3634b58eb5bd3924a07`.
@@ -32,3 +36,25 @@ At D2 midday, UI progress may be reviewed. If copying a specific historical UI c
 ## Licenses
 
 The new project is MIT licensed. The vendored `aelitium-v3` files remain subject to Apache-2.0, with the original `LICENSE` and `NOTICE` retained under `third_party/aelitium-v3/`.
+
+## Portable verification
+
+Run the complete standalone gate from a fresh clone:
+
+```bash
+python3 scripts/validate_scaffold.py
+```
+
+This validates the allowlist metadata, rejects machine-local absolute paths,
+and requires each vendored destination to match its pinned SHA-256. It does not
+contact the network or require an upstream checkout.
+
+If an `aelitium-v3` Git checkout is available, a reviewer can additionally
+verify the source blobs stored at the pinned commit:
+
+```bash
+python3 scripts/validate_scaffold.py --upstream-checkout ../aelitium-v3
+```
+
+The strengthened check reads `commit:path` blobs from Git. It does not trust the
+checkout's current branch or uncommitted working-tree bytes.

@@ -63,6 +63,12 @@ This is a new Build Week application. The exact pre-existing allowlist is record
 
 The project is MIT licensed. The allowlisted `aelitium-v3` canonicalization helper remains Apache-2.0 licensed and retains its original license and notice under `third_party/aelitium-v3/`.
 
+Provenance validation is standalone: the machine-readable manifest contains no
+local checkout path, and `python3 scripts/validate_scaffold.py` verifies the
+vendored files from their pinned SHA-256 values. A reviewer may optionally add
+`--upstream-checkout ../aelitium-v3` to compare the same paths with blobs stored
+at the pinned upstream commit; no network call is required.
+
 ## Backend setup
 
 Python 3.12 is used for the current build. The requirements file pins only the seven approved direct backend dependencies; package-manager-resolved transitives are not promoted to direct dependencies.

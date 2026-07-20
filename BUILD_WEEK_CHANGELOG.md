@@ -235,3 +235,17 @@ This log distinguishes work performed during OpenAI Build Week from the declared
 - Replaced hard-coded historical LIVE metadata in the DEMO snapshot with a
   checked-in-artifact reader that validates the assessment and its hash before
   exposing provenance.
+
+### B5 portable provenance validation
+
+- Removed workstation-specific source checkout paths from the machine-readable
+  pre-existing-assets manifest and replaced reference-only absolute paths with
+  repository/path or descriptive identifiers.
+- Made the default scaffold gate validate pinned metadata and vendored
+  destination hashes using only the standalone repository.
+- Added optional `--upstream-checkout` verification that reads allowlisted blobs
+  from the pinned Git commit rather than trusting the upstream checkout's HEAD
+  or mutable working tree.
+- Added regression tests for execution from an unrelated working directory,
+  absence of machine-local paths, pinned-commit blob verification, and upstream
+  hash mismatch rejection.
