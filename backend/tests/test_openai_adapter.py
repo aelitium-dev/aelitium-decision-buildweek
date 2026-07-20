@@ -8,12 +8,15 @@ import pytest
 
 from aelitium_decision.adapters.openai_assessment import (
     DEFAULT_PROMPT_VERSION,
+    VENDOR_APPROVAL_FACT_KEY_CATALOG,
     AssessmentGenerationError,
     OpenAIAssessmentAdapter,
+    build_assessment_instructions,
     derive_openai_response_schema,
     normalize_transport_identifiers,
 )
 from aelitium_decision.demo import load_golden_manifest
+from aelitium_decision.hashing import hash_json, sha256_text
 from aelitium_decision.paths import REPOSITORY_ROOT
 from aelitium_decision.schema_validation import CanonicalSchemaError, load_schema
 
@@ -25,7 +28,7 @@ class FakeResponses:
 
     def create(self, **kwargs):
         self.calls.append(kwargs)
-        return SimpleNamespace(output_text=self.output_text)
+        return SimpleNamespace(id="resp_test_assessment", output_text=self.output_text)
 
 
 class FakeClient:
@@ -117,7 +120,76 @@ def test_adapter_uses_responses_strict_schema_and_store_false():
     assert "option_id 'option-001'" in call["instructions"]
     assert "control_hint is one control-token" in call["instructions"]
     assert "'R2_EU_DATA_RESIDENCY'" in call["instructions"]
-    assert DEFAULT_PROMPT_VERSION == "vendor-assessment/v2"
+    assert "Every risks[].category must be a lowercase snake_case token" in call[
+        "instructions"
+    ]
+    assert "^[a-z][a-z0-9_]{1,63}$" in call["instructions"]
+    assert "'security_assurance'" in call["instructions"]
+    for _, fact_key in VENDOR_APPROVAL_FACT_KEY_CATALOG:
+        assert f"'{fact_key}'" in call["instructions"]
+    assert "Free-form fact_key values remain allowed" in call["instructions"]
+    assert DEFAULT_PROMPT_VERSION == "vendor-assessment/v3.1"
+
+
+def test_prompt_fact_key_catalog_matches_fact_driven_policy_rules():
+    policy = json.loads(
+        (REPOSITORY_ROOT / "policies/ai_vendor_approval.v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    policy_fact_keys = tuple(
+        rule["fact_key"]
+        for rule in policy["rules"]
+        if rule["operator"].startswith("fact_")
+    )
+    prompt_fact_keys = tuple(
+        fact_key for _, fact_key in VENDOR_APPROVAL_FACT_KEY_CATALOG
+    )
+
+    assert prompt_fact_keys == policy_fact_keys
+    instructions = build_assessment_instructions(
+        model="gpt-5.6", prompt_version=DEFAULT_PROMPT_VERSION
+    )
+    assert "policy thresholds" in instructions
+    assert "Do not invent evidence" in instructions
+
+
+def test_adapter_returns_non_secret_request_and_response_provenance():
+    assessment = _with_live_metadata(_t1_assessment())
+    output_text = json.dumps(assessment)
+    client = FakeClient(output_text)
+    adapter = OpenAIAssessmentAdapter(client=client)
+
+    run = adapter.assess_with_provenance(case_context="fictional evidence")
+
+    assert run.assessment == assessment
+    assert run.provider_response_id == "resp_test_assessment"
+    assert run.provider_output_sha256 == sha256_text(output_text)
+    assert run.identifier_case_normalization_applied is False
+    assert run.request_configuration == {
+        "endpoint": "responses.create",
+        "model": "gpt-5.6",
+        "prompt_version": "vendor-assessment/v3.1",
+        "store": False,
+        "structured_outputs": {
+            "type": "json_schema",
+            "name": "model_assessment_v1",
+            "strict": True,
+        },
+        "instructions_sha256": sha256_text(
+            client.responses.calls[0]["instructions"]
+        ),
+        "input_sha256": sha256_text("fictional evidence"),
+        "canonical_schema_sha256": hash_json(
+            load_schema("model_assessment.v1.schema.json")
+        ),
+        "transport_schema_sha256": hash_json(
+            client.responses.calls[0]["text"]["format"]["schema"]
+        ),
+    }
+    serialized_configuration = json.dumps(run.request_configuration).lower()
+    assert "openai_api_key" not in serialized_configuration
+    assert "authorization" not in serialized_configuration
 
 
 def test_canonical_schema_rejects_value_relaxed_for_api_transport():
@@ -155,7 +227,48 @@ def test_safe_transport_id_casing_is_normalized_before_canonical_validation():
         original_control_hints
     )
     assert result["facts"][0]["statement"] == assessment["facts"][0]["statement"]
+    assert result["facts"][0]["fact_key"] == assessment["facts"][0]["fact_key"]
     assert transported["facts"][0]["fact_id"].startswith("FACT-")
+
+
+def test_free_form_fact_key_is_not_semantically_remapped():
+    assessment = _with_live_metadata(_t1_assessment())
+    assessment["facts"][0]["fact_key"] = "annual_recurring_cost_eur"
+    client = FakeClient(json.dumps(assessment))
+
+    result = OpenAIAssessmentAdapter(client=client).assess(
+        case_context="fictional evidence"
+    )
+
+    assert result["facts"][0]["fact_key"] == "annual_recurring_cost_eur"
+
+
+def test_risk_category_with_spaces_is_not_normalized_and_fails_canonically():
+    assessment = _with_live_metadata(_t2_assessment())
+    invalid_category = "security assurance"
+    assessment["risks"][0]["category"] = invalid_category
+
+    normalized = normalize_transport_identifiers(assessment)
+    assert normalized["risks"][0]["category"] == invalid_category
+
+    client = FakeClient(json.dumps(assessment))
+    with pytest.raises(CanonicalSchemaError, match=r"risks\.0\.category"):
+        OpenAIAssessmentAdapter(client=client).assess(
+            case_context="fictional evidence"
+        )
+
+
+def test_snake_case_risk_category_passes_without_transformation():
+    assessment = _with_live_metadata(_t2_assessment())
+    assessment["risks"][0]["category"] = "security_assurance"
+    client = FakeClient(json.dumps(assessment))
+
+    run = OpenAIAssessmentAdapter(client=client).assess_with_provenance(
+        case_context="fictional evidence"
+    )
+
+    assert run.assessment["risks"][0]["category"] == "security_assurance"
+    assert run.identifier_case_normalization_applied is False
 
 
 @pytest.mark.parametrize("unsafe_id", ["001", "fact_001", "risk-001", "fact-01!"])

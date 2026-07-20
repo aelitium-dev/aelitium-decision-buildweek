@@ -14,10 +14,12 @@ import json
 import os
 import sys
 from datetime import UTC, datetime
+from importlib.metadata import version
 
 from aelitium_decision.adapters.openai_assessment import (
     DEFAULT_MODEL,
     DEFAULT_PROMPT_VERSION,
+    AssessmentRun,
     OpenAIAssessmentAdapter,
 )
 from aelitium_decision.hashing import hash_json
@@ -46,6 +48,46 @@ def build_t2_context() -> str:
     return "\n".join(sections)
 
 
+def build_live_artifact(*, run: AssessmentRun, executed_at: str) -> dict:
+    """Build a non-secret provenance record after canonical validation succeeds."""
+
+    return {
+        "artifact_version": "aelitium-live-assessment/v2",
+        "assessment_source": "gpt_generated_live",
+        "execution_mode": "LIVE",
+        "runtime_model_call": True,
+        "scenario": "T2-style F1–F4 missing-evidence case",
+        "executed_at": executed_at,
+        "model": run.request_configuration["model"],
+        "provider": "openai",
+        "provider_response_id": run.provider_response_id,
+        "provider_sdk": {
+            "package": "openai",
+            "version": version("openai"),
+        },
+        "provider_assessment_hash": hash_json(run.assessment),
+        "prompt_version": run.request_configuration["prompt_version"],
+        "request_configuration": run.request_configuration,
+        "response_transport": {
+            "provider_output_sha256": run.provider_output_sha256,
+            "identifier_case_normalization_applied": (
+                run.identifier_case_normalization_applied
+            ),
+        },
+        "post_validation_transformations": [],
+        "source_documents": {
+            "origin": "build_week_repository_fixtures",
+            "classification": "fictional_build_week_work",
+            "repository_paths": [
+                f"fixtures/documents/{filename}" for filename in SOURCE_DOCUMENTS
+            ],
+            "authenticity_verified": False,
+        },
+        "assessment_hash": hash_json(run.assessment),
+        "assessment": run.assessment,
+    }
+
+
 def main() -> int:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
@@ -53,7 +95,7 @@ def main() -> int:
         return 2
 
     try:
-        assessment = OpenAIAssessmentAdapter(api_key=api_key).assess(
+        run = OpenAIAssessmentAdapter(api_key=api_key).assess_with_provenance(
             case_context=build_t2_context()
         )
     except Exception as exc:  # report API/schema failure without leaking the key
@@ -64,30 +106,12 @@ def main() -> int:
         )
         return 1
 
-    artifact = {
-        "artifact_version": "aelitium-live-assessment/v1",
-        "assessment_source": "gpt_generated_live",
-        "execution_mode": "LIVE",
-        "runtime_model_call": True,
-        "scenario": "T2-style F1–F4 missing-evidence case",
-        "executed_at": datetime.now(UTC)
+    artifact = build_live_artifact(
+        run=run,
+        executed_at=datetime.now(UTC)
         .isoformat(timespec="seconds")
         .replace("+00:00", "Z"),
-        "model": DEFAULT_MODEL,
-        "provider": "openai",
-        "prompt_version": DEFAULT_PROMPT_VERSION,
-        "post_validation_transformations": [],
-        "source_documents": {
-            "origin": "build_week_repository_fixtures",
-            "classification": "fictional_build_week_work",
-            "repository_paths": [
-                f"fixtures/documents/{filename}" for filename in SOURCE_DOCUMENTS
-            ],
-            "authenticity_verified": False,
-        },
-        "assessment_hash": hash_json(assessment),
-        "assessment": assessment,
-    }
+    )
     ARTIFACT_PATH.parent.mkdir(parents=True, exist_ok=True)
     ARTIFACT_PATH.write_text(
         json.dumps(artifact, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
