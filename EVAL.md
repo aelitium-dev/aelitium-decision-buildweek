@@ -107,13 +107,27 @@ authoritative.
   with exact source substrings and splitting combined evidence references. No
   new OpenAI call was made and the original accepted assessment hash above is
   retained as the transformation input hash.
-- The current canonical assessment hash is
+- The literal-repair output assessment hash is
   `1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a`.
   The transformation record contains both hashes and the original failure count.
 - Automated evidence-integrity tests resolve every `document_id` to a
   repository source and require each `quoted_text` value to be an exact raw
   substring. The policy route and its documented prompt-v2 fact-key limitation
   remain unchanged.
+
+### Fictional vendor rename transformation
+
+- A public exact-match screening on 2026-07-20 found no obvious AI/SaaS vendor
+  collision for the synthetic replacement name `Nerythica AI Ltd.`. This was a
+  practical fixture-name check, not trade-mark or company-name clearance.
+- The existing LIVE assessment was not regenerated during the rename. Its
+  transformation chain declares `fictional-vendor-rename/v1`, limited to the
+  fictional vendor and product names, with the literal-repair hash above as its
+  input.
+- The current canonical assessment hash is
+  `3b5863bb233c433c935a6dce7f670c0c2df4ee54751784116bdc24809d58f3c2`.
+  No finding, risk, recommendation, policy fact, or route was changed by the
+  rename. A later final LIVE run may replace this derived artifact explicitly.
 
 ## D2 UI integration record
 

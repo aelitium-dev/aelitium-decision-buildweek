@@ -32,7 +32,7 @@
     "T3": {
       "case_id": "case-t3-document-conflict",
       "assessment_path": "fixtures/demo/T3_assessment.json",
-      "expected_assessment_hash": "a9dbb096217691b8713d35fb1a101fc91e9ebeedbc66d26cb2304008234434c5",
+      "expected_assessment_hash": "419cfb3bc805ec2f9e97a1aec1a7e8918ef6b6593762f364b3eea8d9b139bb1b",
       "evaluated_at": "2026-07-19T09:10:00Z",
       "expected_state": "HUMAN_REVIEW",
       "expected_blocking_controls": [],

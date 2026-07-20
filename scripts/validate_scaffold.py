@@ -72,6 +72,10 @@ def validate_preexisting_assets() -> None:
 
 def validate_fixture_manifest() -> None:
     manifest = load_json(ROOT / "fixtures" / "manifest.json")
+    require(
+        manifest.get("vendor") == "Nerythica AI Ltd. (fictional)",
+        "FIXTURE_VENDOR_IDENTITY_INVALID",
+    )
     documents = manifest.get("documents")
     require(isinstance(documents, list) and len(documents) == 5, "FIXTURE_MANIFEST_REQUIRES_F1_TO_F5")
     require([document["document_id"] for document in documents] == ["F1", "F2", "F3", "F4", "F5"], "FIXTURE_ORDER_INVALID")
@@ -137,6 +141,10 @@ def validate_long_dpa() -> None:
     require("without providing Customer prior notice" in page_23, "F4_PAGE_23_MATERIAL_CLAUSE_MISSING")
     require("30 days' advance notice" in page_23, "F4_PAGE_23_CONFLICT_ACKNOWLEDGEMENT_MISSING")
     require("Page 34 of 34 — Execution" in text, "F4_EXECUTION_PAGE_MISSING")
+    require(
+        "As described in sections 8.3 and 8.4" in text,
+        "F4_RETENTION_SECTION_REFERENCE_INVALID",
+    )
 
 
 def validate_no_key_material() -> None:

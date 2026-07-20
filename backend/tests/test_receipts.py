@@ -87,7 +87,7 @@ def _t4_assessment():
             "document_id": "F5",
             "locator": "section 2",
             "quoted_text": (
-                "NovaMind's SOC 2 Type II examination has been completed and the "
+                "Nerythica's SOC 2 Type II examination has been completed and the "
                 "report was issued on 2026-07-15."
             ),
             "reference_level": "validated_reference",
@@ -150,7 +150,7 @@ def _decision_case():
         "schema_version": "decision-case/v1",
         "case_id": "case-t4-conditional-approval",
         "decision_domain": "ai_vendor_approval",
-        "title": "NovaMind AI vendor approval",
+        "title": "Nerythica AI vendor approval",
         "case_version": 2,
         "state": "HUMAN_APPROVAL_REQUIRED",
         "documents": documents,

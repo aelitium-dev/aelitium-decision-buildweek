@@ -2,7 +2,7 @@
   "fixture_manifest_version": "1.0",
   "scenario": "ai_vendor_approval",
   "company": "Caldera Works Europe S.A.S. (fictional)",
-  "vendor": "NovaMind AI Ltd. (fictional)",
+  "vendor": "Nerythica AI Ltd. (fictional)",
   "encoding": "UTF-8",
   "documents": [
     {
@@ -11,7 +11,7 @@
       "filename": "F1_vendor_commercial_proposal.md",
       "path": "documents/F1_vendor_commercial_proposal.md",
       "version": "1.0",
-      "sha256": "5b294c430f29c422a71e7c082b65c3b5e7a4cdbc1cad862686880dc3ecc3f7a5",
+      "sha256": "25728f7bd3e1bdcd92b04ad5e395dd633ceda2890f1f4604e364f8c063c944ec",
       "expected_material_facts": [
         "annual subscription is EUR 18,000 excluding VAT",
         "initial term is 36 months",
@@ -39,7 +39,7 @@
       "filename": "F3_security_questionnaire.md",
       "path": "documents/F3_security_questionnaire.md",
       "version": "1.0",
-      "sha256": "88395b9c536c82768ec0c6cdfe9386120581214b60ce5abb2ecbd94086690ac8",
+      "sha256": "a6cdf37714dd5d47f00d06e0296aed2c909107589ace2453347bbe281ec5cd21",
       "expected_material_facts": [
         "data residency is US–EU and configurable",
         "SOC 2 Type II is in progress without an issue date",
@@ -52,7 +52,7 @@
       "filename": "F4_executed_data_processing_addendum.md",
       "path": "documents/F4_executed_data_processing_addendum.md",
       "version": "4.3",
-      "sha256": "7c2d9909275286661ecc0f2f22a34f60015f28d595b080d1493c2372ff66cd86",
+      "sha256": "5591da6d5fc2572026f8ade04b4d586251e0ce61df9cc3b43fb194d98e6cdbb2",
       "print_pages": 34,
       "expected_material_facts": [
         "the DPA is executed by both fictional parties",
@@ -67,7 +67,7 @@
       "filename": "F5_vendor_assurance_letter.md",
       "path": "documents/F5_vendor_assurance_letter.md",
       "version": "1.0",
-      "sha256": "c3189770b1b4c09609c20abe382c31de8ced9284afe6f7e9943fbe7f73816a1c",
+      "sha256": "ae4e8747fca714c082b1229a3f447886746626d997731850a2430beb7d509378",
       "expected_material_facts": [
         "Customer Content, backups, and core processing are committed to the EU or EEA",
         "a SOC 2 Type II report is stated as issued on 2026-07-15",

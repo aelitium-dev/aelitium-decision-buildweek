@@ -16,8 +16,11 @@ POLICY_PATH = REPOSITORY_ROOT / "policies/ai_vendor_approval.v1.json"
 LIVE_INPUT_ASSESSMENT_HASH = (
     "55fe5993c5ec2aeb466052c61ed97e15dc60e3777b4d6469d55fb3a7203e4ca4"
 )
-LIVE_CURRENT_ASSESSMENT_HASH = (
+LIVE_LITERAL_REPAIR_HASH = (
     "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
+)
+LIVE_CURRENT_ASSESSMENT_HASH = (
+    "3b5863bb233c433c935a6dce7f670c0c2df4ee54751784116bdc24809d58f3c2"
 )
 
 
@@ -44,8 +47,14 @@ def test_checked_in_live_artifact_is_canonical_and_routes_fail_closed():
                 "quoted_text exact-source repair and evidence-reference splitting only"
             ),
             "input_assessment_hash": LIVE_INPUT_ASSESSMENT_HASH,
-            "output_assessment_hash": LIVE_CURRENT_ASSESSMENT_HASH,
+            "output_assessment_hash": LIVE_LITERAL_REPAIR_HASH,
             "original_non_literal_quote_fields": 19,
+        },
+        {
+            "transformation_version": "fictional-vendor-rename/v1",
+            "scope": "fictional vendor and product names only",
+            "input_assessment_hash": LIVE_LITERAL_REPAIR_HASH,
+            "output_assessment_hash": LIVE_CURRENT_ASSESSMENT_HASH,
         }
     ]
     assert artifact["source_documents"] == {

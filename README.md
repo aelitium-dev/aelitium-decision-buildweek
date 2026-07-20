@@ -6,7 +6,7 @@ Turn AI recommendations into evidence-backed, human-approved, and tamper-evident
 
 ## Build Week workflow
 
-The MVP evaluates whether a fictional European company should adopt the fictional AI SaaS vendor NovaMind AI:
+The MVP evaluates whether a fictional European company should adopt the fictional AI SaaS vendor Nerythica AI:
 
 1. In LIVE mode, GPT-5.6 cross-references a commercial proposal, internal procurement policy, security questionnaire, and DPA. DEMO instead uses checked-in precomputed fixtures and makes no model call.
 2. Deterministic rules identify blocking evidence and approval routing.

@@ -2,6 +2,14 @@
 
 All organizations, people, identifiers, reports, signatures, and events in F1–F5 are fictional. The documents are demonstration inputs, not legal, security, procurement, or certification advice.
 
+## Fictional vendor-name screening
+
+The synthetic vendor name `Nerythica AI Ltd.` and product name `Nerythica
+Workspace Enterprise` were selected on 2026-07-20 after exact-match public web
+searches for `Nerythica`, `Nerythica AI`, and the full product name returned no
+obvious AI/SaaS vendor collision. This is a practical demo-name screen, not a
+company-name, domain, or trade-mark clearance opinion.
+
 ## DPA execution interpretation
 
 The governing specification calls F4 a “proposed DPA” while the hard policy rule requires an executed DPA before approval. To preserve both the non-overridable control and the approved demo sequence, F4 is the vendor-proposed form that the fictional parties subsequently executed for this evaluation. Its execution page is complete, while the substantive subprocessor and transfer clause remains a human-review risk.

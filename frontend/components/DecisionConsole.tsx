@@ -127,7 +127,7 @@ type DemoSnapshot = {
         scope: string;
         input_assessment_hash: string;
         output_assessment_hash: string;
-        original_non_literal_quote_fields: number;
+        original_non_literal_quote_fields?: number;
       }>;
       used_for_current_demo: false;
     };
@@ -591,7 +591,7 @@ function CaseView({
                 {" "}
                 The separate LIVE artifact originated from GPT-5.6
                 {snapshot.provenance.live_assessment.post_validation_transformations.length > 0
-                  ? " and records post-validation literal evidence-quote repairs"
+                  ? " and records declared post-validation fixture transformations"
                   : ""}.
               </p>
             </div>

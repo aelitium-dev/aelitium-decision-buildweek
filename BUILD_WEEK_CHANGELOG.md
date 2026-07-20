@@ -171,3 +171,20 @@ This log distinguishes work performed during OpenAI Build Week from the declared
 - Added a repository-wide assessment evidence test that resolves each source
   path and requires every `quoted_text` to occur literally in the named file,
   including the assessment generated for the post-F5 clickable DEMO.
+
+### B4 fictional vendor identity and fixture consistency
+
+- Replaced the previous collision-prone fictional vendor identity with the
+  synthetic `Nerythica AI Ltd.` / `Nerythica Workspace Enterprise` identity
+  after a dated public exact-match screen found no obvious AI/SaaS collision.
+  The screen is documented as practical risk reduction, not legal clearance.
+- Updated the F1–F5 dossier, derived fixture identifiers, assessments, policy
+  description, DEMO workflow, UI-facing records, and tests without changing the
+  commercial, security, privacy, or policy facts.
+- Corrected the F4 Annex A page-number-like retention cross-reference to the
+  actual substantive sections 8.3 and 8.4.
+- Recomputed all affected fixture and assessment hashes. The existing LIVE
+  artefact declares the deterministic `fictional-vendor-rename/v1`
+  transformation and retains the full prior hash chain; no model call was made.
+- Extended the scaffold and backend gates to reject the previous vendor identity
+  or identifiers and to require the corrected F4 retention reference.

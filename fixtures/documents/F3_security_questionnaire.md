@@ -1,12 +1,12 @@
-# F3 — NovaMind AI Security Questionnaire
+# F3 — Nerythica AI Security Questionnaire
 
 > FICTIONAL BUILD WEEK DEMO DOCUMENT — INCOMPLETE VENDOR RESPONSE
 
 | Field | Value |
 |---|---|
 | Questionnaire ID | CW-SEC-2026-044 |
-| Vendor | NovaMind AI Ltd. |
-| Service | NovaMind Workspace Enterprise |
+| Vendor | Nerythica AI Ltd. |
+| Service | Nerythica Workspace Enterprise |
 | Submitted | 2026-07-11 |
 | Respondent | Mina Vale, Vendor Security Operations |
 | Completion status | 82%; follow-up required |

@@ -1,4 +1,4 @@
-# F1 — NovaMind AI Commercial Proposal
+# F1 — Nerythica AI Commercial Proposal
 
 > FICTIONAL BUILD WEEK DEMO DOCUMENT — NOT A REAL OFFER OR COMPANY RECORD
 
@@ -6,16 +6,16 @@
 
 | Field | Value |
 |---|---|
-| Proposal reference | NM-2026-0718-EU |
+| Proposal reference | NYA-2026-0718-EU |
 | Prepared for | Caldera Works Europe S.A.S. |
-| Prepared by | NovaMind AI Ltd. |
+| Prepared by | Nerythica AI Ltd. |
 | Proposal date | 2026-07-10 |
 | Offer valid until | 2026-08-10 |
-| Product | NovaMind Workspace Enterprise |
+| Product | Nerythica Workspace Enterprise |
 
 ## Executive summary
 
-NovaMind AI proposes an enterprise workspace for drafting, document analysis, internal research, and workflow assistance. The service is intended for approximately 80 employees across operations, legal, sales, and customer-success teams.
+Nerythica AI proposes an enterprise workspace for drafting, document analysis, internal research, and workflow assistance. The service is intended for approximately 80 employees across operations, legal, sales, and customer-success teams.
 
 The proposed deployment includes a shared enterprise workspace, administrative controls, single sign-on support, usage analytics, and an initial enablement programme. Customer users may submit internal documents and limited customer-related material when performing approved business tasks.
 
@@ -38,15 +38,15 @@ The annual subscription exceeds EUR 15,000. Any internal purchasing or director-
 
 ## Hosting and service delivery
 
-The service operates on global cloud infrastructure. NovaMind maintains capacity in the United States and European Union. Regional processing options may be configurable for enterprise customers, subject to service availability and written order-form configuration.
+The service operates on global cloud infrastructure. Nerythica maintains capacity in the United States and European Union. Regional processing options may be configurable for enterprise customers, subject to service availability and written order-form configuration.
 
-Unless a regional commitment is stated in an executed order form or later written assurance, NovaMind may select infrastructure locations to maintain service availability, security, and performance. Customer administrators are responsible for selecting available regional settings during implementation.
+Unless a regional commitment is stated in an executed order form or later written assurance, Nerythica may select infrastructure locations to maintain service availability, security, and performance. Customer administrators are responsible for selecting available regional settings during implementation.
 
 Backups, telemetry, support access, and subprocessors may follow the arrangements described in the Data Processing Addendum. This commercial proposal does not itself create an EU-only data-residency commitment.
 
 ## Security programme
 
-NovaMind states that it maintains the following controls:
+Nerythica states that it maintains the following controls:
 
 - encryption in transit using TLS 1.2 or later;
 - encryption at rest for production databases and object storage;
@@ -55,15 +55,15 @@ NovaMind states that it maintains the following controls:
 - vulnerability scanning and incident-response procedures;
 - logical tenant separation.
 
-NovaMind's SOC 2 Type II examination is described as **in progress**. No final report, certificate date, bridge letter, or committed completion date is included with this proposal.
+Nerythica's SOC 2 Type II examination is described as **in progress**. No final report, certificate date, bridge letter, or committed completion date is included with this proposal.
 
 ISO/IEC 27001 certification is not included in the quoted service documentation.
 
 ## Data use
 
-Customer Content is processed to provide and secure the service. NovaMind states that Customer Content is not used to train shared foundation models by default. Product telemetry may be aggregated for reliability, abuse prevention, capacity planning, and product analytics, subject to the Data Processing Addendum.
+Customer Content is processed to provide and secure the service. Nerythica states that Customer Content is not used to train shared foundation models by default. Product telemetry may be aggregated for reliability, abuse prevention, capacity planning, and product analytics, subject to the Data Processing Addendum.
 
-The customer must avoid uploading special-category personal data, payment-card data, health records, government identifiers, or authentication secrets unless NovaMind has expressly approved the relevant use case in writing.
+The customer must avoid uploading special-category personal data, payment-card data, health records, government identifiers, or authentication secrets unless Nerythica has expressly approved the relevant use case in writing.
 
 ## Legal documents
 
@@ -71,7 +71,7 @@ This proposal incorporates the following documents when executed:
 
 1. the enterprise order form;
 2. the Master Subscription Agreement;
-3. the NovaMind AI Data Processing Addendum;
+3. the Nerythica AI Data Processing Addendum;
 4. the security schedule;
 5. the then-current subprocessor schedule.
 
@@ -89,5 +89,5 @@ If documents conflict, the executed order form controls for commercial scope, th
 
 This proposal is non-binding until an authorized order form is signed. Acceptance of commercial terms does not replace required internal approvals or the execution of applicable privacy documents.
 
-Prepared by: Elian Rowe, Enterprise Account Executive, NovaMind AI Ltd.  
+Prepared by: Elian Rowe, Enterprise Account Executive, Nerythica AI Ltd.
 Status: Vendor proposal supplied for review; not an order form.

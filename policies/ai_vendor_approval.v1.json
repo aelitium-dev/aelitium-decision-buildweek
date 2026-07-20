@@ -2,7 +2,7 @@
   "policy_schema_version": "aelitium-policy/v1",
   "policy_version": "ai-vendor-approval/1.1.0",
   "decision_domain": "ai_vendor_approval",
-  "description": "Deterministic minimum controls for the fictional NovaMind AI vendor approval workflow.",
+  "description": "Deterministic minimum controls for the fictional Nerythica AI vendor approval workflow.",
   "confidence_floor": 70,
   "routing_precedence": [
     {

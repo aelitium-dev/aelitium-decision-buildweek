@@ -65,6 +65,16 @@ LIVE_POST_VALIDATION_TRANSFORMATIONS = [
             "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
         ),
         "original_non_literal_quote_fields": 19,
+    },
+    {
+        "transformation_version": "fictional-vendor-rename/v1",
+        "scope": "fictional vendor and product names only",
+        "input_assessment_hash": (
+            "1db3baa0d9e5d60706e426c77e33ca221924f6dd12409c6ee46e0eec4785892a"
+        ),
+        "output_assessment_hash": (
+            "3b5863bb233c433c935a6dce7f670c0c2df4ee54751784116bdc24809d58f3c2"
+        ),
     }
 ]
 DEMO_BASE_ASSESSMENT_PATH = "fixtures/demo/T2_assessment.json"
@@ -90,7 +100,7 @@ F5_RESIDENCY_QUOTE = (
     "Economic Area."
 )
 F5_ASSURANCE_QUOTE = (
-    "NovaMind's SOC 2 Type II examination has been completed and the report was "
+    "Nerythica's SOC 2 Type II examination has been completed and the report was "
     "issued on 2026-07-15."
 )
 
@@ -230,9 +240,9 @@ def _decision_case() -> dict[str, Any]:
     ]
     case = {
         "schema_version": "decision-case/v1",
-        "case_id": "case-novamind-conditional-approval",
+        "case_id": "case-nerythica-conditional-approval",
         "decision_domain": "ai_vendor_approval",
-        "title": "NovaMind AI vendor approval",
+        "title": "Nerythica AI vendor approval",
         "case_version": 2,
         "state": "HUMAN_APPROVAL_REQUIRED",
         "documents": documents,
@@ -288,7 +298,7 @@ def _static_snapshot() -> dict[str, Any]:
     return {
         "mode": "DEMO",
         "company": "Caldera Works Europe S.A.S. (fictional)",
-        "vendor": "NovaMind AI Ltd. (fictional)",
+        "vendor": "Nerythica AI Ltd. (fictional)",
         "case": case,
         "assessment": after_assessment,
         "policy_result": after_result,
