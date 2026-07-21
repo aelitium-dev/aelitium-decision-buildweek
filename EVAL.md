@@ -1,6 +1,6 @@
 # Evaluation Plan
 
-Results below come from the checked-in deterministic golden fixtures and local D1 test runs. They do not measure live-model quality.
+Golden-case results below come from the checked-in deterministic fixtures and local test runs. Later sections separately record scoped LIVE executions; neither is a generalized measure of live-model quality.
 
 ## Golden cases
 
@@ -127,7 +127,7 @@ authoritative.
 - The current canonical assessment hash is
   `3b5863bb233c433c935a6dce7f670c0c2df4ee54751784116bdc24809d58f3c2`.
   No finding, risk, recommendation, policy fact, or route was changed by the
-  rename. A later final LIVE run may replace this derived artifact explicitly.
+  rename. This derived artifact was later replaced by the v3.1 LIVE run recorded below.
 
 ### Prompt v3 attempt — canonical category rejection
 
@@ -153,7 +153,7 @@ authoritative.
   `^[a-z][a-z0-9_]{1,63}$` and gives lowercase `snake_case` examples. There is
   no category normalizer: invalid model output must still fail canonical
   validation.
-- The prepared LIVE artifact writer will record the provider response ID when
+- At this gate, the prepared LIVE artifact writer was configured to record the provider response ID when
   available, OpenAI SDK version, effective request settings, and SHA-256 hashes
   of the instructions, input, canonical schema, transport schema, and provider
   structured output text. It does not record the API key.

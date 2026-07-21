@@ -6,7 +6,7 @@
 - Date: 2026-07-18
 - Decision owner: Catarina Pereira
 - Implementation session: primary Codex Build Week session
-- Governing specification: `/home/catarina-aelitium/SPEC_BUILDWEEK_2026-07-18.md`
+- Governing specification: session-supplied `SPEC_BUILDWEEK_2026-07-18.md`
 - Governing specification SHA-256: `03f4fe1921862f0741bce3913fbc64a642db5724d71487a42cb8485a5afeb560`
 
 ### Context
@@ -17,7 +17,7 @@ This ADR records the approved refinement of specification sections 8, 10, and 11
 
 ### Decisions
 
-1. The product is built in a new standalone repository at `/home/catarina-aelitium/aelitium-decision-buildweek`. Existing repositories are read-only sources or references.
+1. The product is built in this new standalone repository. Existing repositories are read-only sources or references.
 2. The MVP is one vertical workflow: documents → structured GPT-5.6 assessment → deterministic policy → human decision → Decision Receipt → offline verification → tamper result `INVALID`.
 3. GPT-5.6 performs interpretation and proposes an assessment. Deterministic code validates and routes. A human remains the decision authority.
 4. The backend is the only canonicalization, hashing, signing, and verification authority. Browser calculations are never authoritative.

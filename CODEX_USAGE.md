@@ -4,7 +4,7 @@
 
 - Started: 2026-07-18
 - Scope: specification → scaffold → backend → frontend → integration → tests
-- `/feedback` Session ID: pending; record the exact value before submission
+- `/feedback` Session ID: `019f75ba-0204-75e1-aadd-529c29934a84`
 - Session discipline: all core implementation stays in this primary thread; secondary sessions are limited to audit or review
 
 ## Work performed with Codex
@@ -19,7 +19,7 @@ Codex identified that the earlier P3 receipt signed a representation with an emp
 
 ### Scaffold
 
-Codex created ADR-001, exact provenance manifests, the Build Week documentation scaffold, fixtures, and versioned schemas. Subsequent entries will record concrete backend, policy, receipt, test, and UI work.
+Codex created ADR-001, exact provenance manifests, the Build Week documentation scaffold, fixtures, and versioned schemas. The following entries record concrete backend, policy, receipt, test, and UI work.
 
 ### D1 backend
 
@@ -29,6 +29,6 @@ Codex implemented DEMO mode before the live adapter, split the generic Policy En
 
 Codex introduced a single internal hashing boundary, implemented the new ADR-001 signer/verifier rather than inheriting P3 behavior, and iterated against a deterministic tamper matrix. The resulting tests distinguish top-level content mismatch, nested commitment mismatch, signed-metadata changes, key-fingerprint mismatch, signature failure, duplicate JSON keys, and schema additions without claiming that verification proves truth or legal validity.
 
-## Submission reminder
+### Integration and final audit gates
 
-Before submission, replace the pending `/feedback` entry with the Session ID produced for this primary development thread and cite concrete examples of where Codex accelerated implementation and testing.
+Codex implemented and tested the Decision Console, approval authorization, DEMO/LIVE provenance separation, literal-evidence gates, portable provenance validation, secure key bootstrap and offline sample, and the validated Decision Timeline. Repository changes proceeded through explicit human approval gates; LIVE GPT-5.6 calls were executed externally by the human operator, and repository publication remained subject to explicit human approval.

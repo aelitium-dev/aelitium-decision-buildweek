@@ -4,13 +4,15 @@ Turn AI recommendations into evidence-backed, human-approved, and tamper-evident
 
 > Build status: the D1 backend, D2 receipt core, and all four clickable UI screens—including the validated Decision Timeline—are implemented. DEMO T1–T5 are green without an OpenAI key; a canonical GPT-5.6 LIVE smoke artifact is recorded with its evaluation limits.
 
+Implementation was directed through Codex under explicit human approval gates; the full record is in [CODEX_USAGE.md](CODEX_USAGE.md).
+
 ## Build Week workflow
 
 The MVP evaluates whether a fictional European company should adopt the fictional AI SaaS vendor Nerythica AI:
 
 1. In LIVE mode, GPT-5.6 cross-references a commercial proposal, internal procurement policy, security questionnaire, and DPA. DEMO instead uses checked-in precomputed fixtures and makes no model call.
 2. Deterministic rules identify blocking evidence and approval routing.
-3. A human approves, rejects, requests evidence, or approves with conditions.
+3. A human records the policy-permitted decision; the clickable DEMO exercises conditional approval.
 4. A Decision Receipt binds the recorded evidence, assessment, policy result, and human decision.
 5. An offline verifier detects changes to decision content or signed receipt metadata.
 6. A hash-linked Decision Timeline records the workflow transitions and their actual API origins.
@@ -56,7 +58,7 @@ fixture history is labelled as such, and runtime timeline state is currently
 in-memory and resets with the demo server. The B6 public offline receipt remains
 a compact verification fixture, not a capture of the interactive B7 timeline.
 
-## Planned architecture
+## Architecture
 
 ```text
 Next.js Decision Console

@@ -1,6 +1,6 @@
 # Roadmap
 
-The following are intentionally outside the Build Week MVP unless the core vertical workflow is already green:
+The following remain intentionally outside the Build Week MVP:
 
 - Authentication and RBAC
 - Multi-company tenancy
